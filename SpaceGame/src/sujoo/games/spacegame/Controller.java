@@ -13,6 +13,7 @@ import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
+import sujoo.games.spacegame.datatypes.Command;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.gui.MainGui;
 
@@ -114,19 +115,31 @@ public class Controller {
 	}
 	
 	public void enterCommand(String command) {
-		if (StringUtils.isNumeric(command)) {
-			travel(Integer.parseInt(command));
-		}
-		else if (command.equals("scan")) {
-			scanCurrentSystem();
-		}
-		else if (command.equals("full scan")) {
-			printGraph();
+		if (!command.isEmpty()) {
+			String[] commandString = command.split(" ");
+			switch (Command.toCommand(commandString[0])) {
+			case JUMP:
+				if (commandString.length > 1 && StringUtils.isNumeric(commandString[1])) {
+					travel(Integer.parseInt(commandString[1]));
+				}
+				break;
+			case SCAN:
+				scanCurrentSystem();
+				break;
+			case FULL_SCAN:
+				printGraph();
+				break;
+			case UNKNOWN:
+				break;
+			}
 		}
 	}
 	
 	private void travel(int travelToStarId) {
-		currentStar = starSystemUtil.getStarSystem(travelToStarId);
+		Star jumpToStar = starSystemUtil.getStarSystem(travelToStarId);
+		if (starSystemUtil.isNeighbor(currentStar, jumpToStar)) {
+			currentStar = jumpToStar;
+		}
 		gui.clearTextArea();
 		printCurrentStarSystem();
 	}
