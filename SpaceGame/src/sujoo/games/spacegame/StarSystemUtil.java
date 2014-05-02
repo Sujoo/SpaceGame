@@ -111,4 +111,8 @@ public class StarSystemUtil {
 		
 		return subGraph;
 	}
+	
+	public boolean isNeighbor(Star star1, Star star2) {
+		return starGraph.isNeighbor(star1, star2);
+	}
 }

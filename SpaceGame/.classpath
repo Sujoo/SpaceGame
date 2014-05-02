@@ -2,11 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Mark/Documents/Guava/guava-17.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Mark/Documents/ExternalJars/commons-lang3-3.3.2/commons-lang3-3.3.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Mark/Downloads/jung2-2_0_1/collections-generic-4.01.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Mark/Downloads/jung2-2_0_1/jung-visualization-2.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Mark/Downloads/jung2-2_0_1/jung-graph-impl-2.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Mark/Downloads/jung2-2_0_1/jung-io-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mark/Documents/External Jars/guava-17.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mark/Documents/External Jars/commons-lang3-3.3.2/commons-lang3-3.3.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mark/Documents/External Jars/jung2-2_0_1/jung-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mark/Documents/External Jars/jung2-2_0_1/jung-visualization-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mark/Documents/External Jars/jung2-2_0_1/jung-graph-impl-2.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

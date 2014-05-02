@@ -12,8 +12,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 import sujoo.games.spacegame.Controller;
-import sujoo.games.spacegame.datatypes.Star;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
 
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
@@ -96,8 +94,8 @@ public class MainGui extends JFrame {
 		textArea.append(text + System.lineSeparator());
 	}
 	
-	public void setGraph(VisualizationViewer<Star, String> vv) {
-		graphPanel.add(vv, BorderLayout.CENTER);
+	public void setGraph(JPanel panel) {
+		graphPanel.add(panel, BorderLayout.CENTER);
 		pack();
 	}
 	
