@@ -50,13 +50,4 @@ public enum Command {
             return false;
         }
     }
-    
-    /**
-     * 
-     * 
-     * @return
-     */
-    public static boolean isOpenClassWord(Command command) {
-        return true;
-    }
 }

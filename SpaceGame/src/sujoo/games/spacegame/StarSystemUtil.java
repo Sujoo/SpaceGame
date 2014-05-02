@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import sujoo.games.spacegame.datatypes.Star;
+import sujoo.games.spacegame.datatypes.ai.StationManagerAI;
 import sujoo.games.spacegame.datatypes.planet.PlanetFactory;
 import sujoo.games.spacegame.datatypes.planet.PlanetType;
 
@@ -37,6 +38,7 @@ public class StarSystemUtil {
 		for (Integer i : generateUniqueStarIds(totalStarSystems)) {
 			Star newStar = new Star(i);
 			generatePlanets(newStar);
+			generateStationCargo(newStar);
 			starSystems.add(newStar);
 		}
 
@@ -56,6 +58,12 @@ public class StarSystemUtil {
 	private void generatePlanets(Star star) {
 		while (star.getPlanets().size() < maximumPlanets && random.nextBoolean()) {
 			star.addPlanet(PlanetFactory.buildPlanet(PlanetType.values()[random.nextInt(PlanetType.values().length)]));
+		}
+	}
+	
+	private void generateStationCargo(Star star) {
+		if (true) {
+			StationManagerAI.fillStationWithCargo(star.getStation());
 		}
 	}
 	

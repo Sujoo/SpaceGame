@@ -9,10 +9,12 @@ import com.google.common.collect.Lists;
 public class Star implements Comparable<Star> {
 	private final int id;
 	private List<Planet> planets;
+	private Station station;
 	
 	public Star(int id) {
 		this.id = id;
 		planets = Lists.newArrayList();
+		station = new Station();
 	}
 	
 	public int getId() {
@@ -25,6 +27,10 @@ public class Star implements Comparable<Star> {
 	
 	public void addPlanet(Planet planet) {
 		planets.add(planet);
+	}
+	
+	public Station getStation() {
+		return station;
 	}
 
 	@Override
