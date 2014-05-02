@@ -2,8 +2,10 @@ package sujoo.games.spacegame.datatypes;
 
 public enum Command {
 	SCAN("scan"),
-    FULL_SCAN("fullscan"),
+	MAP("map"),
+    FULL_MAP("fullscan"),
     JUMP("jump"),
+    HELP("help"),
     UNKNOWN("unknown");
 
 	private String code;
@@ -23,10 +25,9 @@ public enum Command {
      * @return
      */
     public static Command toCommand(String code) {
-    	code = code.toLowerCase();
     	Command result = UNKNOWN;
         for (Command command : Command.values()) {
-            if (command.getCode().equals(code)) {
+            if (command.getCode().equalsIgnoreCase(code)) {
                 result = command;
             }
         }

@@ -4,12 +4,16 @@ import java.util.List;
 import java.util.Random;
 
 import sujoo.games.spacegame.datatypes.Star;
+import sujoo.games.spacegame.datatypes.planet.PlanetFactory;
+import sujoo.games.spacegame.datatypes.planet.PlanetType;
 
 import com.google.common.collect.Lists;
 
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 public class StarSystemUtil {
+	
+	private final int maximumPlanets = 4;
 	
 	private int minStarId;
 	private int totalStarSystems;
@@ -27,27 +31,15 @@ public class StarSystemUtil {
 		createStarSystems();
 	}
 	
-	public UndirectedSparseGraph<Star, String> getStarGraph() {
-		return starGraph;
-	}
-	
-	public Star getStarSystem(int id) {
-		List<Star> starList = Lists.newArrayList(starGraph.getVertices());
-		for (Star star : starList) {
-			if (star.getId() == id) {
-				return star;
-			}
-		}
-		return null;
-	}
-	
 	public void createStarSystems() {
 		List<Star> starSystems = Lists.newArrayList();
 		
 		for (Integer i : generateUniqueStarIds(totalStarSystems)) {
-			starSystems.add(new Star(i));
+			Star newStar = new Star(i);
+			generatePlanets(newStar);
+			starSystems.add(newStar);
 		}
-//		return createStarSystemConnections(starSystems, maximumConnections);
+
 		createStarSystemGraph(starSystems, maximumConnections);
 	}
 	
@@ -59,6 +51,12 @@ public class StarSystemUtil {
 		}
 		
 		return starSystemIds;
+	}
+	
+	private void generatePlanets(Star star) {
+		while (star.getPlanets().size() < maximumPlanets && random.nextBoolean()) {
+			star.addPlanet(PlanetFactory.buildPlanet(PlanetType.values()[random.nextInt(PlanetType.values().length)]));
+		}
 	}
 	
 	private void createStarSystemGraph(List<Star> starSystems, int maximumConnections) {
@@ -90,16 +88,6 @@ public class StarSystemUtil {
 		return starList.get(random.nextInt(starList.size()));
 	}
 	
-	public String getNeighborsString(Star star) {
-		List<Star> neighbors = Lists.newArrayList(starGraph.getNeighbors(star));
-		
-		String result = "";
-		for (Star neighbor : neighbors) {
-			result += neighbor + "  ";
-		}
-		return result;
-	}
-	
 	public UndirectedSparseGraph<Star, String> createSubGraph(Star star) {
 		UndirectedSparseGraph<Star, String> subGraph = new UndirectedSparseGraph<Star, String>();
 		
@@ -114,5 +102,29 @@ public class StarSystemUtil {
 	
 	public boolean isNeighbor(Star star1, Star star2) {
 		return starGraph.isNeighbor(star1, star2);
+	}
+	
+	public String getNeighborsString(Star star) {
+		List<Star> neighbors = Lists.newArrayList(starGraph.getNeighbors(star));
+		
+		String result = "";
+		for (Star neighbor : neighbors) {
+			result += neighbor + "  ";
+		}
+		return result;
+	}
+	
+	public UndirectedSparseGraph<Star, String> getStarGraph() {
+		return starGraph;
+	}
+	
+	public Star getStarSystem(int id) {
+		List<Star> starList = Lists.newArrayList(starGraph.getVertices());
+		for (Star star : starList) {
+			if (star.getId() == id) {
+				return star;
+			}
+		}
+		return null;
 	}
 }

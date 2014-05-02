@@ -2,39 +2,29 @@ package sujoo.games.spacegame.datatypes;
 
 import java.util.List;
 
+import sujoo.games.spacegame.datatypes.planet.Planet;
+
 import com.google.common.collect.Lists;
 
 public class Star implements Comparable<Star> {
 	private final int id;
-	private List<Star> connectedStars;
+	private List<Planet> planets;
 	
 	public Star(int id) {
 		this.id = id;
-		connectedStars = Lists.newArrayList();
+		planets = Lists.newArrayList();
 	}
 	
 	public int getId() {
 		return id;
 	}
 	
-	public List<Star> getConnections() {
-		return connectedStars;
+	public List<Planet> getPlanets() {
+		return planets;
 	}
 	
-	public int getNumberOfConnections() {
-		return connectedStars.size();
-	}
-	
-	public void addConnectedStar(Star s) {
-		connectedStars.add(s);
-	}
-	
-	public boolean isConnectedTo(Star s) {
-		if(connectedStars.contains(s)) {
-			return true;
-		} else {
-			return false;
-		}
+	public void addPlanet(Planet planet) {
+		planets.add(planet);
 	}
 
 	@Override
