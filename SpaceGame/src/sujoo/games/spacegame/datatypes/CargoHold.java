@@ -9,30 +9,32 @@ public class CargoHold {
 		cargo = new int[CargoEnum.values().length - 1];
 	}
 	
-	public boolean removeCargo(CargoEnum cargoEnum, int amount) {
-		boolean result = false;
-		for (int i = 0; i < CargoEnum.values().length; i++) {
-			if (CargoEnum.values()[i] == cargoEnum) {
-				if (cargo[i] - amount >= 0) {
-					cargo[i] -= amount;
-					result = true;
-				}
-			}
+	public void removeCargo(CargoEnum cargoEnum, int amount) {
+		int index = CargoEnum.getCargoEnumIndex(cargoEnum);
+		if (cargo[index] - amount >= 0) {
+			cargo[index] -= amount;
 		}
-		return result;
+	}
+	
+	public boolean canRemoveCargo(CargoEnum cargoEnum, int amount) {
+		if (cargo[CargoEnum.getCargoEnumIndex(cargoEnum)] - amount >= 0) {
+			return true;
+		}
+		return false;
 	}
 
-	public boolean addCargo(CargoEnum cargoEnum, int amount) {
-		boolean result = false;
-		for (int i = 0; i < CargoEnum.values().length; i++) {
-			if (CargoEnum.values()[i] == cargoEnum) {
-				if (getCargoSpaceUsage() + amount * CargoEnum.values()[i].getSize() <= size) {
-					cargo[i] += amount;
-					result = true;
-				}
-			}
+	public void addCargo(CargoEnum cargoEnum, int amount) {
+		int index = CargoEnum.getCargoEnumIndex(cargoEnum);
+		if (getCargoSpaceUsage() + amount * CargoEnum.values()[index].getSize() <= size) {
+			cargo[index] += amount;
 		}
-		return result;
+	}
+	
+	public boolean canAddCargo(CargoEnum cargoEnum, int amount) {
+		if (getCargoSpaceUsage() + amount * CargoEnum.values()[CargoEnum.getCargoEnumIndex(cargoEnum)].getSize() <= size) {
+			return true;
+		}
+		return false;
 	}
 	
 	public int remainingCargoSpace() {

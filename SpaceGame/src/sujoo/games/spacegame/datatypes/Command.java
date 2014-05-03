@@ -6,6 +6,9 @@ public enum Command {
     FULL_MAP("fullscan"),
     JUMP("jump"),
     DOCK("dock"),
+    BUY("buy"),
+    SELL("sell"),
+    STATUS("status"),
     HELP("help"),
     UNKNOWN("unknown");
 

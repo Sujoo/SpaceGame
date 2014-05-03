@@ -2,18 +2,18 @@ package sujoo.games.spacegame.datatypes;
 
 public enum CargoEnum {
 	FUEL("fuel", 1, 50),
-	PARTS("parts", 1, 50),
-    ORGANICS("organics", 1, 50),
-    WEAPONS("weapons", 1, 75),
+	//PARTS("parts", 1, 50),
+    //ORGANICS("organics", 1, 50),
+    //WEAPONS("weapons", 1, 75),
     UNKNOWN("unknown", 0, 0);
 
 	private String code;
 	private int size;
 	private int baseValue;
-    private CargoEnum(String code, int size, int baseValue) {
+    private CargoEnum(String code, int size, int modifierValue) {
         this.code = code;
         this.size = size;
-        this.baseValue = baseValue;
+        this.baseValue = modifierValue;
     }
     
     private String getCode() {
@@ -64,5 +64,16 @@ public enum CargoEnum {
         } else {
             return false;
         }
+    }
+    
+    public static int getCargoEnumIndex(CargoEnum cargoEnum) {
+    	int result = CargoEnum.values().length-1;
+    	for (int i = 0; i < CargoEnum.values().length - 1; i++) {
+    		if (CargoEnum.values()[i] == cargoEnum) {
+    			result =  i;
+    			break;
+    		}
+    	}
+    	return result;
     }
 }

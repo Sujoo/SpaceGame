@@ -1,4 +1,4 @@
-package sujoo.games.spacegame;
+package sujoo.games.spacegame.manager;
 
 import java.util.List;
 import java.util.Random;
@@ -12,7 +12,7 @@ import com.google.common.collect.Lists;
 
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
-public class StarSystemUtil {
+public class StarSystemManager {
 	
 	private final int maximumPlanets = 4;
 	
@@ -22,7 +22,7 @@ public class StarSystemUtil {
 	private UndirectedSparseGraph<Star, String> starGraph;
 	private Random random;
 	
-	public StarSystemUtil(int minStarId, int totalStarSystems, int maximumConnections) {
+	public StarSystemManager(int minStarId, int totalStarSystems, int maximumConnections) {
 		this.minStarId = minStarId;
 		this.totalStarSystems = totalStarSystems;
 		this.maximumConnections = maximumConnections;

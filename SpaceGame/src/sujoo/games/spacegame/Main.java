@@ -1,12 +1,14 @@
 package sujoo.games.spacegame;
 
+import sujoo.games.spacegame.manager.GameManager;
+
 public class Main {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Controller controller = new Controller();
+		GameManager controller = new GameManager();
 		controller.play();
 	}
 

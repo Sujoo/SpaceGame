@@ -14,8 +14,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
-import sujoo.games.spacegame.Controller;
 import sujoo.games.spacegame.datatypes.Star;
+import sujoo.games.spacegame.manager.GameManager;
 
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
@@ -34,6 +34,7 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
+
 import javax.swing.JScrollPane;
 
 public class MainGui extends JFrame {
@@ -47,13 +48,13 @@ public class MainGui extends JFrame {
 	private JTextArea textArea;
 	private JTextField textField;
 	
-	private Controller controller;
+	private GameManager controller;
 	private JScrollPane scrollPane;
 
 	/**
 	 * Create the frame.
 	 */
-	public MainGui(Controller controller) {
+	public MainGui(GameManager controller) {
 		setResizable(false);
 		this.controller = controller;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -1,17 +1,18 @@
-package sujoo.games.spacegame;
+package sujoo.games.spacegame.manager;
 
 import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.CargoHold;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Station;
 import sujoo.games.spacegame.datatypes.planet.Planet;
+import sujoo.games.spacegame.datatypes.player.Player;
 
-public class TextUtil {
+public class TextManager {
 	private static final String nl = System.lineSeparator();
 	private static final String starTag = "System : ";
 	private static final String connectionsTag = "Exits  : ";
 	private static final String planetsTag = "Planets: ";
-	private static final String stationTag = "Station: ";
+	private static final String creditsTag = "Credits: ";
 	
 	private static final String dust = "Dust and Echoes";
 	
@@ -20,10 +21,36 @@ public class TextUtil {
 			"Scan - Display star system information" + nl +
 			"Map - Display adject system map";
 	
+	//Public Methods
 	public static String getCurrentStarSystemString(Star star, String connectionString) {
 		return starTag + star.getId() + nl +
 				connectionsTag + connectionString + nl +
 				planetsTag + getStarPlanetString(star);
+	}
+	
+	public static String getPlayerStatusString(Player player) {
+		return getPlayerCargoStatusString(player); 
+	}
+	
+	public static String getDockString(Station station, Player player) {
+		return getStationString(station) + nl + getPlayerStatusString(player);
+	}
+	
+	public static String getStationString(Station station) {
+		return station.getCargoHold().getCargoSpaceUsage() + " / " + station.getCargoHold().getSize() + nl + getStationCargoString(station);
+	}
+	
+	public static String getHelpString() {
+		return helpString;
+	}
+	
+	
+	// Support Methods
+	private static String getPlayerCargoStatusString(Player player) {
+		CargoHold hold = player.getShip().getCargoHold();
+		return creditsTag + player.getCredits() + nl +
+				hold.getCargoSpaceUsage() + " / " + hold.getSize() + nl +
+				getCargoHoldString(hold); 
 	}
 	
 	private static String getStarPlanetString(Star star) {
@@ -41,14 +68,10 @@ public class TextUtil {
 		return result;
 	}
 	
-	public static String getStationString(Station station) {
-		return getStationCargoString(station);
-	}
-	
 	private static String getStationCargoString(Station station) {
 		int longestCargoString = getLongestCargoEnumSize();
 		
-		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty : sell :  buy |";
+		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty :    $ |";
 		String bottomBar = getRepeatingCharacter("-", titleBar.length());
 		String result = bottomBar + nl + titleBar + nl + bottomBar + nl;
 		
@@ -56,8 +79,24 @@ public class TextUtil {
 		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
 			result += "| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
 					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + 
-					frontPad(String.valueOf(station.getBuyPrices()[i]),4) + " : " + 
-					frontPad(String.valueOf(station.getSellPrices()[i]),4) + " |" + nl;
+					frontPad(String.valueOf(station.getPrices()[i]),4) + " : " + nl;
+		}
+		
+		result += bottomBar;
+		
+		return result;
+	}
+	
+	private static String getCargoHoldString(CargoHold hold) {
+		int longestCargoString = getLongestCargoEnumSize();
+		
+		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty |";
+		String bottomBar = getRepeatingCharacter("-", titleBar.length());
+		String result = bottomBar + nl + titleBar + nl + bottomBar + nl;
+		;
+		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
+			result += "| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
+					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + nl;
 		}
 		
 		result += bottomBar;
@@ -88,11 +127,5 @@ public class TextUtil {
 			s = " " + s;
  		}
 		return s;
-	}
-	
-	public static String getHelpString() {
-		return helpString;
-	}
-	
-	
+	}	
 }
