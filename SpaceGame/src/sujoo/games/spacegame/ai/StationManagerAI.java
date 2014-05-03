@@ -13,7 +13,7 @@ public class StationManagerAI {
 		CargoHold hold = station.getCargoHold();
 		
 		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
-			hold.addCargo(CargoEnum.values()[i], random.nextInt(hold.remainingCargoSpace() / CargoEnum.values()[i].getSize()));		
+			hold.addCargo(CargoEnum.values()[i], random.nextInt(hold.remainingCargoSpace() / CargoEnum.values()[i].getSize()));
 		}
 	}
 

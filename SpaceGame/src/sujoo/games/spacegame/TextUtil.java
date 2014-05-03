@@ -35,9 +35,10 @@ public class TextUtil {
 			for (Planet planet : star.getPlanets()) {
 				result += planet + ", ";
 			}
+			result = result.substring(0, result.length()-2);
 		}
 		
-		return result.substring(0, result.length()-2);
+		return result;
 	}
 	
 	public static String getStationString(Station station) {

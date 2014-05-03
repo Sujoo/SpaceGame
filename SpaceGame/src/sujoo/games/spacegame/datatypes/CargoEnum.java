@@ -4,6 +4,7 @@ public enum CargoEnum {
 	FUEL("fuel", 1, 50),
 	PARTS("parts", 1, 50),
     ORGANICS("organics", 1, 50),
+    WEAPONS("weapons", 1, 75),
     UNKNOWN("unknown", 0, 0);
 
 	private String code;
