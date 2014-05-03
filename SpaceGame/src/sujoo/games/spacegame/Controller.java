@@ -26,7 +26,7 @@ public class Controller {
 	public void play() {
 		currentStar = starSystemUtil.getRandomStarSystem();
 		displayStarSystemInformation();
-		displaySystemMap(starSystemUtil.createSubGraph(currentStar));
+		displayLocalSystemMap();
 	}
 	
 	public void enterCommand(String command) {
@@ -42,10 +42,13 @@ public class Controller {
 				displayStarSystemInformation();
 				break;
 			case MAP:
-				displaySystemMap(starSystemUtil.createSubGraph(currentStar));
+				displayLocalSystemMap();
 				break;
 			case FULL_MAP:
-				displaySystemMap(starSystemUtil.getStarGraph());
+				displayGlobalSystemMap();
+				break;
+			case DOCK:
+				displayStationInformation();
 				break;
 			case HELP:
 				printHelp();
@@ -64,6 +67,15 @@ public class Controller {
 			currentStar = jumpToStar;
 		}
 		displayStarSystemInformation();
+		displayLocalSystemMap();
+	}
+	
+	private void displayLocalSystemMap() {
+		displaySystemMap(starSystemUtil.createSubGraph(currentStar));
+	}
+	
+	private void displayGlobalSystemMap() {
+		displaySystemMap(starSystemUtil.getStarGraph());
 	}
 	
 	private void displaySystemMap(UndirectedSparseGraph<Star, String> graph) {
@@ -72,6 +84,10 @@ public class Controller {
 	
 	private void displayStarSystemInformation() {
 		gui.setText(TextUtil.getCurrentStarSystemString(currentStar, starSystemUtil.getNeighborsString(currentStar)));
+	}
+	
+	private void displayStationInformation() {
+		gui.setText(TextUtil.getStationString(currentStar.getStation()));
 	}
 	
 	private void printHelp() {

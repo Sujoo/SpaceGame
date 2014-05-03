@@ -34,6 +34,7 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
+import javax.swing.JScrollPane;
 
 public class MainGui extends JFrame {
 
@@ -47,6 +48,7 @@ public class MainGui extends JFrame {
 	private JTextField textField;
 	
 	private Controller controller;
+	private JScrollPane scrollPane;
 
 	/**
 	 * Create the frame.
@@ -79,26 +81,30 @@ public class MainGui extends JFrame {
 		contentPane.add(graphPanel, gbc_graphPanel);
 		graphPanel.setLayout(new BorderLayout(0, 0));
 		
+		
+		scrollPane = new JScrollPane();
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridx = 0;
+		gbc_scrollPane.gridy = 1;
+		contentPane.add(scrollPane, gbc_scrollPane);
+		
 		textArea = new JTextArea();
 		textArea.setTabSize(4);
-		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		textArea.setFont(new Font("Consolas", Font.PLAIN, 12));
 		textArea.setEditable(false);
-		GridBagConstraints gbc_textArea = new GridBagConstraints();
-		gbc_textArea.insets = new Insets(0, 0, 5, 0);
-		gbc_textArea.fill = GridBagConstraints.BOTH;
-		gbc_textArea.gridx = 0;
-		gbc_textArea.gridy = 1;
-		contentPane.add(textArea, gbc_textArea);
+		scrollPane.setViewportView(textArea);
 		
 		textField = new JTextField();
 		textField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    enterCommand(textField.getText());
-                }
-            }
-        });
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					enterCommand(textField.getText());
+				}
+			}
+		});
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField.gridx = 0;

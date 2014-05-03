@@ -1,6 +1,5 @@
 package sujoo.games.spacegame.datatypes.planet;
 
-
 public class ClassNPlanet extends Planet {
 	
 	public ClassNPlanet() {
@@ -8,14 +7,6 @@ public class ClassNPlanet extends Planet {
 	}
 
 	public String toString() {
-		return shortDesc();
-	}
-	
-	public String shortDesc() {
-		return "N";
-	}
-	
-	public String longDesc() {
-		return "Sulfuric";
+		return getType().getShortDesc();
 	}
 }

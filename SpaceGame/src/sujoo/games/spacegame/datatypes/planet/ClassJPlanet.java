@@ -7,14 +7,6 @@ public class ClassJPlanet extends Planet {
 	}
 
 	public String toString() {
-		return shortDesc();
-	}
-	
-	public String shortDesc() {
-		return "J";
-	}
-	
-	public String longDesc() {
-		return "Gas Giant";
+		return getType().getShortDesc();
 	}
 }

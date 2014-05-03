@@ -7,14 +7,6 @@ public class ClassTPlanet extends Planet {
 	}
 
 	public String toString() {
-		return shortDesc();
-	}
-	
-	public String shortDesc() {
-		return "T";
-	}
-	
-	public String longDesc() {
-		return "Super Gas Giant";
+		return getType().getShortDesc();
 	}
 }

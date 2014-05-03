@@ -5,6 +5,7 @@ public enum Command {
 	MAP("map"),
     FULL_MAP("fullscan"),
     JUMP("jump"),
+    DOCK("dock"),
     HELP("help"),
     UNKNOWN("unknown");
 

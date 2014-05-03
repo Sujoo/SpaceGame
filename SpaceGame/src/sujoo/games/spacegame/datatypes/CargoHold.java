@@ -9,12 +9,17 @@ public class CargoHold {
 		cargo = new int[CargoEnum.values().length - 1];
 	}
 	
-	public void removeCargo(CargoEnum cargoEnum, int amount) {
+	public boolean removeCargo(CargoEnum cargoEnum, int amount) {
+		boolean result = false;
 		for (int i = 0; i < CargoEnum.values().length; i++) {
 			if (CargoEnum.values()[i] == cargoEnum) {
-				cargo[i] -= amount;
+				if (cargo[i] - amount >= 0) {
+					cargo[i] -= amount;
+					result = true;
+				}
 			}
 		}
+		return result;
 	}
 
 	public boolean addCargo(CargoEnum cargoEnum, int amount) {

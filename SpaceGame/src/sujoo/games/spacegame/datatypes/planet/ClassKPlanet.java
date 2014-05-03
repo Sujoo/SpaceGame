@@ -7,14 +7,6 @@ public class ClassKPlanet extends Planet {
 	}
 
 	public String toString() {
-		return shortDesc();
-	}
-	
-	public String shortDesc() {
-		return "K";
-	}
-	
-	public String longDesc() {
-		return "Adaptable with pressure domes";
+		return getType().getShortDesc();
 	}
 }

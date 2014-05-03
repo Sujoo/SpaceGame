@@ -3,6 +3,7 @@ package sujoo.games.spacegame;
 import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.CargoHold;
 import sujoo.games.spacegame.datatypes.Star;
+import sujoo.games.spacegame.datatypes.Station;
 import sujoo.games.spacegame.datatypes.planet.Planet;
 
 public class TextUtil {
@@ -22,8 +23,7 @@ public class TextUtil {
 	public static String getCurrentStarSystemString(Star star, String connectionString) {
 		return starTag + star.getId() + nl +
 				connectionsTag + connectionString + nl +
-				planetsTag + getStarPlanetString(star) + nl +
-				stationTag + getStarStationCargoString(star);
+				planetsTag + getStarPlanetString(star);
 	}
 	
 	private static String getStarPlanetString(Star star) {
@@ -40,15 +40,53 @@ public class TextUtil {
 		return result.substring(0, result.length()-2);
 	}
 	
-	private static String getStarStationCargoString(Star star) {
-		String result = "";
+	public static String getStationString(Station station) {
+		return getStationCargoString(station);
+	}
+	
+	private static String getStationCargoString(Station station) {
+		int longestCargoString = getLongestCargoEnumSize();
 		
-		CargoHold hold = star.getStation().getCargoHold();
+		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty : sell :  buy |";
+		String bottomBar = getRepeatingCharacter("-", titleBar.length());
+		String result = bottomBar + nl + titleBar + nl + bottomBar + nl;
+		
+		CargoHold hold = station.getCargoHold();
 		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
-			result += CargoEnum.values()[i].toString() + " : " + hold.getCargo()[i] + "  ";
+			result += "| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
+					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + 
+					frontPad(String.valueOf(station.getBuyPrices()[i]),4) + " : " + 
+					frontPad(String.valueOf(station.getSellPrices()[i]),4) + " |" + nl;
 		}
 		
+		result += bottomBar;
+		
 		return result;
+	}
+	
+	private static String getRepeatingCharacter(String repeatMe, int num) {
+		String result = "";
+		for (int i = 0; i < num; i++) {
+			result += repeatMe;
+		}
+		return result;
+	}
+	
+	private static int getLongestCargoEnumSize() {
+		int longest = 0;
+		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
+			if (CargoEnum.values()[i].toString().length() > longest) {
+				longest = CargoEnum.values()[i].toString().length();
+			}
+		}
+		return longest;
+	}
+	
+	private static String frontPad(String s, int max) {
+		for (int i = s.length(); i < max; i++) {
+			s = " " + s;
+ 		}
+		return s;
 	}
 	
 	public static String getHelpString() {

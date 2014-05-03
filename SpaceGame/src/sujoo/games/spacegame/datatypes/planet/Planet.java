@@ -1,6 +1,5 @@
 package sujoo.games.spacegame.datatypes.planet;
 
-
 public abstract class Planet {
 	private PlanetType type;
 	

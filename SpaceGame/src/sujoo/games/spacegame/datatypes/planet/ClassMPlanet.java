@@ -8,14 +8,6 @@ public class ClassMPlanet extends Planet {
 	}
 
 	public String toString() {
-		return shortDesc();
-	}
-	
-	public String shortDesc() {
-		return "M";
-	}
-	
-	public String longDesc() {
-		return "Terrestrial";
+		return getType().getShortDesc();
 	}
 }

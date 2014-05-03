@@ -7,14 +7,6 @@ public class ClassDPlanet extends Planet {
 	}
 
 	public String toString() {
-		return shortDesc();
-	}
-	
-	public String shortDesc() {
-		return "D";
-	}
-	
-	public String longDesc() {
-		return "Planetoid or moon";
+		return getType().getShortDesc();
 	}
 }

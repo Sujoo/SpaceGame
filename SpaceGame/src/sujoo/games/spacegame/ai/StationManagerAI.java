@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatypes.ai;
+package sujoo.games.spacegame.ai;
 
 import java.util.Random;
 

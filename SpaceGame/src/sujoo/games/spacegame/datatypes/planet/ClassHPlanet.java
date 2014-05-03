@@ -7,14 +7,6 @@ public class ClassHPlanet extends Planet {
 	}
 
 	public String toString() {
-		return shortDesc();
-	}
-	
-	public String shortDesc() {
-		return "H";
-	}
-	
-	public String longDesc() {
-		return "Generally uninhabitable";
+		return getType().getShortDesc();
 	}
 }
