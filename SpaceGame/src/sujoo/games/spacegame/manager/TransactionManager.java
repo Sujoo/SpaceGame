@@ -1,6 +1,5 @@
 package sujoo.games.spacegame.manager;
 
-import sujoo.games.spacegame.ai.StationManagerAI;
 import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.CargoHold;
 import sujoo.games.spacegame.datatypes.Station;
@@ -14,7 +13,7 @@ public class TransactionManager {
 	 * @param station
 	 * @param cargoEnum
 	 * @param amount
-	 * @return validation code : -1(unknown failure), 0(successful validation), 1(not enough cargo to remove), 2(not enough cargo space to add), 3(player not enough money)
+	 * @return validation code : -1(unknown failure), 0(successful validation), 1(no room in player), 2(no room in station), 3(no money in player)
 	 */
 	public static int validateBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
 		int result = -1;
@@ -22,17 +21,17 @@ public class TransactionManager {
 		CargoHold stationHold = station.getCargoHold();
 		int stationSellValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
 		// Does player have enough money?
-		if (player.getCredits() >= stationSellValue) {
+		if (player.getWallet().getCredits() >= stationSellValue) {
 			// Does station have enough cargo?
 			if (stationHold.canRemoveCargo(cargoEnum, amount)) {
 				// Does player have enough cargo space?
 				if (playerHold.canAddCargo(cargoEnum, amount)) {
 					result = 0;
 				} else {
-					result = 2;
+					result = 1;
 				}
 			} else {
-				result = 1;
+				result = 2;
 			}
 		} else {
 			result = 3;
@@ -47,22 +46,28 @@ public class TransactionManager {
 	 * @param station
 	 * @param cargoEnum
 	 * @param amount
-	 * @return validation code : -1(unknown failure), 0(successful validation), 1(not enough cargo to remove), 2(not enough cargo space to add)
+	 * @return validation code : -1(unknown failure), 0(successful validation), 1(no room in station), 2(no room in player), 3(no money in station)
 	 */
 	public static int validateSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
 		int result = -1;
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
-		// Does player have enough cargo?
-		if (playerHold.canRemoveCargo(cargoEnum, amount)) {
-			// Does station have enough cargo space?
-			if (stationHold.canAddCargo(cargoEnum, amount)) {
-				result = 0;
+		int stationBuyValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
+		// Does player have enough money?
+		if (station.getWallet().getCredits() >= stationBuyValue) {
+			// Does player have enough cargo?
+			if (playerHold.canRemoveCargo(cargoEnum, amount)) {
+				// Does station have enough cargo space?
+				if (stationHold.canAddCargo(cargoEnum, amount)) {
+					result = 0;
+				} else {
+					result = 1;
+				}
 			} else {
 				result = 2;
 			}
 		} else {
-			result = 1;
+			result = 3;
 		}
 		
 		return result;
@@ -77,15 +82,12 @@ public class TransactionManager {
 	 * @param amount
 	 * @return amount of money player will have to pay to station
 	 */
-	public static int performBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
+	public static void performBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {		
+		transactCargoTrade(station.getCargoHold(), player.getShip().getCargoHold(), cargoEnum, amount);
+		
 		int stationSellValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
-		
-		CargoHold playerHold = player.getShip().getCargoHold();
-		CargoHold stationHold = station.getCargoHold();
-		transactCargoTrade(stationHold, playerHold, cargoEnum, amount);
-		StationManagerAI.updateStationPrice(station, cargoEnum);
-		
-		return stationSellValue;
+		station.getWallet().addCredits(stationSellValue);
+		player.getWallet().removeCredits(stationSellValue);
 	}
 	
 	/**
@@ -97,16 +99,12 @@ public class TransactionManager {
 	 * @param amount
 	 * @return amount of money player will gain from station
 	 */
-	public static int performSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
+	public static void performSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
+		transactCargoTrade(player.getShip().getCargoHold(), station.getCargoHold(), cargoEnum, amount);
+		
 		int stationBuyValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
-		
-		CargoHold playerHold = player.getShip().getCargoHold();
-		CargoHold stationHold = station.getCargoHold();
-		
-		transactCargoTrade(playerHold, stationHold, cargoEnum, amount);
-		StationManagerAI.updateStationPrice(station, cargoEnum);
-		
-		return stationBuyValue;
+		player.getWallet().addCredits(stationBuyValue);
+		station.getWallet().removeCredits(stationBuyValue);
 	}
 	
 	private static void transactCargoTrade(CargoHold srcHold, CargoHold destHold, CargoEnum cargoEnum, int amount) {

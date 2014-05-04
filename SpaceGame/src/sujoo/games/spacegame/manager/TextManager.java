@@ -33,11 +33,14 @@ public class TextManager {
 	}
 	
 	public static String getDockString(Station station, Player player) {
-		return getStationString(station) + nl + getPlayerStatusString(player);
+		return getStationString(station) + nl + getPlayerCargoStatusString(player);
 	}
 	
 	public static String getStationString(Station station) {
-		return station.getCargoHold().getCargoSpaceUsage() + " / " + station.getCargoHold().getSize() + nl + getStationCargoString(station);
+		CargoHold hold = station.getCargoHold();
+		return creditsTag + station.getWallet().getCredits() + nl +
+				hold.getCargoSpaceUsage() + " / " + hold.getSize() + nl +
+				getStationCargoHoldString(station);
 	}
 	
 	public static String getHelpString() {
@@ -48,9 +51,9 @@ public class TextManager {
 	// Support Methods
 	private static String getPlayerCargoStatusString(Player player) {
 		CargoHold hold = player.getShip().getCargoHold();
-		return creditsTag + player.getCredits() + nl +
+		return creditsTag + player.getWallet().getCredits() + nl +
 				hold.getCargoSpaceUsage() + " / " + hold.getSize() + nl +
-				getCargoHoldString(hold); 
+				getPlayerCargoHoldString(hold); 
 	}
 	
 	private static String getStarPlanetString(Star star) {
@@ -68,7 +71,7 @@ public class TextManager {
 		return result;
 	}
 	
-	private static String getStationCargoString(Station station) {
+	private static String getStationCargoHoldString(Station station) {
 		int longestCargoString = getLongestCargoEnumSize();
 		
 		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty :    $ |";
@@ -76,7 +79,7 @@ public class TextManager {
 		String result = bottomBar + nl + titleBar + nl + bottomBar + nl;
 		
 		CargoHold hold = station.getCargoHold();
-		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
+		for (int i = 0; i < CargoEnum.values().length; i++) {
 			result += "| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
 					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + 
 					frontPad(String.valueOf(station.getPrices()[i]),4) + " : " + nl;
@@ -87,14 +90,14 @@ public class TextManager {
 		return result;
 	}
 	
-	private static String getCargoHoldString(CargoHold hold) {
+	private static String getPlayerCargoHoldString(CargoHold hold) {
 		int longestCargoString = getLongestCargoEnumSize();
 		
 		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty |";
 		String bottomBar = getRepeatingCharacter("-", titleBar.length());
 		String result = bottomBar + nl + titleBar + nl + bottomBar + nl;
 		;
-		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
+		for (int i = 0; i < CargoEnum.values().length; i++) {
 			result += "| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
 					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + nl;
 		}
@@ -114,7 +117,7 @@ public class TextManager {
 	
 	private static int getLongestCargoEnumSize() {
 		int longest = 0;
-		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
+		for (int i = 0; i < CargoEnum.values().length; i++) {
 			if (CargoEnum.values()[i].toString().length() > longest) {
 				longest = CargoEnum.values()[i].toString().length();
 			}

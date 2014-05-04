@@ -118,14 +118,16 @@ public class MainGui extends JFrame {
 	public void setText(String text) {
 		clearTextArea();
 		textArea.append(text);
+		pack();
 	}
 	
 	public void setDisplayPanel(JPanel panel) {
+		graphPanel.removeAll();
 		graphPanel.add(panel, BorderLayout.CENTER);
 		pack();
 	}
 	
-	public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar) {
+	public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {
 		FRLayout<Star, String> layout = new FRLayout<Star, String>(graph);
 		layout.setMaxIterations(10000);
 		layout.setRepulsionMultiplier(1.5);
@@ -137,8 +139,10 @@ public class MainGui extends JFrame {
 			public Paint transform(Star star) {
 				if (star.equals(currentStar)) {
 					return Color.WHITE;
-				} else {
+				} else if (star.equals(previousStar)) {
 					return Color.LIGHT_GRAY;
+				} else {
+					return Color.GREEN;
 				}
 			}
 		};

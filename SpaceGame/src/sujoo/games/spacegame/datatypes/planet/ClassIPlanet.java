@@ -1,9 +1,10 @@
 package sujoo.games.spacegame.datatypes.planet;
 
-public class ClassKPlanet extends Planet {
+
+public class ClassIPlanet extends Planet {
 	
-	public ClassKPlanet() {
-		super(PlanetType.CLASS_K);
+	public ClassIPlanet() {
+		super(PlanetType.CLASS_I);
 	}
 
 	public String toString() {

@@ -56,15 +56,13 @@ public class StarSystemManager {
 	}
 	
 	private void generatePlanets(Star star) {
-		while (star.getPlanets().size() < maximumPlanets && random.nextBoolean()) {
+		while (star.getPlanets().size() == 0 || (star.getPlanets().size() < maximumPlanets && random.nextBoolean())) {
 			star.addPlanet(PlanetFactory.buildPlanet(PlanetType.values()[random.nextInt(PlanetType.values().length)]));
 		}
 	}
 	
 	private void generateStationCargo(Star star) {
-		if (true) {
-			StationManagerAI.fillStationWithCargo(star.getStation());
-		}
+		StationManagerAI.fillStationWithCargo(star.getStation(), star.getPlanets());
 	}
 	
 	private void createStarSystemGraph(List<Star> starSystems, int maximumConnections) {

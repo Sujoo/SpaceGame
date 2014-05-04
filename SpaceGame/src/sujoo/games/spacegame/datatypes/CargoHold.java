@@ -6,7 +6,7 @@ public class CargoHold {
 	
 	public CargoHold(int size) {
 		this.size = size;
-		cargo = new int[CargoEnum.values().length - 1];
+		cargo = new int[CargoEnum.values().length];
 	}
 	
 	public void removeCargo(CargoEnum cargoEnum, int amount) {
@@ -43,7 +43,7 @@ public class CargoHold {
 	
 	public int getCargoSpaceUsage() {
 		int result = 0;
-		for (int i = 0; i < CargoEnum.values().length - 1; i++) {
+		for (int i = 0; i < CargoEnum.values().length; i++) {
 			result += cargo[i] * CargoEnum.values()[i].getSize();
 		}
 		return result;
