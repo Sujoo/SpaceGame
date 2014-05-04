@@ -3,7 +3,7 @@ package sujoo.games.spacegame.datatypes;
 public class Station {
 	
 	private final int defaultHoldSize = 15000;
-	private final int defaultCredits = 10000;
+	private final int defaultCredits = 50000;
 	private CargoHold hold;
 	private int[] prices;
 	private Wallet wallet;

@@ -94,8 +94,9 @@ public class GameManager {
 	public void buy(String[] commandString, Player player, Station station) {
 		if (commandString.length >= 3) {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
-			int amountToBuy = getAmount(commandString[1], player, station, cargoEnum);			
 			if (cargoEnum != null) {
+			int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(), station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)],
+					player.getShip().getCargoHold().remainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold().getCargo()[CargoEnum.getCargoEnumIndex(cargoEnum)]);
 				int validationCode = TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 				switch(validationCode) {
 				case 0:
@@ -110,8 +111,9 @@ public class GameManager {
 	public void sell(String[] commandString, Player player, Station station) {
 		if (commandString.length >= 3) {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
-			int amountToSell = getAmount(commandString[1], player, station, cargoEnum);
 			if (cargoEnum != null) {
+				int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(), station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)],
+						station.getCargoHold().remainingCargoSpace(), cargoEnum.getSize(), player.getShip().getCargoHold().getCargo()[CargoEnum.getCargoEnumIndex(cargoEnum)]);
 				int validationCode = TransactionManager.validateSellToStationTransaction(player, station, cargoEnum, amountToSell);
 				switch(validationCode) {
 				case 0:
@@ -123,12 +125,20 @@ public class GameManager {
 		}
 	}
 	
-	private int getAmount(String command, Player player, Station station, CargoEnum cargoEnum) {
-		int amount = 0;
+	private int getAmount(String command, int buyerCredits, int cargoPrice, int remainingCargoSpace, int cargoSize, int maxStock) {
+		int amount = 0;		
 		if (StringUtils.isNumeric(command)) {
 			amount = Integer.parseInt(command);
 		} else if (command.equalsIgnoreCase("max") || command.equalsIgnoreCase("all")) {
-			// calculate maximum value here
+			int priceLimit = buyerCredits / cargoPrice;
+			int cargoLimit = remainingCargoSpace / cargoSize;
+			if (maxStock < priceLimit && maxStock < cargoLimit) {
+				amount = maxStock;
+			} else if (priceLimit < cargoLimit) {
+				amount = priceLimit;
+			} else {
+				amount = cargoLimit;
+			}
 		}
 		return amount;
 	}
