@@ -1,0 +1,45 @@
+Races:
+Terrans
+Lizardmen
+Robots
+Furbols
+Birdfolk
+
+Planets:
+Terrestrial {terrans, birdfolk, furbols} {fuel, ammo, alloy, parts, electronics, organics}
+Gas Giant {birdfolk} {fuel, organics}
+Volcanic {terrans, lizardmen} {fuel, alloy}
+Jungle {terrans, birdfolk, furbols} {fuel, alloys, organics}
+Desert {terrans, lizardmen} {fuel, ammo, parts}
+Ice {terrans, robots} {fuel, organics, electronics}
+Silicon {robots} {ammo, alloy, parts, electronics}
+
+Resources:
+
+Commodities:
+Fuel - used by ships / stations
+Ammo - used by weapons
+Alloy
+Parts
+Electronics
+Organics
+
+3rd Tier:
+ships {alloy, parts, electronics, organics}
+ship upgrades {alloy, parts, [organics/electronics]}
+station parts {alloy, parts, [organics/elections]}
+
+gas - fuel, organics, ammo
+vol - fuel, parts, alloy
+jun - fuel, ammo, organics
+des - ammo, parts, electronics
+ice - fuel, ammo, alloy
+sil - alloy, parts, electronics
+
+Commodity Base Values:
+Electronics - 150
+Organics - 125
+Parts - 100
+Alloys - 75
+Ammo - 50
+Fuel - 25
