@@ -16,7 +16,7 @@ public class TransactionManager {
 	 * @param amount
 	 * @return validation code : -1(unknown failure), 0(successful validation), 1(not enough cargo to remove), 2(not enough cargo space to add), 3(player not enough money)
 	 */
-	public static int validateStationPurchaseTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
+	public static int validateBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
 		int result = -1;
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
@@ -49,7 +49,7 @@ public class TransactionManager {
 	 * @param amount
 	 * @return validation code : -1(unknown failure), 0(successful validation), 1(not enough cargo to remove), 2(not enough cargo space to add)
 	 */
-	public static int validateStationSaleTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
+	public static int validateSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
 		int result = -1;
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
@@ -77,7 +77,7 @@ public class TransactionManager {
 	 * @param amount
 	 * @return amount of money player will have to pay to station
 	 */
-	public static int performStationBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
+	public static int performBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
 		int stationSellValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
 		
 		CargoHold playerHold = player.getShip().getCargoHold();
@@ -102,6 +102,7 @@ public class TransactionManager {
 		
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
+		
 		transactCargoTrade(playerHold, stationHold, cargoEnum, amount);
 		StationManagerAI.updateStationPrice(station, cargoEnum);
 		

@@ -92,10 +92,10 @@ public class GameManager {
 		if (commandString.length >= 3) {
 			int amountToBuy = getAmount(commandString[1]);			
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
-			int validationCode = TransactionManager.validateStationPurchaseTransaction(player, station, cargoEnum, amountToBuy);
+			int validationCode = TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 			switch(validationCode) {
 			case 0:
-				int creditsToRemove = TransactionManager.performStationBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
+				int creditsToRemove = TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 				player.removeCredits(creditsToRemove);
 				break;
 			}
@@ -107,7 +107,7 @@ public class GameManager {
 		if (commandString.length >= 3) {
 			int amountToSell = getAmount(commandString[1]);
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
-			int validationCode = TransactionManager.validateStationSaleTransaction(player, station, cargoEnum, amountToSell);
+			int validationCode = TransactionManager.validateSellToStationTransaction(player, station, cargoEnum, amountToSell);
 			switch(validationCode) {
 			case 0:
 				int creditsToAdd = TransactionManager.performSellToStationTransaction(player, station, cargoEnum, amountToSell);
