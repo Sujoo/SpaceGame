@@ -1,6 +1,7 @@
 package sujoo.games.spacegame.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -12,12 +13,10 @@ import java.awt.Shape;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.manager.GameManager;
 
-import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -35,8 +34,6 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
-import javax.swing.JScrollPane;
-
 public class MainGui extends JFrame {
 
 	/**
@@ -44,12 +41,11 @@ public class MainGui extends JFrame {
 	 */
 	private static final long serialVersionUID = -2672177212106851596L;
 	private JPanel contentPane;
-	private JPanel graphPanel;
-	private JTextArea textArea;
+	private JPanel upperPanel;
+	private JPanel lowerPanel;
 	private JTextField textField;
 	
 	private GameManager controller;
-	private JScrollPane scrollPane;
 
 	/**
 	 * Create the frame.
@@ -70,32 +66,27 @@ public class MainGui extends JFrame {
 		gbl_contentPane.rowWeights = new double[]{};
 		contentPane.setLayout(gbl_contentPane);
 		
-		graphPanel = new JPanel();
-		graphPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
-		graphPanel.setBackground(Color.GRAY);
-		GridBagConstraints gbc_graphPanel = new GridBagConstraints();
-		gbc_graphPanel.anchor = GridBagConstraints.NORTH;
-		gbc_graphPanel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_graphPanel.insets = new Insets(0, 0, 5, 0);
-		gbc_graphPanel.gridx = 0;
-		gbc_graphPanel.gridy = 0;
-		contentPane.add(graphPanel, gbc_graphPanel);
-		graphPanel.setLayout(new BorderLayout(0, 0));
+		upperPanel = new JPanel();
+		upperPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
+		GridBagConstraints gbc_upperPanel = new GridBagConstraints();
+		gbc_upperPanel.anchor = GridBagConstraints.NORTH;
+		gbc_upperPanel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_upperPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_upperPanel.gridx = 0;
+		gbc_upperPanel.gridy = 0;
+		contentPane.add(upperPanel, gbc_upperPanel);
+		upperPanel.setLayout(new BorderLayout(0, 0));
 		
 		
-		scrollPane = new JScrollPane();
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 1;
-		contentPane.add(scrollPane, gbc_scrollPane);
-		
-		textArea = new JTextArea();
-		textArea.setTabSize(4);
-		textArea.setFont(new Font("Consolas", Font.PLAIN, 12));
-		textArea.setEditable(false);
-		scrollPane.setViewportView(textArea);
+		lowerPanel = new JPanel();
+		lowerPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
+		GridBagConstraints gbc_lowerPanel = new GridBagConstraints();
+		gbc_lowerPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_lowerPanel.fill = GridBagConstraints.BOTH;
+		gbc_lowerPanel.gridx = 0;
+		gbc_lowerPanel.gridy = 1;
+		contentPane.add(lowerPanel, gbc_lowerPanel);
+		lowerPanel.setLayout(new BorderLayout(0 ,0));
 		
 		textField = new JTextField();
 		textField.addKeyListener(new KeyAdapter() {
@@ -111,20 +102,23 @@ public class MainGui extends JFrame {
 		gbc_textField.gridx = 0;
 		gbc_textField.gridy = 2;
 		contentPane.add(textField, gbc_textField);
-		
+	}
+	
+	public void setLowerPanel(Component panel) {
+		lowerPanel.removeAll();
+		lowerPanel.add(panel, BorderLayout.CENTER);
+		redraw();
+	}
+	
+	public void setUpperPanel(Component panel) {
+		upperPanel.removeAll();
+		upperPanel.add(panel, BorderLayout.CENTER);
+		redraw();
+	}
+	
+	private void redraw() {
+		pack();
 		textField.requestFocusInWindow();
-	}
-	
-	public void setText(String text) {
-		clearTextArea();
-		textArea.append(text);
-		pack();
-	}
-	
-	public void setDisplayPanel(JPanel panel) {
-		graphPanel.removeAll();
-		graphPanel.add(panel, BorderLayout.CENTER);
-		pack();
 	}
 	
 	public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {
@@ -159,15 +153,11 @@ public class MainGui extends JFrame {
 		vs.getRenderContext().setVertexShapeTransformer(vertexShapeTransformer);
 		vs.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 		
-		setDisplayPanel(vs);
+		setUpperPanel(vs);
 	}
 	
 	private void enterCommand(String text) {
 		textField.setText("");
 		controller.enterCommand(text);
-	}
-	
-	private void clearTextArea() {
-		textArea.setText("");		
 	}
 }

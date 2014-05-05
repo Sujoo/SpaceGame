@@ -1,20 +1,26 @@
 package sujoo.games.spacegame.manager;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.util.List;
+
+import javax.swing.JTextPane;
 
 import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.CargoHold;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Station;
+import sujoo.games.spacegame.datatypes.Wallet;
 import sujoo.games.spacegame.datatypes.planet.Planet;
 import sujoo.games.spacegame.datatypes.player.Player;
+import sujoo.games.spacegame.gui.STextArea;
 
 public class TextManager {
 	private static final String nl = System.lineSeparator();
 	private static final String starTag = "System : ";
 	private static final String connectionsTag = "Exits  : ";
-	private static final String planetsTag = "Planets: ";
-	private static final String playersTag = "Players: ";
+	private static final String planetsTag = "Planets ";
+	private static final String playersTag = "Players ";
 	private static final String creditsTag = "Credits: ";
 	
 	private static final String dust = "Dust and Echoes";
@@ -24,54 +30,114 @@ public class TextManager {
 			"Scan - Display star system information" + nl +
 			"Map - Display adject system map";
 	
+	private static Component wrapText(STextArea textArea) {
+		JTextPane textPane = new JTextPane(textArea);
+		textPane.setEditable(false);
+		textPane.setBackground(Color.BLACK);
+		return textPane;
+	}
+	
 	//Public Methods
-	public static String getCurrentStarSystemString(Star star, String connectionString, List<Player> players) {
-		return starTag + star.getId() + nl +
-				connectionsTag + connectionString + nl +
-				planetsTag + getStarPlanetString(star) + nl +
-				playersTag + getPlayersString(players);
+	public static Component getCurrentStarSystemPanel(Star star, String connectionString, List<Player> players) {		
+	    STextArea textArea = new STextArea();
+
+	    textArea.append(starTag, Color.YELLOW);
+	    textArea.appendLine(String.valueOf(star.getId()), Color.WHITE);
+	    textArea.append(connectionsTag, Color.YELLOW);
+	    textArea.appendLine(connectionString, Color.GREEN);
+	    textArea.append(planetsTag, Color.WHITE);
+	    textArea.appendLine(getStarPlanetString(star), Color.WHITE);
+	    textArea.append(playersTag, Color.BLUE);
+	    textArea.append(getPlayersString(players), Color.BLUE);
+	    
+	    return wrapText(textArea);
 	}
 	
-	public static String getScoreString(Player humanPlayer, List<Player> players) {
-		String result = "You: " + humanPlayer.getWallet().getCredits() + nl;
+	public static Component getScoreString(Player humanPlayer, List<Player> players) {
+		STextArea textArea = new STextArea();
+		textArea.appendLine("You: " + humanPlayer.getWallet().getCredits());
+		
 		for (Player player : players) {
-			result += player.toString() + ": " + player.getWallet().getCredits() + nl;
+			textArea.appendLine(player + ": " + player.getWallet().getCredits());
 		}
-		return result;
+		return wrapText(textArea);
 	}
 	
-	public static String getPlayerStatusString(Player player) {
-		return getPlayerCargoStatusString(player); 
+	public static Component getPlayerStatusPanel(Player player) {
+		STextArea textArea = new STextArea();
+		includeCreditsText(textArea, player.getWallet());
+		includePlayerCargoText(textArea, player); 
+		return wrapText(textArea);
 	}
 	
-	public static String getDockString(Station station, Player player) {
-		return getStationString(station) + nl + getPlayerCargoStatusString(player);
+	public static Component getDockUpperPanel(Station station) {
+		STextArea textArea = new STextArea();
+		includeCreditsText(textArea, station.getWallet());
+		includeStationCargoText(textArea, station);
+		return wrapText(textArea);
 	}
 	
-	public static String getStationString(Station station) {
-		CargoHold hold = station.getCargoHold();
-		return creditsTag + station.getWallet().getCredits() + nl +
-				hold.getCargoSpaceUsage() + " / " + hold.getSize() + nl +
-				getStationCargoHoldString(station);
+	public static Component getDockLowerPanel(Player player) {
+		STextArea textArea = new STextArea();
+		includeCreditsText(textArea, player.getWallet());
+		includePlayerCargoText(textArea, player); 
+		return wrapText(textArea);
 	}
 	
-	public static String getHelpString() {
-		return helpString;
+	public static Component getHelpPanel() {
+		STextArea textArea = new STextArea();
+		textArea.appendLine(helpString); 
+		return wrapText(textArea);
 	}
 	
 	
 	// Support Methods
-	private static String getPlayerCargoStatusString(Player player) {
+	private static void includeCreditsText(STextArea textArea, Wallet wallet) {
+		textArea.appendLine(creditsTag + wallet.getCredits(), Color.YELLOW);
+	}
+	private static void includeStationCargoText(STextArea textArea, Station station) {
+		CargoHold hold = station.getCargoHold();
+		textArea.appendLine(hold.getCargoSpaceUsage() + " / " + hold.getSize());
+		
+		int longestCargoString = getLongestTextLength(CargoEnum.values());
+		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty :    $ |";
+		String bottomBar = getRepeatingCharacter("-", titleBar.length());
+		textArea.appendLine(bottomBar);
+		textArea.appendLine(titleBar);
+		textArea.appendLine(bottomBar);
+		
+		for (int i = 0; i < CargoEnum.values().length; i++) {
+			textArea.appendLine("| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
+					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + 
+					frontPad(String.valueOf(station.getPrices()[i]),4) + " : ");
+		}
+		
+		textArea.appendLine(bottomBar);
+	}
+	
+	private static void includePlayerCargoText(STextArea textArea, Player player) {
 		CargoHold hold = player.getShip().getCargoHold();
-		return creditsTag + player.getWallet().getCredits() + nl +
-				hold.getCargoSpaceUsage() + " / " + hold.getSize() + nl +
-				getPlayerCargoHoldString(hold); 
+		textArea.appendLine(hold.getCargoSpaceUsage() + " / " + hold.getSize());
+		
+		int longestCargoString = getLongestTextLength(CargoEnum.values());
+		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty |";
+		String bottomBar = getRepeatingCharacter("-", titleBar.length());
+		textArea.appendLine(bottomBar);
+		textArea.appendLine(titleBar);
+		textArea.appendLine(bottomBar);
+		
+		for (int i = 0; i < CargoEnum.values().length; i++) {
+			textArea.appendLine("| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
+					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : ");
+		}
+		
+		textArea.appendLine(bottomBar);
 	}
 	
 	private static String getPlayersString(List<Player> players) {
-		String result = "";
+		String result = "(" + players.size() + ") :";
 		for (Player player : players) {
-			result += player.toString();
+			result += nl + player.toString();
 		}
 		return result;
 	}
@@ -81,48 +147,11 @@ public class TextManager {
 		if (star.getPlanets().size() == 0) {
 			result = dust;
 		} else {
-			result = "(" + star.getPlanets().size() + ") : ";
+			result = "(" + star.getPlanets().size() + ") :";
 			for (Planet planet : star.getPlanets()) {
-				result += planet + ", ";
+				result += nl + planet.getType().getLongDesc();
 			}
-			result = result.substring(0, result.length()-2);
 		}
-		
-		return result;
-	}
-	
-	private static String getStationCargoHoldString(Station station) {
-		int longestCargoString = getLongestCargoEnumSize();
-		
-		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty :    $ |";
-		String bottomBar = getRepeatingCharacter("-", titleBar.length());
-		String result = bottomBar + nl + titleBar + nl + bottomBar + nl;
-		
-		CargoHold hold = station.getCargoHold();
-		for (int i = 0; i < CargoEnum.values().length; i++) {
-			result += "| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
-					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + 
-					frontPad(String.valueOf(station.getPrices()[i]),4) + " : " + nl;
-		}
-		
-		result += bottomBar;
-		
-		return result;
-	}
-	
-	private static String getPlayerCargoHoldString(CargoHold hold) {
-		int longestCargoString = getLongestCargoEnumSize();
-		
-		String titleBar = "| " + frontPad("type", longestCargoString) + " :  qty |";
-		String bottomBar = getRepeatingCharacter("-", titleBar.length());
-		String result = bottomBar + nl + titleBar + nl + bottomBar + nl;
-		;
-		for (int i = 0; i < CargoEnum.values().length; i++) {
-			result += "| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
-					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + nl;
-		}
-		
-		result += bottomBar;
 		
 		return result;
 	}
@@ -135,11 +164,11 @@ public class TextManager {
 		return result;
 	}
 	
-	private static int getLongestCargoEnumSize() {
+	private static int getLongestTextLength(Object[] objects) {
 		int longest = 0;
-		for (int i = 0; i < CargoEnum.values().length; i++) {
-			if (CargoEnum.values()[i].toString().length() > longest) {
-				longest = CargoEnum.values()[i].toString().length();
+		for (int i = 0; i < objects.length; i++) {
+			if (objects[i].toString().length() > longest) {
+				longest = objects[i].toString().length();
 			}
 		}
 		return longest;

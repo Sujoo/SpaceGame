@@ -1,5 +1,8 @@
-package sujoo.games.spacegame.manager;
+package sujoo.games.spacegame.ai;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.List;
 import java.util.Random;
 
@@ -13,8 +16,10 @@ import sujoo.games.spacegame.datatypes.player.Player;
 import sujoo.games.spacegame.datatypes.ship.Ship;
 import sujoo.games.spacegame.datatypes.ship.ShipFactory;
 import sujoo.games.spacegame.datatypes.ship.ShipType;
+import sujoo.games.spacegame.manager.StarSystemManager;
+import sujoo.games.spacegame.manager.TransactionManager;
 
-public class AIPlayerManager {
+public class PlayerManagerAI {
 	private final int initCredits = 1000;
 	private final Ship startingShip = ShipFactory.buildShip(ShipType.SMALL_TRANS);
 	
@@ -23,7 +28,7 @@ public class AIPlayerManager {
 	private Random random;
 	private List<CargoEnum> recentlyPurchasedCargo;
 	
-	public AIPlayerManager(int numberOfAI, StarSystemManager starSystemManager) {
+	public PlayerManagerAI(int numberOfAI, StarSystemManager starSystemManager) {
 		aiPlayers = Lists.newArrayList();
 		this.starSystemManager = starSystemManager;
 		random = new Random();
@@ -33,11 +38,29 @@ public class AIPlayerManager {
 	}
 	
 	private void createAIPlayers(int numberOfAI) {
+		List<String> traderNames = getNames("resources\\TraderNames.txt");
 		for (int i = 0; i < numberOfAI; i++) {
-			Player p = new Player(startingShip, initCredits);
+			Player p = new Player(startingShip, initCredits, traderNames.get(i));
 			p.setNewCurrentStar(starSystemManager.getRandomStarSystem());
 			aiPlayers.add(p);
 		}
+	}
+	
+	private List<String> getNames(String fileName) {
+		List<String> names = Lists.newArrayList();
+		
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
+			String name;
+			while((name = reader.readLine()) != null) {
+				names.add(name);
+			}
+			reader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return names;
 	}
 	
 	public void performAIPlayerTurns() {

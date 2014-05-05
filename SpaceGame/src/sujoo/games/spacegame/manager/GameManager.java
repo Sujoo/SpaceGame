@@ -3,6 +3,7 @@ package sujoo.games.spacegame.manager;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
+import sujoo.games.spacegame.ai.PlayerManagerAI;
 import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.Command;
 import sujoo.games.spacegame.datatypes.Star;
@@ -22,14 +23,14 @@ public class GameManager {
 	private final Ship playerStartingShip = ShipFactory.buildShip(ShipType.SMALL_TRANS);
 	
 	private StarSystemManager starSystemManager;
-	private AIPlayerManager aiPlayerManager;
+	private PlayerManagerAI playerManagerAI;
 	private MainGui gui;
 	private Player humanPlayer;
 	
 	public GameManager() {
 		starSystemManager = new StarSystemManager(minStarId, totalStarSystems, maximumConnections);
-		aiPlayerManager = new AIPlayerManager(numberOfAIPlayers, starSystemManager);
-		humanPlayer = new Player(playerStartingShip, initCredits);
+		playerManagerAI = new PlayerManagerAI(numberOfAIPlayers, starSystemManager);
+		humanPlayer = new Player(playerStartingShip, initCredits, "You");
 		gui = new MainGui(this);
 		gui.setVisible(true);
 	}
@@ -57,7 +58,7 @@ public class GameManager {
 				displayGlobalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
 				break;
 			case DOCK:
-				displayDockInformation(humanPlayer.getCurrentStar(), humanPlayer);
+				dock();
 				break;
 			case BUY:
 				buy(commandString, humanPlayer, humanPlayer.getCurrentStar().getStation());
@@ -83,7 +84,7 @@ public class GameManager {
 	}
 	
 	private void printScore() {
-		gui.setText(TextManager.getScoreString(humanPlayer, aiPlayerManager.getAIPlayers()));
+		gui.setLowerPanel(TextManager.getScoreString(humanPlayer, playerManagerAI.getAIPlayers()));
 	}
 	
 	private void travel(String[] commandString) {
@@ -91,7 +92,7 @@ public class GameManager {
 			Star jumpToStar = starSystemManager.getStarSystem(Integer.parseInt(commandString[1]));
 			if (jumpToStar != null && starSystemManager.isNeighbor(humanPlayer.getCurrentStar(), jumpToStar)) {
 				humanPlayer.setNewCurrentStar(jumpToStar);
-				aiPlayerManager.performAIPlayerTurns();
+				playerManagerAI.performAIPlayerTurns();
 				displayStarSystemInformation();
 				displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
 			}
@@ -110,7 +111,7 @@ public class GameManager {
 					TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 					break;
 				}
-			displayDockInformation(humanPlayer.getCurrentStar(), humanPlayer);
+			displayDockPanels(humanPlayer);
 			}
 		}
 	}
@@ -128,7 +129,7 @@ public class GameManager {
 					break;
 				}
 			}
-			displayDockInformation(humanPlayer.getCurrentStar(), humanPlayer);
+			displayDockPanels(humanPlayer);
 		}
 	}
 	
@@ -142,8 +143,12 @@ public class GameManager {
 		return amount;
 	}
 	
+	private void dock() {
+		displayDockPanels(humanPlayer);
+	}
+	
 	private void displayStatus(Player player) {
-		gui.setText(TextManager.getPlayerStatusString(player));
+		gui.setLowerPanel(TextManager.getPlayerStatusPanel(player));
 	}
 	
 	private void displayLocalSystemMap(Star currStar, Star prevStar) {
@@ -159,14 +164,15 @@ public class GameManager {
 	}
 	
 	private void displayStarSystemInformation() {
-		gui.setText(TextManager.getCurrentStarSystemString(humanPlayer.getCurrentStar(), starSystemManager.getNeighborsString(humanPlayer.getCurrentStar()), aiPlayerManager.getAIPlayersInStarSystem(humanPlayer.getCurrentStar())));
+		gui.setLowerPanel(TextManager.getCurrentStarSystemPanel(humanPlayer.getCurrentStar(), starSystemManager.getNeighborsString(humanPlayer.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(humanPlayer.getCurrentStar())));
 	}
 	
-	private void displayDockInformation(Star star, Player player) {
-		gui.setText(TextManager.getDockString(star.getStation(), player));
+	private void displayDockPanels(Player player) {
+		gui.setUpperPanel(TextManager.getDockUpperPanel(player.getCurrentStar().getStation()));
+		gui.setLowerPanel(TextManager.getDockLowerPanel(player));
 	}
 	
 	private void printHelp() {
-		gui.setText(TextManager.getHelpString());
+		gui.setLowerPanel(TextManager.getHelpPanel());
 	}
 }
