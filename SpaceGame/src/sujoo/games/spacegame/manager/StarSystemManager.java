@@ -110,6 +110,10 @@ public class StarSystemManager {
 		return starGraph.isNeighbor(star1, star2);
 	}
 	
+	public List<Star> getNeighbors(Star star) {
+		return Lists.newArrayList(starGraph.getNeighbors(star));
+	}
+	
 	public String getNeighborsString(Star star) {
 		List<Star> neighbors = Lists.newArrayList(starGraph.getNeighbors(star));
 		

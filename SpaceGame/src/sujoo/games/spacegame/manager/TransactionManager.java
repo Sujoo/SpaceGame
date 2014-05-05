@@ -111,4 +111,18 @@ public class TransactionManager {
 		srcHold.removeCargo(cargoEnum, amount);
 		destHold.addCargo(cargoEnum, amount);
 	}
+	
+	public static int getMaximumAmount(int buyerCredits, int cargoPrice, int remainingCargoSpace, int cargoSize, int maxStock) {
+		int amount = 0;
+		int priceLimit = buyerCredits / cargoPrice;
+		int cargoLimit = remainingCargoSpace / cargoSize;
+		if (maxStock < priceLimit && maxStock < cargoLimit) {
+			amount = maxStock;
+		} else if (priceLimit < cargoLimit) {
+			amount = priceLimit;
+		} else {
+			amount = cargoLimit;
+		}
+		return amount;
+	}
 }

@@ -10,6 +10,7 @@ public enum Command {
     SELL("sell"),
     STATUS("status"),
     HELP("help"),
+    SCORE("score"),
     UNKNOWN("unknown");
 
 	private String code;

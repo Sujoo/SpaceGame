@@ -1,5 +1,7 @@
 package sujoo.games.spacegame.manager;
 
+import java.util.List;
+
 import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.CargoHold;
 import sujoo.games.spacegame.datatypes.Star;
@@ -12,6 +14,7 @@ public class TextManager {
 	private static final String starTag = "System : ";
 	private static final String connectionsTag = "Exits  : ";
 	private static final String planetsTag = "Planets: ";
+	private static final String playersTag = "Players: ";
 	private static final String creditsTag = "Credits: ";
 	
 	private static final String dust = "Dust and Echoes";
@@ -22,10 +25,19 @@ public class TextManager {
 			"Map - Display adject system map";
 	
 	//Public Methods
-	public static String getCurrentStarSystemString(Star star, String connectionString) {
+	public static String getCurrentStarSystemString(Star star, String connectionString, List<Player> players) {
 		return starTag + star.getId() + nl +
 				connectionsTag + connectionString + nl +
-				planetsTag + getStarPlanetString(star);
+				planetsTag + getStarPlanetString(star) + nl +
+				playersTag + getPlayersString(players);
+	}
+	
+	public static String getScoreString(Player humanPlayer, List<Player> players) {
+		String result = "You: " + humanPlayer.getWallet().getCredits() + nl;
+		for (Player player : players) {
+			result += player.toString() + ": " + player.getWallet().getCredits() + nl;
+		}
+		return result;
 	}
 	
 	public static String getPlayerStatusString(Player player) {
@@ -54,6 +66,14 @@ public class TextManager {
 		return creditsTag + player.getWallet().getCredits() + nl +
 				hold.getCargoSpaceUsage() + " / " + hold.getSize() + nl +
 				getPlayerCargoHoldString(hold); 
+	}
+	
+	private static String getPlayersString(List<Player> players) {
+		String result = "";
+		for (Player player : players) {
+			result += player.toString();
+		}
+		return result;
 	}
 	
 	private static String getStarPlanetString(Star star) {

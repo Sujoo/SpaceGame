@@ -7,8 +7,8 @@ import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.Command;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Station;
-import sujoo.games.spacegame.datatypes.player.HumanPlayer;
 import sujoo.games.spacegame.datatypes.player.Player;
+import sujoo.games.spacegame.datatypes.ship.Ship;
 import sujoo.games.spacegame.datatypes.ship.ShipFactory;
 import sujoo.games.spacegame.datatypes.ship.ShipType;
 import sujoo.games.spacegame.gui.MainGui;
@@ -17,27 +17,27 @@ public class GameManager {
 	private final int totalStarSystems = 10;
 	private final int maximumConnections = 4;
 	private final int minStarId = 1000;
+	private final int numberOfAIPlayers = 5;
 	private final int initCredits = 1000;
+	private final Ship playerStartingShip = ShipFactory.buildShip(ShipType.SMALL_TRANS);
 	
 	private StarSystemManager starSystemManager;
+	private AIPlayerManager aiPlayerManager;
 	private MainGui gui;
 	private Player humanPlayer;
 	
-	private Star currentStar;
-	private Star previousStar;
-	
 	public GameManager() {
 		starSystemManager = new StarSystemManager(minStarId, totalStarSystems, maximumConnections);
-		humanPlayer = new HumanPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits);
+		aiPlayerManager = new AIPlayerManager(numberOfAIPlayers, starSystemManager);
+		humanPlayer = new Player(playerStartingShip, initCredits);
 		gui = new MainGui(this);
 		gui.setVisible(true);
 	}
 	
 	public void play() {
-		currentStar = starSystemManager.getRandomStarSystem();
-		previousStar = null;
+		humanPlayer.setNewCurrentStar(starSystemManager.getRandomStarSystem());
 		displayStarSystemInformation();
-		displayLocalSystemMap(currentStar, previousStar);
+		displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
 	}
 	
 	public void enterCommand(String command) {
@@ -53,25 +53,28 @@ public class GameManager {
 				displayStarSystemInformation();
 				break;
 			case MAP:
-				displayLocalSystemMap(currentStar, previousStar);
+				displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
 				break;
 			case FULL_MAP:
-				displayGlobalSystemMap(currentStar, previousStar);
+				displayGlobalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
 				break;
 			case DOCK:
-				displayDockInformation(currentStar, humanPlayer);
+				displayDockInformation(humanPlayer.getCurrentStar(), humanPlayer);
 				break;
 			case BUY:
-				buy(commandString, humanPlayer, currentStar.getStation());
+				buy(commandString, humanPlayer, humanPlayer.getCurrentStar().getStation());
 				break;
 			case SELL:
-				sell(commandString, humanPlayer, currentStar.getStation());
+				sell(commandString, humanPlayer, humanPlayer.getCurrentStar().getStation());
 				break;
 			case STATUS:
 				displayStatus(humanPlayer);
 				break;
 			case HELP:
 				printHelp();
+				break;
+			case SCORE:
+				printScore();
 				break;
 			case UNKNOWN:
 				break;
@@ -81,17 +84,21 @@ public class GameManager {
 		}
 	}
 	
-	private void travel(int travelToStarId) {
-		Star jumpToStar = starSystemManager.getStarSystem(travelToStarId);
-		if (starSystemManager.isNeighbor(currentStar, jumpToStar)) {
-			previousStar = currentStar;
-			currentStar = jumpToStar;
-		}
-		displayStarSystemInformation();
-		displayLocalSystemMap(currentStar, previousStar);
+	private void printScore() {
+		gui.setText(TextManager.getScoreString(humanPlayer, aiPlayerManager.getAIPlayers()));
 	}
 	
-	public void buy(String[] commandString, Player player, Station station) {
+	private void travel(int travelToStarId) {
+		Star jumpToStar = starSystemManager.getStarSystem(travelToStarId);
+		if (starSystemManager.isNeighbor(humanPlayer.getCurrentStar(), jumpToStar)) {
+			humanPlayer.setNewCurrentStar(jumpToStar);
+		}
+		aiPlayerManager.performAIPlayerTurns();
+		displayStarSystemInformation();
+		displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
+	}
+	
+	private void buy(String[] commandString, Player player, Station station) {
 		if (commandString.length >= 3) {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
 			if (cargoEnum != null) {
@@ -103,12 +110,12 @@ public class GameManager {
 					TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 					break;
 				}
-			displayDockInformation(currentStar, humanPlayer);
+			displayDockInformation(humanPlayer.getCurrentStar(), humanPlayer);
 			}
 		}
 	}
 	
-	public void sell(String[] commandString, Player player, Station station) {
+	private void sell(String[] commandString, Player player, Station station) {
 		if (commandString.length >= 3) {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
 			if (cargoEnum != null) {
@@ -121,7 +128,7 @@ public class GameManager {
 					break;
 				}
 			}
-			displayDockInformation(currentStar, humanPlayer);
+			displayDockInformation(humanPlayer.getCurrentStar(), humanPlayer);
 		}
 	}
 	
@@ -130,15 +137,7 @@ public class GameManager {
 		if (StringUtils.isNumeric(command)) {
 			amount = Integer.parseInt(command);
 		} else if (command.equalsIgnoreCase("max") || command.equalsIgnoreCase("all")) {
-			int priceLimit = buyerCredits / cargoPrice;
-			int cargoLimit = remainingCargoSpace / cargoSize;
-			if (maxStock < priceLimit && maxStock < cargoLimit) {
-				amount = maxStock;
-			} else if (priceLimit < cargoLimit) {
-				amount = priceLimit;
-			} else {
-				amount = cargoLimit;
-			}
+			amount = TransactionManager.getMaximumAmount(buyerCredits, cargoPrice, remainingCargoSpace, cargoSize, maxStock);
 		}
 		return amount;
 	}
@@ -160,7 +159,7 @@ public class GameManager {
 	}
 	
 	private void displayStarSystemInformation() {
-		gui.setText(TextManager.getCurrentStarSystemString(currentStar, starSystemManager.getNeighborsString(currentStar)));
+		gui.setText(TextManager.getCurrentStarSystemString(humanPlayer.getCurrentStar(), starSystemManager.getNeighborsString(humanPlayer.getCurrentStar()), aiPlayerManager.getAIPlayersInStarSystem(humanPlayer.getCurrentStar())));
 	}
 	
 	private void displayDockInformation(Star star, Player player) {
