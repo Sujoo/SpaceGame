@@ -45,9 +45,7 @@ public class GameManager {
 			String[] commandString = command.split(" ");
 			switch (Command.toCommand(commandString[0])) {
 			case JUMP:
-				if (commandString.length > 1 && StringUtils.isNumeric(commandString[1])) {
-					travel(Integer.parseInt(commandString[1]));
-				}
+				travel(commandString);
 				break;
 			case SCAN:
 				displayStarSystemInformation();
@@ -88,14 +86,16 @@ public class GameManager {
 		gui.setText(TextManager.getScoreString(humanPlayer, aiPlayerManager.getAIPlayers()));
 	}
 	
-	private void travel(int travelToStarId) {
-		Star jumpToStar = starSystemManager.getStarSystem(travelToStarId);
-		if (starSystemManager.isNeighbor(humanPlayer.getCurrentStar(), jumpToStar)) {
-			humanPlayer.setNewCurrentStar(jumpToStar);
+	private void travel(String[] commandString) {
+		if (commandString.length > 1 && StringUtils.isNumeric(commandString[1])) {
+			Star jumpToStar = starSystemManager.getStarSystem(Integer.parseInt(commandString[1]));
+			if (jumpToStar != null && starSystemManager.isNeighbor(humanPlayer.getCurrentStar(), jumpToStar)) {
+				humanPlayer.setNewCurrentStar(jumpToStar);
+				aiPlayerManager.performAIPlayerTurns();
+				displayStarSystemInformation();
+				displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
+			}
 		}
-		aiPlayerManager.performAIPlayerTurns();
-		displayStarSystemInformation();
-		displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
 	}
 	
 	private void buy(String[] commandString, Player player, Station station) {
