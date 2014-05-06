@@ -12,7 +12,7 @@ public abstract class Ship {
 		this.type = type;
 		hold = new CargoHold(type.getHoldSize());
 		currentShieldPoints = type.getShieldPoints();
-		currentHullPoints = type.getHoldSize();
+		currentHullPoints = type.getHullPoints();
 	}
 
 	public ShipType getType() {

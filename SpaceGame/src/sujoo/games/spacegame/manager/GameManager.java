@@ -15,10 +15,10 @@ import sujoo.games.spacegame.datatypes.ship.ShipType;
 import sujoo.games.spacegame.gui.MainGui;
 
 public class GameManager {
-	private final int totalStarSystems = 10;
+	private final int totalStarSystems = 2;
 	private final int maximumConnections = 4;
 	private final int minStarId = 1000;
-	private final int numberOfAIPlayers = 5;
+	private final int numberOfAIPlayers = 2;
 	private final int initCredits = 1000;
 	private final Ship playerStartingShip = ShipFactory.buildShip(ShipType.SMALL_TRANS);
 	
@@ -37,8 +37,7 @@ public class GameManager {
 	
 	public void play() {
 		humanPlayer.setNewCurrentStar(starSystemManager.getRandomStarSystem());
-		displayStarSystemInformation();
-		displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
+		scanSystem(humanPlayer);
 	}
 	
 	public void enterCommand(String command) {
@@ -46,10 +45,10 @@ public class GameManager {
 			String[] commandString = command.split(" ");
 			switch (Command.toCommand(commandString[0])) {
 			case JUMP:
-				travel(commandString);
+				travel(commandString, humanPlayer);
 				break;
 			case SCAN:
-				displayStarSystemInformation();
+				scan(commandString, humanPlayer);
 				break;
 			case MAP:
 				displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
@@ -84,17 +83,16 @@ public class GameManager {
 	}
 	
 	private void printScore() {
-		gui.setLowerPanel(TextManager.getScoreString(humanPlayer, playerManagerAI.getAIPlayers()));
+		gui.setLowerPanel(TextManager.getScoreLowerPanel(humanPlayer, playerManagerAI.getAIPlayers()));
 	}
 	
-	private void travel(String[] commandString) {
+	private void travel(String[] commandString, Player player) {
 		if (commandString.length > 1 && StringUtils.isNumeric(commandString[1])) {
 			Star jumpToStar = starSystemManager.getStarSystem(Integer.parseInt(commandString[1]));
-			if (jumpToStar != null && starSystemManager.isNeighbor(humanPlayer.getCurrentStar(), jumpToStar)) {
-				humanPlayer.setNewCurrentStar(jumpToStar);
+			if (jumpToStar != null && starSystemManager.isNeighbor(player.getCurrentStar(), jumpToStar)) {
+				player.setNewCurrentStar(jumpToStar);
 				playerManagerAI.performAIPlayerTurns();
-				displayStarSystemInformation();
-				displayLocalSystemMap(humanPlayer.getCurrentStar(), humanPlayer.getPreviousStar());
+				scanSystem(player);
 			}
 		}
 	}
@@ -147,8 +145,25 @@ public class GameManager {
 		displayDockPanels(humanPlayer);
 	}
 	
+	private void scan(String[] stringCommand, Player player) {
+		if (stringCommand.length == 1) {
+			scanSystem(player);
+		} else if (stringCommand.length > 1) {
+			Player otherPlayer = playerManagerAI.getAIPlayer(stringCommand[1]);
+			if (otherPlayer != null && player.getCurrentStar().equals(otherPlayer.getCurrentStar())) {
+				scanPlayer(otherPlayer);
+			}
+		}
+	}
+	
+	private void scanSystem(Player player) {
+		displaySystemScanPanel(player);
+		displayLocalSystemMap(player.getCurrentStar(), player.getPreviousStar());
+	}
+	
 	private void displayStatus(Player player) {
-		gui.setLowerPanel(TextManager.getPlayerStatusPanel(player));
+		gui.setUpperPanel(TextManager.getStatusUpperPanel(player));
+		gui.setLowerPanel(TextManager.getStatusLowerPanel(player));
 	}
 	
 	private void displayLocalSystemMap(Star currStar, Star prevStar) {
@@ -163,8 +178,8 @@ public class GameManager {
 		gui.loadSystemMap(graph, currStar, prevStar);		
 	}
 	
-	private void displayStarSystemInformation() {
-		gui.setLowerPanel(TextManager.getCurrentStarSystemPanel(humanPlayer.getCurrentStar(), starSystemManager.getNeighborsString(humanPlayer.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(humanPlayer.getCurrentStar())));
+	private void displaySystemScanPanel(Player player) {
+		gui.setLowerPanel(TextManager.getScanLowerPanel(player.getCurrentStar(), starSystemManager.getNeighborsString(player.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(player.getCurrentStar())));
 	}
 	
 	private void displayDockPanels(Player player) {
@@ -173,6 +188,11 @@ public class GameManager {
 	}
 	
 	private void printHelp() {
-		gui.setLowerPanel(TextManager.getHelpPanel());
+		gui.setLowerPanel(TextManager.getHelpLowerPanel());
+	}
+	
+	private void scanPlayer(Player player) {
+		gui.setUpperPanel(TextManager.getScanPlayerUpperPanel(player));
+		gui.setLowerPanel(TextManager.getScanPlayerLowerPanel(player));
 	}
 }

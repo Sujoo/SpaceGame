@@ -13,7 +13,6 @@ import sujoo.games.spacegame.datatypes.CargoHold;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Station;
 import sujoo.games.spacegame.datatypes.player.Player;
-import sujoo.games.spacegame.datatypes.ship.Ship;
 import sujoo.games.spacegame.datatypes.ship.ShipFactory;
 import sujoo.games.spacegame.datatypes.ship.ShipType;
 import sujoo.games.spacegame.manager.StarSystemManager;
@@ -21,7 +20,6 @@ import sujoo.games.spacegame.manager.TransactionManager;
 
 public class PlayerManagerAI {
 	private final int initCredits = 1000;
-	private final Ship startingShip = ShipFactory.buildShip(ShipType.SMALL_TRANS);
 	
 	private List<Player> aiPlayers;
 	private StarSystemManager starSystemManager;
@@ -40,7 +38,7 @@ public class PlayerManagerAI {
 	private void createAIPlayers(int numberOfAI) {
 		List<String> traderNames = getNames("resources\\TraderNames.txt");
 		for (int i = 0; i < numberOfAI; i++) {
-			Player p = new Player(startingShip, initCredits, traderNames.get(i));
+			Player p = new Player(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, traderNames.get(i));
 			p.setNewCurrentStar(starSystemManager.getRandomStarSystem());
 			aiPlayers.add(p);
 		}
@@ -151,5 +149,16 @@ public class PlayerManagerAI {
 	
 	public List<Player> getAIPlayers() {
 		return aiPlayers;
+	}
+	
+	public Player getAIPlayer(String name) {
+		Player aiPlayer = null;
+		for (Player player : aiPlayers) {
+			if (player.getName().equalsIgnoreCase(name)) {
+				aiPlayer = player;
+				break;
+			}
+		}
+		return aiPlayer;
 	}
 }

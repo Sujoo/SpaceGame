@@ -49,6 +49,14 @@ public class CargoHold {
 		return result;
 	}
 	
+	public int[] getTotalValues() {
+		int[] totalValues = new int[cargo.length];
+		for (int i = 0; i < cargo.length; i++) {
+			totalValues[i] = cargo[i] * CargoEnum.values()[i].getBaseValue();
+		}
+		return totalValues;
+	}
+	
 	public int getSize() {
 		return size;
 	}
