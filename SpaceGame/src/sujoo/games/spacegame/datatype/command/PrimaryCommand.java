@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public enum Command {
+public enum PrimaryCommand {
 	JUMP("Jump", new String[]{"Travel between systems","Usage: jump <system>","Example: jump 1000"}),
 	SCAN("Scan", new String[]{"Display system information", "Usage: scan", "", "Display player information", "Usage: scan <player name>", "Example: scan sujoo"}),
 	STATUS("Status", new String[]{"Display your information", "Usage: status"}),
@@ -19,7 +19,7 @@ public enum Command {
 
 	private String code;
 	private String[] explanation;
-    private Command(String code, String[] explanation) {
+    private PrimaryCommand(String code, String[] explanation) {
         this.code = code;
         this.explanation = explanation;
     }
@@ -38,22 +38,22 @@ public enum Command {
 
     /**
      * Attempts to match an input String with a command
-     * If no match is found, the Unknown type is returned
+     * If no match is found, the null is returned
      * 
      * @param code
      * @return
      */
-    public static Command toCommand(String code) {
-    	Command result = null;
-        for (Command command : Command.values()) {
-            if (command.getCode().equalsIgnoreCase(code)) {
-                result = command;
+    public static PrimaryCommand toCommand(String code) {
+    	PrimaryCommand result = null;
+        for (PrimaryCommand primaryCommand : PrimaryCommand.values()) {
+            if (primaryCommand.getCode().equalsIgnoreCase(code)) {
+                result = primaryCommand;
             }
         }
         return result;
     }
     
-    public static List<Command> getList() {
-    	return Lists.newArrayList(Command.values());
+    public static List<PrimaryCommand> getList() {
+    	return Lists.newArrayList(PrimaryCommand.values());
     }
 }

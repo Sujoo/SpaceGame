@@ -8,13 +8,15 @@ import com.google.common.collect.Lists;
 
 import sujoo.games.spacegame.ai.PlayerManagerAI;
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
-import sujoo.games.spacegame.datatype.command.Command;
+import sujoo.games.spacegame.datatype.command.PrimaryCommand;
+import sujoo.games.spacegame.datatype.command.TransactionSubCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.player.HumanPlayer;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.ShipFactory;
 import sujoo.games.spacegame.datatype.ship.ShipType;
+import sujoo.games.spacegame.gui.ErrorEnum;
 import sujoo.games.spacegame.gui.MainGui;
 
 public class GameManager {
@@ -63,7 +65,7 @@ public class GameManager {
 	//*************************
 	public void enterCommand(String command, Player player) {
 		String[] commandString = command.split(" ");
-		Command firstCommand = Command.toCommand(commandString[0]);
+		PrimaryCommand firstCommand = PrimaryCommand.toCommand(commandString[0]);
 		if (firstCommand != null) {
 			switch (firstCommand) {
 			case JUMP:
@@ -127,8 +129,14 @@ public class GameManager {
 			scanSystem(player);
 		} else if (stringCommand.length > 1) {
 			Player otherPlayer = playerManagerAI.getAIPlayer(stringCommand[1]);
-			if (otherPlayer != null && player.getCurrentStar().equals(otherPlayer.getCurrentStar())) {
-				scanPlayer(otherPlayer);
+			if (otherPlayer != null) {
+				if (player.getCurrentStar().equals(otherPlayer.getCurrentStar())) {
+					scanPlayer(otherPlayer);
+				} else {
+					gui.displayError(ErrorEnum.PLAYER_NOT_IN_SYSTEM);
+				}
+			} else {
+				gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
 			}
 		}
 	}
@@ -180,6 +188,15 @@ public class GameManager {
 				case 0:
 					TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 					break;
+				case 1:
+					gui.displayError(ErrorEnum.PLAYER_NO_CARGO_SPACE);
+					break;
+				case 2:
+					gui.displayError(ErrorEnum.STATION_NO_CARGO_SPACE);
+					break;
+				case 3:
+					gui.displayError(ErrorEnum.PLAYER_NO_MONEY);
+					break;
 				}
 				displayDockCargo(player);
 			}
@@ -201,6 +218,15 @@ public class GameManager {
 				case 0:
 					TransactionManager.performSellToStationTransaction(player, station, cargoEnum, amountToSell);
 					break;
+				case 1:
+					gui.displayError(ErrorEnum.STATION_NO_CARGO_SPACE);
+					break;
+				case 2:
+					gui.displayError(ErrorEnum.PLAYER_NO_CARGO_SPACE);
+					break;
+				case 3:
+					gui.displayError(ErrorEnum.STATION_NO_MONEY);
+					break;
 				}
 				displayDockCargo(player);
 			}
@@ -211,8 +237,10 @@ public class GameManager {
 		int amount = 0;		
 		if (StringUtils.isNumeric(command)) {
 			amount = Integer.parseInt(command);
-		} else if (command.equalsIgnoreCase("max") || command.equalsIgnoreCase("all")) {
+		} else if (TransactionSubCommand.isMaxAllCommand(command)) {
 			amount = TransactionManager.getMaximumAmount(buyerCredits, cargoPrice, remainingCargoSpace, cargoSize, maxStock);
+		} else {
+			gui.displayError(ErrorEnum.INVALID_TRANSACTION_AMOUNT);
 		}
 		return amount;
 	}
@@ -235,9 +263,16 @@ public class GameManager {
 	//* Help Command Logic
 	//*************************
 	private void help(String[] commandString) {
-		Command secondCommand = Command.HELP;
-		if (commandString.length >= 2 && Command.toCommand(commandString[1]) != null) {
-			secondCommand = Command.toCommand(commandString[1]);
+		if (PrimaryCommand.toCommand(commandString[0]) == null) {
+			gui.displayError(ErrorEnum.INVALID_PRIMARY_COMMAND);
+		}
+		PrimaryCommand secondCommand = PrimaryCommand.HELP;
+		if (commandString.length >= 2) {
+			if (PrimaryCommand.toCommand(commandString[1]) != null) {
+				secondCommand = PrimaryCommand.toCommand(commandString[1]);
+			} else {
+				gui.displayError(ErrorEnum.INVALID_SECONDARY_COMMAND);
+			}
 		}
 		
 		gui.displayHelp(secondCommand);

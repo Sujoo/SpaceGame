@@ -6,7 +6,7 @@ import java.util.List;
 
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
-import sujoo.games.spacegame.datatype.command.Command;
+import sujoo.games.spacegame.datatype.command.PrimaryCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.general.Wallet;
 import sujoo.games.spacegame.datatype.planet.Planet;
@@ -99,16 +99,16 @@ public class TextManager {
 	public static STextArea getHelpUpperPanel() {
 		STextArea textArea = new STextArea();
 		includeTitleText(textArea, "List of Commands");
-		for (Command command : Command.getList()) {
-			textArea.appendLine(command.getCode());
+		for (PrimaryCommand primaryCommand : PrimaryCommand.getList()) {
+			textArea.appendLine(primaryCommand.getCode());
 		}
 		return textArea;
 	}	
 	
-	public static STextArea getHelpLowerPanel(Command command) {
+	public static STextArea getHelpLowerPanel(PrimaryCommand primaryCommand) {
 		STextArea textArea = new STextArea();
-		includeTitleText(textArea, "Command Help");
-		for (String text : command.getExplanation()) {
+		includeTitleText(textArea, primaryCommand.getCode() + " Command");
+		for (String text : primaryCommand.getExplanation()) {
 			textArea.appendLine(text);
 		}
 		return textArea;

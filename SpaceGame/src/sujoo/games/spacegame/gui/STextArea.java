@@ -22,7 +22,6 @@ public class STextArea extends DefaultStyledDocument {
 		attr = new SimpleAttributeSet();
 		setFont("Consolas");
 		setColor(defaultColor);
-		//setBackground(Color.BLACK);
 	}
 	
 	public void setFont(String font) {
@@ -33,12 +32,16 @@ public class STextArea extends DefaultStyledDocument {
 		attr.addAttribute(StyleConstants.Foreground, color);
 	}
 	
-	public void append(String text) {
+	public void insert(String text, int location) {
 		try {
-	    	insertString(getLength(), text, attr);
+	    	insertString(location, text, attr);
 	    } catch (BadLocationException badLocationException) {
 	        System.err.println("Bad insert");
 	    }
+	}
+	
+	public void append(String text) {
+	    insert(text, getLength());
 	}
 	
 	public void appendLine(String text) {
@@ -53,5 +56,13 @@ public class STextArea extends DefaultStyledDocument {
 	
 	public void appendLine(String text, Color color) {
 		append(text + System.lineSeparator(), color);
+	}
+	
+	public void preAppend(String text) {
+	    insert(text, 0);
+	}
+	
+	public void preAppendLine(String text) {
+	    preAppend(text + System.lineSeparator());
 	}
 }

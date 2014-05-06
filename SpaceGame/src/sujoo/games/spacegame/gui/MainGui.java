@@ -15,7 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 
-import sujoo.games.spacegame.datatype.command.Command;
+import sujoo.games.spacegame.datatype.command.PrimaryCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.manager.GameManager;
@@ -39,6 +39,8 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
+import javax.swing.JScrollPane;
+
 public class MainGui extends JFrame {
 
 	/**
@@ -48,6 +50,9 @@ public class MainGui extends JFrame {
 	private JPanel contentPane;
 	private JPanel upperPanel;
 	private JPanel lowerPanel;
+	private JPanel infoPanel;
+	private STextArea infoTextArea;
+	private JTextPane infoPane;
 	private JTextField textField;
 	
 	private GameManager controller;
@@ -69,7 +74,7 @@ public class MainGui extends JFrame {
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[]{350};
-		gbl_contentPane.rowHeights = new int[]{100,200,10};
+		gbl_contentPane.rowHeights = new int[]{100,200,50,10};
 		gbl_contentPane.columnWeights = new double[]{};
 		gbl_contentPane.rowWeights = new double[]{};
 		contentPane.setLayout(gbl_contentPane);
@@ -78,7 +83,7 @@ public class MainGui extends JFrame {
 		upperPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
 		GridBagConstraints gbc_upperPanel = new GridBagConstraints();
 		gbc_upperPanel.anchor = GridBagConstraints.NORTH;
-		gbc_upperPanel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_upperPanel.fill = GridBagConstraints.BOTH;
 		gbc_upperPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_upperPanel.gridx = 0;
 		gbc_upperPanel.gridy = 0;
@@ -96,6 +101,25 @@ public class MainGui extends JFrame {
 		contentPane.add(lowerPanel, gbc_lowerPanel);
 		lowerPanel.setLayout(new BorderLayout(0 ,0));
 		
+		infoPanel = new JPanel();
+		infoPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
+		GridBagConstraints gbc_infoPanel = new GridBagConstraints();
+		gbc_infoPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_infoPanel.fill = GridBagConstraints.BOTH;
+		gbc_infoPanel.gridx = 0;
+		gbc_infoPanel.gridy = 2;
+		contentPane.add(infoPanel, gbc_infoPanel);
+		infoPanel.setLayout(new BorderLayout(0 ,0));
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setPreferredSize(new Dimension(350, 50));
+		scrollPane.setAutoscrolls(true);
+		infoPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		infoTextArea = new STextArea();
+		infoPane = getStandardTextPane(infoTextArea);
+		scrollPane.setViewportView(infoPane);
+		
 		textField = new JTextField();
 		textField.addKeyListener(new KeyAdapter() {
 			@Override
@@ -106,9 +130,9 @@ public class MainGui extends JFrame {
 			}
 		});
 		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.fill = GridBagConstraints.BOTH;
 		gbc_textField.gridx = 0;
-		gbc_textField.gridy = 2;
+		gbc_textField.gridy = 3;
 		contentPane.add(textField, gbc_textField);
 	}
 	
@@ -117,21 +141,9 @@ public class MainGui extends JFrame {
 		setLowerPanel(textPane);
 	}
 	
-	private void setLowerPanel(Component panel) {
-		lowerPanel.removeAll();
-		lowerPanel.add(panel, BorderLayout.CENTER);
-		redraw();
-	}
-	
 	private void setUpperPanel(STextArea textArea) {
 		JTextPane textPane = getStandardTextPane(textArea);
 		setUpperPanel(textPane);
-	}
-	
-	private void setUpperPanel(Component panel) {
-		upperPanel.removeAll();
-		upperPanel.add(panel, BorderLayout.CENTER);
-		redraw();
 	}
 	
 	private JTextPane getStandardTextPane(STextArea textArea) {
@@ -141,9 +153,63 @@ public class MainGui extends JFrame {
 		return textPane;
 	}
 	
+	private void setLowerPanel(Component panel) {
+		lowerPanel.removeAll();
+		lowerPanel.add(panel, BorderLayout.CENTER);
+		redraw();
+	}
+	
+	private void setUpperPanel(Component panel) {
+		upperPanel.removeAll();
+		upperPanel.add(panel, BorderLayout.CENTER);
+		redraw();
+	}
+	
 	private void redraw() {
 		pack();
 		textField.requestFocusInWindow();
+	}
+	
+	private void addTextToInfoPane(String text) {
+		infoTextArea.preAppendLine(text);
+		infoPane.setCaretPosition(0);
+	}
+	
+	private void enterCommand(String text) {
+		textField.setText("");
+		controller.enterCommand(text, player);
+	}
+	
+	public void displayError(ErrorEnum error) {
+		addTextToInfoPane(error.getCode());
+	}
+	
+	public void displayScanSystem(Player player, String connections, List<Player> players) {
+		setLowerPanel(TextManager.getScanSystemLowerPanel(player.getCurrentStar(), connections, players));
+	}
+	
+	public void displayScanPlayer(Player player) {
+		setUpperPanel(TextManager.getScanPlayerUpperPanel(player));
+		setLowerPanel(TextManager.getScanPlayerLowerPanel(player));
+	}
+	
+	public void displayStatus(Player player) {
+		setUpperPanel(TextManager.getStatusUpperPanel(player));
+		setLowerPanel(TextManager.getStatusLowerPanel(player));
+	}
+	
+	public void displayDockCargo(Player player) {
+		setUpperPanel(TextManager.getDockUpperPanel(player.getCurrentStar().getStation()));
+		setLowerPanel(TextManager.getDockLowerPanel(player));
+	}
+	
+	public void displayScore(List<Player> players) {
+		setLowerPanel(TextManager.getScoreLowerPanel(players));
+	}
+	
+	public void displayHelp(PrimaryCommand secondCommand) {
+		setUpperPanel(TextManager.getHelpUpperPanel());
+		setLowerPanel(TextManager.getHelpLowerPanel(secondCommand));
 	}
 	
 	public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {
@@ -179,38 +245,5 @@ public class MainGui extends JFrame {
 		vs.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 		
 		setUpperPanel(vs);
-	}
-	
-	private void enterCommand(String text) {
-		textField.setText("");
-		controller.enterCommand(text, player);
-	}
-	
-	public void displayScanSystem(Player player, String connections, List<Player> players) {
-		setLowerPanel(TextManager.getScanSystemLowerPanel(player.getCurrentStar(), connections, players));
-	}
-	
-	public void displayScanPlayer(Player player) {
-		setUpperPanel(TextManager.getScanPlayerUpperPanel(player));
-		setLowerPanel(TextManager.getScanPlayerLowerPanel(player));
-	}
-	
-	public void displayStatus(Player player) {
-		setUpperPanel(TextManager.getStatusUpperPanel(player));
-		setLowerPanel(TextManager.getStatusLowerPanel(player));
-	}
-	
-	public void displayDockCargo(Player player) {
-		setUpperPanel(TextManager.getDockUpperPanel(player.getCurrentStar().getStation()));
-		setLowerPanel(TextManager.getDockLowerPanel(player));
-	}
-	
-	public void displayScore(List<Player> players) {
-		setLowerPanel(TextManager.getScoreLowerPanel(players));
-	}
-	
-	public void displayHelp(Command secondCommand) {
-		setUpperPanel(TextManager.getHelpUpperPanel());
-		setLowerPanel(TextManager.getHelpLowerPanel(secondCommand));
 	}
 }
