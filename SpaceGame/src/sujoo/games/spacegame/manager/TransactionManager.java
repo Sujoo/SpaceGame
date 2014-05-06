@@ -19,7 +19,7 @@ public class TransactionManager {
 		int result = -1;
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
-		int stationSellValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
+		int stationSellValue = station.getPrice(cargoEnum)*amount;
 		// Does player have enough money?
 		if (player.getWallet().getCredits() >= stationSellValue) {
 			// Does station have enough cargo?
@@ -52,7 +52,7 @@ public class TransactionManager {
 		int result = -1;
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
-		int stationBuyValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
+		int stationBuyValue = station.getPrice(cargoEnum)*amount;
 		// Does player have enough money?
 		if (station.getWallet().getCredits() >= stationBuyValue) {
 			// Does player have enough cargo?
@@ -85,9 +85,10 @@ public class TransactionManager {
 	public static void performBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {		
 		transactCargoTrade(station.getCargoHold(), player.getShip().getCargoHold(), cargoEnum, amount);
 		
-		int stationSellValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
+		int stationSellValue = station.getPrice(cargoEnum)*amount;
 		station.getWallet().addCredits(stationSellValue);
 		player.getWallet().removeCredits(stationSellValue);
+		player.setPurchasePrice(stationSellValue, cargoEnum);
 	}
 	
 	/**
@@ -102,7 +103,7 @@ public class TransactionManager {
 	public static void performSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
 		transactCargoTrade(player.getShip().getCargoHold(), station.getCargoHold(), cargoEnum, amount);
 		
-		int stationBuyValue = station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)]*amount;
+		int stationBuyValue = station.getPrice(cargoEnum)*amount;
 		player.getWallet().addCredits(stationBuyValue);
 		station.getWallet().removeCredits(stationBuyValue);
 	}

@@ -3,16 +3,19 @@ package sujoo.games.spacegame.datatypes;
 public class CargoHold {
 	private int size;
 	private int[] cargo;
+	private int[] transactionPrice;
+	private int[] recentPurchasedPrice;
 	
 	public CargoHold(int size) {
 		this.size = size;
 		cargo = new int[CargoEnum.values().length];
+		transactionPrice = new int[CargoEnum.values().length];
+		recentPurchasedPrice = new int[CargoEnum.values().length];
 	}
 	
 	public void removeCargo(CargoEnum cargoEnum, int amount) {
-		int index = CargoEnum.getCargoEnumIndex(cargoEnum);
-		if (cargo[index] - amount >= 0) {
-			cargo[index] -= amount;
+		if (getCargoAmount(cargoEnum) - amount >= 0) {
+			cargo[CargoEnum.getCargoEnumIndex(cargoEnum)] -= amount;
 		}
 	}
 	
@@ -24,44 +27,69 @@ public class CargoHold {
 	}
 
 	public void addCargo(CargoEnum cargoEnum, int amount) {
-		int index = CargoEnum.getCargoEnumIndex(cargoEnum);
-		if (getCargoSpaceUsage() + amount * CargoEnum.values()[index].getSize() <= size) {
-			cargo[index] += amount;
+		if (getCargoSpaceUsage() + amount * cargoEnum.getSize() <= size) {
+			cargo[CargoEnum.getCargoEnumIndex(cargoEnum)] += amount;
 		}
 	}
 	
 	public boolean canAddCargo(CargoEnum cargoEnum, int amount) {
-		if (getCargoSpaceUsage() + amount * CargoEnum.values()[CargoEnum.getCargoEnumIndex(cargoEnum)].getSize() <= size) {
+		if (getCargoSpaceUsage() + amount * cargoEnum.getSize() <= size) {
 			return true;
 		}
 		return false;
 	}
 	
-	public int remainingCargoSpace() {
+	public int getRemainingCargoSpace() {
 		return size - getCargoSpaceUsage();
 	}
 	
 	public int getCargoSpaceUsage() {
 		int result = 0;
-		for (int i = 0; i < CargoEnum.values().length; i++) {
+		for (int i = 0; i < cargo.length; i++) {
 			result += cargo[i] * CargoEnum.values()[i].getSize();
 		}
 		return result;
 	}
 	
-	public int[] getTotalValues() {
-		int[] totalValues = new int[cargo.length];
+	public int getTotalWorth() {
+		int totalWorth = 0;
 		for (int i = 0; i < cargo.length; i++) {
-			totalValues[i] = cargo[i] * CargoEnum.values()[i].getBaseValue();
+			totalWorth += cargo[i] * CargoEnum.values()[i].getBaseValue();
 		}
-		return totalValues;
+		return totalWorth;
+	}
+	
+	public void dumpAllCargo() {
+		for (int i = 0; i < cargo.length; i++) {
+			cargo[i] = 0;
+		}
+	}
+	
+	public void dumpCargo(CargoEnum cargoEnum) {
+		cargo[CargoEnum.getCargoEnumIndex(cargoEnum)] = 0;
 	}
 	
 	public int getSize() {
 		return size;
 	}
 	
-	public int[] getCargo() {
-		return cargo;
+	public int getCargoAmount(CargoEnum cargoEnum) {
+		return cargo[CargoEnum.getCargoEnumIndex(cargoEnum)];
+	}
+	
+	public int getTransactionPrice(CargoEnum cargoEnum) {
+		return transactionPrice[CargoEnum.getCargoEnumIndex(cargoEnum)];
+	}
+	
+	public void setTransactionPrice(int price, CargoEnum cargoEnum) {
+		transactionPrice[CargoEnum.getCargoEnumIndex(cargoEnum)] = price;
+	}
+	
+	public int getRecentPurchasePrice(CargoEnum cargoEnum) {
+		return recentPurchasedPrice[CargoEnum.getCargoEnumIndex(cargoEnum)];
+	}
+	
+	public void setRecentPurchasePrice(int price, CargoEnum cargoEnum) {
+		recentPurchasedPrice[CargoEnum.getCargoEnumIndex(cargoEnum)] = price;
 	}
 }

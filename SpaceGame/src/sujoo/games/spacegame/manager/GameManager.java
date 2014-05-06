@@ -1,5 +1,7 @@
 package sujoo.games.spacegame.manager;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -8,31 +10,37 @@ import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.Command;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Station;
+import sujoo.games.spacegame.datatypes.player.HumanPlayer;
 import sujoo.games.spacegame.datatypes.player.Player;
-import sujoo.games.spacegame.datatypes.ship.Ship;
 import sujoo.games.spacegame.datatypes.ship.ShipFactory;
 import sujoo.games.spacegame.datatypes.ship.ShipType;
 import sujoo.games.spacegame.gui.MainGui;
 
 public class GameManager {
-	private final int totalStarSystems = 2;
+	private final int totalStarSystems = 10;
 	private final int maximumConnections = 4;
 	private final int minStarId = 1000;
-	private final int numberOfAIPlayers = 2;
+	private final int numberOfAIPlayers = 5;
 	private final int initCredits = 1000;
-	private final Ship playerStartingShip = ShipFactory.buildShip(ShipType.SMALL_TRANS);
+	
+	private final int turnsUntilStationRefreshBase = 50;
+	private final int turnsUntilModifier = totalStarSystems / numberOfAIPlayers;
+	private final int turnsUntilStationRefresh = turnsUntilStationRefreshBase * turnsUntilModifier;
 	
 	private StarSystemManager starSystemManager;
 	private PlayerManagerAI playerManagerAI;
 	private MainGui gui;
 	private Player humanPlayer;
 	
+	private int turnCounter;
+	
 	public GameManager() {
 		starSystemManager = new StarSystemManager(minStarId, totalStarSystems, maximumConnections);
 		playerManagerAI = new PlayerManagerAI(numberOfAIPlayers, starSystemManager);
-		humanPlayer = new Player(playerStartingShip, initCredits, "You");
+		humanPlayer = new HumanPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, "You");
 		gui = new MainGui(this);
 		gui.setVisible(true);
+		turnCounter = 0;
 	}
 	
 	public void play() {
@@ -72,7 +80,10 @@ public class GameManager {
 				printHelp();
 				break;
 			case SCORE:
-				printScore();
+				score();
+				break;
+			case WAIT:
+				waitTurn();
 				break;
 			case UNKNOWN:
 				break;
@@ -82,8 +93,10 @@ public class GameManager {
 		}
 	}
 	
-	private void printScore() {
-		gui.setLowerPanel(TextManager.getScoreLowerPanel(humanPlayer, playerManagerAI.getAIPlayers()));
+	private void score() {
+		List<Player> playerList = playerManagerAI.getAIPlayers();
+		playerList.add(humanPlayer);
+		gui.setLowerPanel(TextManager.getScoreLowerPanel(playerList));
 	}
 	
 	private void travel(String[] commandString, Player player) {
@@ -91,18 +104,30 @@ public class GameManager {
 			Star jumpToStar = starSystemManager.getStarSystem(Integer.parseInt(commandString[1]));
 			if (jumpToStar != null && starSystemManager.isNeighbor(player.getCurrentStar(), jumpToStar)) {
 				player.setNewCurrentStar(jumpToStar);
-				playerManagerAI.performAIPlayerTurns();
+				advanceTurn();
 				scanSystem(player);
 			}
 		}
+	}
+	
+	private void advanceTurn() {
+		playerManagerAI.performAIPlayerTurns();
+		turnCounter++;
+		if (turnCounter % turnsUntilStationRefresh == 0) {
+			starSystemManager.refreshStationCargo();
+		}
+	}
+	
+	private void waitTurn() {
+		advanceTurn();
 	}
 	
 	private void buy(String[] commandString, Player player, Station station) {
 		if (commandString.length >= 3) {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
 			if (cargoEnum != null) {
-			int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(), station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)],
-					player.getShip().getCargoHold().remainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold().getCargo()[CargoEnum.getCargoEnumIndex(cargoEnum)]);
+			int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(), station.getPrice(cargoEnum),
+					player.getShip().getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold().getCargoAmount(cargoEnum));
 				int validationCode = TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 				switch(validationCode) {
 				case 0:
@@ -118,8 +143,8 @@ public class GameManager {
 		if (commandString.length >= 3) {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
 			if (cargoEnum != null) {
-				int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(), station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)],
-						station.getCargoHold().remainingCargoSpace(), cargoEnum.getSize(), player.getShip().getCargoHold().getCargo()[CargoEnum.getCargoEnumIndex(cargoEnum)]);
+				int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(), station.getPrice(cargoEnum),
+						station.getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), player.getShip().getCargoHold().getCargoAmount(cargoEnum));
 				int validationCode = TransactionManager.validateSellToStationTransaction(player, station, cargoEnum, amountToSell);
 				switch(validationCode) {
 				case 0:

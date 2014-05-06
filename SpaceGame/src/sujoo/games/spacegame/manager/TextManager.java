@@ -2,6 +2,7 @@ package sujoo.games.spacegame.manager;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JTextPane;
@@ -71,13 +72,17 @@ public class TextManager {
 	    return wrapText(textArea);
 	}
 	
-	public static Component getScoreLowerPanel(Player humanPlayer, List<Player> players) {
+	public static Component getScoreLowerPanel(List<Player> players) {
 		STextArea textArea = new STextArea();
-		textArea.appendLine("You: " + humanPlayer.getWallet().getCredits());
 		
+		int longestNameLength = getLongestTextLength(players.toArray());
+		
+		Collections.sort(players);
+		Collections.reverse(players);
 		for (Player player : players) {
-			textArea.appendLine(player + ": " + player.getWallet().getCredits());
+			textArea.appendLine(frontPad(player.toString(), longestNameLength) + " : " + player.getScore());
 		}
+		
 		return wrapText(textArea);
 	}
 	
@@ -113,14 +118,14 @@ public class TextManager {
 
 	// Support Methods
 	private static void includeCargoText(STextArea textArea, Station station) {
-		includeCargoText(textArea, "Station", station.getWallet(), station.getCargoHold(), station.getPrices(), true);
+		includeCargoText(textArea, "Station", station.getWallet(), station.getCargoHold(), true);
 	}
 	
 	private static void includeCargoText(STextArea textArea, Player player) {
-		includeCargoText(textArea, player.getName(), player.getWallet(), player.getShip().getCargoHold(), player.getShip().getCargoHold().getTotalValues(), false);
+		includeCargoText(textArea, player.getName(), player.getWallet(), player.getShip().getCargoHold(), false);
 	}
 	
-	private static void includeCargoText(STextArea textArea, String name, Wallet wallet, CargoHold hold, int[] values, boolean isStation) {
+	private static void includeCargoText(STextArea textArea, String name, Wallet wallet, CargoHold hold, boolean isStation) {
 		includeTitleText(textArea, name + " Cargo");
 		includeCreditsText(textArea, wallet);
 		includeCargoCapacityText(textArea, hold.getCargoSpaceUsage(), hold.getSize());
@@ -137,10 +142,10 @@ public class TextManager {
 		textArea.appendLine(titleBar);
 		textArea.appendLine(bottomBar);
 		
-		for (int i = 0; i < CargoEnum.values().length; i++) {
-			textArea.appendLine("| " + frontPad(CargoEnum.values()[i].toString(),longestCargoString) + " : " + 
-					frontPad(String.valueOf(hold.getCargo()[i]),4) + " : " + 
-					frontPad(String.valueOf(values[i]),5) + " : ");
+		for (CargoEnum cargoEnum : CargoEnum.getList()) {
+			textArea.appendLine("| " + frontPad(cargoEnum.toString(), longestCargoString) + " : " + 
+					frontPad(String.valueOf(hold.getCargoAmount(cargoEnum)),4) + " : " + 
+					frontPad(String.valueOf(isStation?hold.getTransactionPrice(cargoEnum):hold.getCargoAmount(cargoEnum)*cargoEnum.getBaseValue()),5) + " : ");			
 		}
 		
 		textArea.appendLine(bottomBar);

@@ -45,6 +45,13 @@ public class StarSystemManager {
 		createStarSystemGraph(starSystems, maximumConnections);
 	}
 	
+	public void refreshStationCargo() {
+		List<Star> stars = Lists.newArrayList(starGraph.getVertices());
+		for (Star star : stars) {
+			StationManagerAI.refreshStationCargo(star.getStation(), star.getPlanets());
+		}
+	}
+	
 	private List<Integer> generateUniqueStarIds(int totalStarSystems) {
 		List<Integer> starSystemIds = Lists.newArrayList();
 		

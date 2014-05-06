@@ -11,6 +11,7 @@ public enum Command {
     STATUS("status"),
     HELP("help"),
     SCORE("score"),
+    WAIT("wait"),
     UNKNOWN("unknown");
 
 	private String code;

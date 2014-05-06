@@ -1,5 +1,9 @@
 package sujoo.games.spacegame.datatypes;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 public enum CargoEnum {
 	ELECTRONICS("Electronics", 1, 150),
 	ORGANICS("Organics", 1, 125),
@@ -59,5 +63,9 @@ public enum CargoEnum {
     		}
     	}
     	return result;
+    }
+    
+    public static List<CargoEnum> getList() {
+    	return Lists.newArrayList(CargoEnum.values());
     }
 }

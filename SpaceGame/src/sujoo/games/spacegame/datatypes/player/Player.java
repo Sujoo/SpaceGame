@@ -1,10 +1,11 @@
 package sujoo.games.spacegame.datatypes.player;
 
+import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Wallet;
 import sujoo.games.spacegame.datatypes.ship.Ship;
 
-public class Player {
+public abstract class Player implements Comparable<Player> {
 	private final String name;
 	private Ship ship;
 	private Wallet wallet;
@@ -17,6 +18,10 @@ public class Player {
 		wallet = new Wallet(credits);
 		currentStar = null;
 		previousStar = null;
+	}
+	
+	public int getScore() {
+		return wallet.getCredits() + ship.getCargoHold().getTotalWorth();
 	}
 	
 	public Ship getShip() {
@@ -38,6 +43,14 @@ public class Player {
 	public void setNewCurrentStar(Star newCurrentStar) {
 		previousStar = currentStar;
 		currentStar = newCurrentStar;
+	}
+	
+	public int getPurchasePrice(CargoEnum cargoEnum) {
+		return ship.getCargoHold().getRecentPurchasePrice(cargoEnum);
+	}
+	
+	public void setPurchasePrice(int price, CargoEnum cargoEnum) {
+		ship.getCargoHold().setRecentPurchasePrice(price, cargoEnum);
 	}
 	
 	public String getName() {
@@ -71,5 +84,10 @@ public class Player {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public int compareTo(Player other) {
+		return Integer.compare(this.getScore(), other.getScore());
 	}
 }

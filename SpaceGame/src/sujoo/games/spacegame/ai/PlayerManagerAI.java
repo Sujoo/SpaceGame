@@ -12,6 +12,7 @@ import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.CargoHold;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Station;
+import sujoo.games.spacegame.datatypes.player.AIPlayer;
 import sujoo.games.spacegame.datatypes.player.Player;
 import sujoo.games.spacegame.datatypes.ship.ShipFactory;
 import sujoo.games.spacegame.datatypes.ship.ShipType;
@@ -21,16 +22,14 @@ import sujoo.games.spacegame.manager.TransactionManager;
 public class PlayerManagerAI {
 	private final int initCredits = 1000;
 	
-	private List<Player> aiPlayers;
+	private List<AIPlayer> aiPlayers;
 	private StarSystemManager starSystemManager;
 	private Random random;
-	private List<CargoEnum> recentlyPurchasedCargo;
 	
 	public PlayerManagerAI(int numberOfAI, StarSystemManager starSystemManager) {
 		aiPlayers = Lists.newArrayList();
 		this.starSystemManager = starSystemManager;
 		random = new Random();
-		recentlyPurchasedCargo = Lists.newArrayList();
 		
 		createAIPlayers(numberOfAI);
 	}
@@ -38,7 +37,7 @@ public class PlayerManagerAI {
 	private void createAIPlayers(int numberOfAI) {
 		List<String> traderNames = getNames("resources\\TraderNames.txt");
 		for (int i = 0; i < numberOfAI; i++) {
-			Player p = new Player(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, traderNames.get(i));
+			AIPlayer p = new AIPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, traderNames.get(i));
 			p.setNewCurrentStar(starSystemManager.getRandomStarSystem());
 			aiPlayers.add(p);
 		}
@@ -62,79 +61,85 @@ public class PlayerManagerAI {
 	}
 	
 	public void performAIPlayerTurns() {
-		for (Player player : aiPlayers) {
+		for (AIPlayer player : aiPlayers) {
 			trade(player);
 			jumpToNewSystem(player);
+			player.clearRecentlyPurchased();
 		}
 	}
 	
-	private void trade(Player player) {
-		// while ai has money and cargo space
-			// find best value item to buy that station has in stock
-			// buy max of that item
-			// remember what items have been bought here
-		buyFromStation(player);
-		// find best value item to sell that player has in cargo and weren't just bought
-			// sell max of that item
+	private void trade(AIPlayer player) {
 		sellToStation(player);
+		buyFromStation(player);
 	}
 	
-	private void buyFromStation(Player player) {
+	private void buyFromStation(AIPlayer player) {
 		Station station = player.getCurrentStar().getStation();
 		int credits = player.getWallet().getCredits();
 		CargoHold hold = player.getShip().getCargoHold();
 		
-		if (credits > 0 && hold.remainingCargoSpace() > 0) {
+		// while ai has money and cargo space
+		if (credits > 0 && hold.getRemainingCargoSpace() > 0) {
 			int greatestDifference = 0;
-			CargoEnum cargoEnum = null;
-			for (int i = 0; i < station.getPrices().length; i++) {
-				int difference = CargoEnum.values()[i].getBaseValue() - station.getPrices()[i];
-				if (difference > greatestDifference && station.getCargoHold().getCargo()[i] > 0 && !recentlyPurchasedCargo.contains(cargoEnum)) {
+			CargoEnum bestCargoEnum = null;
+			// find best value item to buy that station has in stock
+			for (CargoEnum cargoEnum : CargoEnum.getList()) {
+				int difference = cargoEnum.getBaseValue() - station.getPrice(cargoEnum);
+				if (difference > greatestDifference && station.getCargoHold().getCargoAmount(cargoEnum) > 0 && !player.isRecentlyPurchased(bestCargoEnum)) {
 					greatestDifference = difference;
-					cargoEnum = CargoEnum.values()[i];
-				}
+					bestCargoEnum = cargoEnum;
+				}				
 			}
 			
-			if (cargoEnum != null) {
-				int maxPurchaseAmount = TransactionManager.getMaximumAmount(credits, station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)],
-						hold.remainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold().getCargo()[CargoEnum.getCargoEnumIndex(cargoEnum)]);
-				if(TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum, maxPurchaseAmount) == 0) {
-					TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, maxPurchaseAmount);
-					recentlyPurchasedCargo.add(cargoEnum);
+			// buy max of that item
+			if (bestCargoEnum != null) {
+				int maxPurchaseAmount = TransactionManager.getMaximumAmount(credits, station.getPrice(bestCargoEnum),
+						hold.getRemainingCargoSpace(), bestCargoEnum.getSize(), station.getCargoHold().getCargoAmount(bestCargoEnum));
+				if(TransactionManager.validateBuyFromStationTransaction(player, station, bestCargoEnum, maxPurchaseAmount) == 0) {
+					TransactionManager.performBuyFromStationTransaction(player, station, bestCargoEnum, maxPurchaseAmount);
+					// remember what items have been bought
+					player.addRecentlyPurchased(bestCargoEnum);
 				}
 			}
 		}
 	}
 	
-	private void sellToStation(Player player) {
+	private void sellToStation(AIPlayer player) {
 		Station station = player.getCurrentStar().getStation();
 		CargoHold hold = player.getShip().getCargoHold();
 		
+		// find best value item to sell that player has in cargo and wasn't just bought
 		if (hold.getCargoSpaceUsage() > 0) {
 			int greatestDifference = 0;
-			CargoEnum cargoEnum = null;
-			for (int i = 0; i < station.getPrices().length; i++) {
-				int difference = station.getPrices()[i] - CargoEnum.values()[i].getBaseValue();
-				if (difference > greatestDifference && hold.getCargo()[i] > 0 && !recentlyPurchasedCargo.contains(cargoEnum)) {
-					greatestDifference = difference;
-					cargoEnum = CargoEnum.values()[i];
+			CargoEnum bestCargoEnum = null;
+			for (CargoEnum cargoEnum : CargoEnum.getList()) {
+				if (hold.getCargoAmount(cargoEnum) > 0) {
+					int difference = station.getPrice(cargoEnum) - player.getPurchasePrice(cargoEnum);
+					if (difference > greatestDifference && !player.isRecentlyPurchased(bestCargoEnum)) {
+						greatestDifference = difference;
+						bestCargoEnum = cargoEnum;
+					}
 				}
+				
 			}
 			
-			if (cargoEnum != null) {
-				int maxSaleAmount = TransactionManager.getMaximumAmount(station.getWallet().getCredits(), station.getPrices()[CargoEnum.getCargoEnumIndex(cargoEnum)],
-						station.getCargoHold().remainingCargoSpace(), cargoEnum.getSize(), hold.getCargo()[CargoEnum.getCargoEnumIndex(cargoEnum)]);
-				if(TransactionManager.validateSellToStationTransaction(player, station, cargoEnum, maxSaleAmount) == 0) {
-					TransactionManager.performSellToStationTransaction(player, station, cargoEnum, maxSaleAmount);
-					recentlyPurchasedCargo.add(cargoEnum);
+			// sell max of that item
+			if (bestCargoEnum != null) {
+				int maxSaleAmount = TransactionManager.getMaximumAmount(station.getWallet().getCredits(), station.getPrice(bestCargoEnum),
+						station.getCargoHold().getRemainingCargoSpace(), bestCargoEnum.getSize(), hold.getCargoAmount(bestCargoEnum));
+				if(TransactionManager.validateSellToStationTransaction(player, station, bestCargoEnum, maxSaleAmount) == 0) {
+					TransactionManager.performSellToStationTransaction(player, station, bestCargoEnum, maxSaleAmount);
+					player.addRecentlyPurchased(bestCargoEnum);
 				}
 			}
 		}
 	}
 	
-	private void jumpToNewSystem(Player player) {
+	private void jumpToNewSystem(AIPlayer player) {
 		List<Star> neighbors = starSystemManager.getNeighbors(player.getCurrentStar());
-		player.setNewCurrentStar(neighbors.get(random.nextInt(neighbors.size())));
+		Star nextJump;
+		nextJump = neighbors.get(random.nextInt(neighbors.size()));
+		player.setNewCurrentStar(nextJump);
 	}
 	
 	public List<Player> getAIPlayersInStarSystem(Star star) {
@@ -148,7 +153,9 @@ public class PlayerManagerAI {
 	}
 	
 	public List<Player> getAIPlayers() {
-		return aiPlayers;
+		List<Player> result = Lists.newArrayList();
+		result.addAll(aiPlayers);
+		return result;
 	}
 	
 	public Player getAIPlayer(String name) {

@@ -12,6 +12,7 @@ public class StationManagerAI {
 	private static final Random random = new Random();
 	private static final int priceVariance = 3;
 	private static final int cargoVariance = 10;
+	private static final int stationCashReload = 50000;
 	
 	public static void fillStationWithCargo(Station station, List<Planet> planets) {
 		CargoHold hold = station.getCargoHold();
@@ -25,21 +26,33 @@ public class StationManagerAI {
 					randomVariance *= -1;
 				}
 				hold.addCargo(cargoEnums[i], baseProduction + randomVariance);
+				station.addCargoGeneratedByPlanet(cargoEnums[i]);
 			}
 		}
 		updateStationPrices(station);
 	}
 	
-	public static void updateStationPrices(Station station) {
+	private static void updateStationPrices(Station station) {
 		CargoHold hold = station.getCargoHold();
 		
-		for (int i = 0; i < CargoEnum.values().length; i++) {
-			int baseValue = CargoEnum.values()[i].getBaseValue();
-			if (hold.getCargo()[i] > 0) {
-				station.getPrices()[i] = baseValue - random.nextInt(baseValue / priceVariance);
+		for (CargoEnum cargoEnum : CargoEnum.getList()) {
+			int baseValue = cargoEnum.getBaseValue();
+			if (hold.getCargoAmount(cargoEnum) > 0) {
+				station.setPrice(baseValue - random.nextInt(baseValue / priceVariance), cargoEnum);
 			} else {
-				station.getPrices()[i] = baseValue + random.nextInt(baseValue / priceVariance);
+				station.setPrice(baseValue + random.nextInt(baseValue / priceVariance), cargoEnum);
+			}
+			
+		}
+	}
+	
+	public static void refreshStationCargo(Station station, List<Planet> planets) {
+		for (CargoEnum cargoEnum : CargoEnum.getList()) {
+			if (!station.isCargoGeneratedByPlanet(cargoEnum)) {
+				station.getCargoHold().dumpCargo(cargoEnum);
 			}
 		}
+		fillStationWithCargo(station, planets);
+		station.getWallet().addCredits(stationCashReload);
 	}
 }
