@@ -61,7 +61,7 @@ public class MainGui extends JFrame {
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[]{350};
-		gbl_contentPane.rowHeights = new int[]{200,200,10};
+		gbl_contentPane.rowHeights = new int[]{100,200,10};
 		gbl_contentPane.columnWeights = new double[]{};
 		gbl_contentPane.rowWeights = new double[]{};
 		contentPane.setLayout(gbl_contentPane);

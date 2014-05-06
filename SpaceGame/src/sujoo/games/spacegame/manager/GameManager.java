@@ -49,9 +49,10 @@ public class GameManager {
 	}
 	
 	public void enterCommand(String command) {
-		if (!command.isEmpty()) {
-			String[] commandString = command.split(" ");
-			switch (Command.toCommand(commandString[0])) {
+		String[] commandString = command.split(" ");
+		Command firstCommand = Command.toCommand(commandString[0]);
+		if (firstCommand != null) {
+			switch (firstCommand) {
 			case JUMP:
 				travel(commandString, humanPlayer);
 				break;
@@ -77,7 +78,7 @@ public class GameManager {
 				displayStatus(humanPlayer);
 				break;
 			case HELP:
-				printHelp();
+				help();
 				break;
 			case SCORE:
 				score();
@@ -85,11 +86,9 @@ public class GameManager {
 			case WAIT:
 				waitTurn();
 				break;
-			case UNKNOWN:
-				break;
 			}
 		} else {
-			printHelp();
+			help();
 		}
 	}
 	
@@ -204,7 +203,7 @@ public class GameManager {
 	}
 	
 	private void displaySystemScanPanel(Player player) {
-		gui.setLowerPanel(TextManager.getScanLowerPanel(player.getCurrentStar(), starSystemManager.getNeighborsString(player.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(player.getCurrentStar())));
+		gui.setLowerPanel(TextManager.getScanSystemLowerPanel(player.getCurrentStar(), starSystemManager.getNeighborsString(player.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(player.getCurrentStar())));
 	}
 	
 	private void displayDockPanels(Player player) {
@@ -212,7 +211,8 @@ public class GameManager {
 		gui.setLowerPanel(TextManager.getDockLowerPanel(player));
 	}
 	
-	private void printHelp() {
+	private void help() {
+		gui.setUpperPanel(TextManager.getHelpUpperPanel());
 		gui.setLowerPanel(TextManager.getHelpLowerPanel());
 	}
 	

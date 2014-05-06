@@ -9,6 +9,7 @@ import javax.swing.JTextPane;
 
 import sujoo.games.spacegame.datatypes.CargoEnum;
 import sujoo.games.spacegame.datatypes.CargoHold;
+import sujoo.games.spacegame.datatypes.Command;
 import sujoo.games.spacegame.datatypes.Star;
 import sujoo.games.spacegame.datatypes.Station;
 import sujoo.games.spacegame.datatypes.Wallet;
@@ -32,11 +33,6 @@ public class TextManager {
 	
 	private static final String dust = "Dust and Echoes";
 	
-	private static final String helpString = "List of Commands:" + nl +
-			"Jump #### - Jump to adjacent star system #" + nl +
-			"Scan - Display star system information" + nl +
-			"Map - Display adject system map";
-	
 	private static Component wrapText(STextArea textArea) {
 		JTextPane textPane = new JTextPane(textArea);
 		textPane.setEditable(false);
@@ -57,7 +53,7 @@ public class TextManager {
 		return wrapText(textArea);
 	}
 	
-	public static Component getScanLowerPanel(Star star, String connectionString, List<Player> players) {		
+	public static Component getScanSystemLowerPanel(Star star, String connectionString, List<Player> players) {		
 	    STextArea textArea = new STextArea();
 
 	    textArea.append(starTag, Color.YELLOW);
@@ -110,9 +106,18 @@ public class TextManager {
 		return wrapText(textArea);
 	}
 	
+	public static Component getHelpUpperPanel() {
+		STextArea textArea = new STextArea();
+		includeTitleText(textArea, "List of Commands");
+		for (Command command : Command.getList()) {
+			textArea.appendLine(command.getCode());
+		}
+		return wrapText(textArea);
+	}	
+	
 	public static Component getHelpLowerPanel() {
 		STextArea textArea = new STextArea();
-		textArea.appendLine(helpString); 
+		includeTitleText(textArea, "Enter a command name for more info");
 		return wrapText(textArea);
 	}
 

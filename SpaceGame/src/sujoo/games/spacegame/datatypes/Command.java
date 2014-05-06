@@ -1,26 +1,33 @@
 package sujoo.games.spacegame.datatypes;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 public enum Command {
-	SCAN("scan"),
-	MAP("map"),
-    FULL_MAP("fullscan"),
-    JUMP("jump"),
-    DOCK("dock"),
-    BUY("buy"),
-    SELL("sell"),
-    STATUS("status"),
-    HELP("help"),
-    SCORE("score"),
-    WAIT("wait"),
-    UNKNOWN("unknown");
+	JUMP("Jump"),
+	SCAN("Scan"),
+	STATUS("Status"),
+	DOCK("Dock"),
+	BUY("Buy"),
+	SELL("Sell"),
+	MAP("Map"),
+    FULL_MAP("Fullscan"),
+    WAIT("Wait"),
+    SCORE("Score"),
+    HELP("Help");
 
 	private String code;
     private Command(String code) {
         this.code = code;
     }
     
-    private String getCode() {
+    public String getCode() {
         return code;
+    }
+    
+    public String toString() {
+    	return code;
     }
 
     /**
@@ -31,7 +38,7 @@ public enum Command {
      * @return
      */
     public static Command toCommand(String code) {
-    	Command result = UNKNOWN;
+    	Command result = null;
         for (Command command : Command.values()) {
             if (command.getCode().equalsIgnoreCase(code)) {
                 result = command;
@@ -39,21 +46,8 @@ public enum Command {
         }
         return result;
     }
-
-    /**
-     * Does the entered string match a command?
-     * @param pos
-     * @return
-     */
-    public static boolean isCommand(String command) {
-        return isCommand(toCommand(command));
-    }
-
-    private static boolean isCommand(Command command) {
-        if (command != UNKNOWN) {
-            return true;
-        } else {
-            return false;
-        }
+    
+    public static List<Command> getList() {
+    	return Lists.newArrayList(Command.values());
     }
 }
