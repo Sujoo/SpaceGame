@@ -7,14 +7,14 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
 
 import sujoo.games.spacegame.ai.PlayerManagerAI;
-import sujoo.games.spacegame.datatypes.CargoEnum;
-import sujoo.games.spacegame.datatypes.Command;
-import sujoo.games.spacegame.datatypes.Star;
-import sujoo.games.spacegame.datatypes.Station;
-import sujoo.games.spacegame.datatypes.player.HumanPlayer;
-import sujoo.games.spacegame.datatypes.player.Player;
-import sujoo.games.spacegame.datatypes.ship.ShipFactory;
-import sujoo.games.spacegame.datatypes.ship.ShipType;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
+import sujoo.games.spacegame.datatype.command.Command;
+import sujoo.games.spacegame.datatype.general.Star;
+import sujoo.games.spacegame.datatype.player.HumanPlayer;
+import sujoo.games.spacegame.datatype.player.Player;
+import sujoo.games.spacegame.datatype.player.Station;
+import sujoo.games.spacegame.datatype.ship.ShipFactory;
+import sujoo.games.spacegame.datatype.ship.ShipType;
 import sujoo.games.spacegame.gui.MainGui;
 
 public class GameManager {
@@ -134,17 +134,16 @@ public class GameManager {
 	}
 	
 	private void scanSystem(Player player) {
-		displaySystemScanPanel(player);
+		displayScanSystem(player);
 		displayLocalSystemMap(player.getCurrentStar(), player.getPreviousStar());
 	}
 	
-	private void displaySystemScanPanel(Player player) {
-		gui.setLowerPanel(TextManager.getScanSystemLowerPanel(player.getCurrentStar(), starSystemManager.getNeighborsString(player.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(player.getCurrentStar())));
+	private void displayScanSystem(Player player) {
+		gui.displayScanSystem(player, starSystemManager.getNeighborsString(player.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(player.getCurrentStar()));
 	}
 	
 	private void scanPlayer(Player player) {
-		gui.setUpperPanel(TextManager.getScanPlayerUpperPanel(player));
-		gui.setLowerPanel(TextManager.getScanPlayerLowerPanel(player));
+		gui.displayScanPlayer(player);
 	}
 	
 	
@@ -152,20 +151,18 @@ public class GameManager {
 	//* Status Command Logic
 	//*************************
 	private void status(Player player) {
-		gui.setUpperPanel(TextManager.getStatusUpperPanel(player));
-		gui.setLowerPanel(TextManager.getStatusLowerPanel(player));
+		gui.displayStatus(player);
 	}
 	
 	//*************************
 	//* Dock Command Logic
 	//*************************
 	private void dock(Player player) {
-		displayDockPanels(player);
+		displayDockCargo(player);
 	}
 	
-	private void displayDockPanels(Player player) {
-		gui.setUpperPanel(TextManager.getDockUpperPanel(player.getCurrentStar().getStation()));
-		gui.setLowerPanel(TextManager.getDockLowerPanel(player));
+	private void displayDockCargo(Player player) {
+		gui.displayDockCargo(player);
 	}
 	
 	//*************************
@@ -176,15 +173,15 @@ public class GameManager {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
 			if (cargoEnum != null) {
 				Station station = player.getCurrentStar().getStation();
-				int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(), station.getPrice(cargoEnum),
-					player.getShip().getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold().getCargoAmount(cargoEnum));
+				int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(), station.getTransactionPrice(cargoEnum),
+					player.getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold().getCargoAmount(cargoEnum));
 				int validationCode = TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 				switch(validationCode) {
 				case 0:
 					TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
 					break;
 				}
-				displayDockPanels(player);
+				displayDockCargo(player);
 			}
 		}
 	}
@@ -197,15 +194,15 @@ public class GameManager {
 			CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
 			if (cargoEnum != null) {
 				Station station = player.getCurrentStar().getStation();
-				int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(), station.getPrice(cargoEnum),
-						station.getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), player.getShip().getCargoHold().getCargoAmount(cargoEnum));
+				int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(), station.getTransactionPrice(cargoEnum),
+						station.getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), player.getCargoHold().getCargoAmount(cargoEnum));
 				int validationCode = TransactionManager.validateSellToStationTransaction(player, station, cargoEnum, amountToSell);
 				switch(validationCode) {
 				case 0:
 					TransactionManager.performSellToStationTransaction(player, station, cargoEnum, amountToSell);
 					break;
 				}
-				displayDockPanels(player);
+				displayDockCargo(player);
 			}
 		}
 	}
@@ -231,22 +228,19 @@ public class GameManager {
 	//* Score Command Logic
 	//*************************
 	private void score() {
-		gui.setLowerPanel(TextManager.getScoreLowerPanel(players));
+		gui.displayScore(players);
 	}
 	
 	//*************************
 	//* Help Command Logic
 	//*************************
 	private void help(String[] commandString) {
-		gui.setUpperPanel(TextManager.getHelpUpperPanel());
-		if (commandString.length < 2) {
-			gui.setLowerPanel(TextManager.getHelpLowerPanel(Command.HELP));
-		} else {
-			Command secondCommand = Command.toCommand(commandString[1]);
-			if (secondCommand != null) {
-				gui.setLowerPanel(TextManager.getHelpLowerPanel(secondCommand));
-			}
+		Command secondCommand = Command.HELP;
+		if (commandString.length >= 2 && Command.toCommand(commandString[1]) != null) {
+			secondCommand = Command.toCommand(commandString[1]);
 		}
+		
+		gui.displayHelp(secondCommand);
 	}
 	
 	//*************************

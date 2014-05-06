@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatypes;
+package sujoo.games.spacegame.datatype.general;
 
 public class Wallet {
 	private int credits;

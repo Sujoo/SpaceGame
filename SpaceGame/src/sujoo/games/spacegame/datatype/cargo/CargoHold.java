@@ -1,4 +1,5 @@
-package sujoo.games.spacegame.datatypes;
+package sujoo.games.spacegame.datatype.cargo;
+
 
 public class CargoHold {
 	private int size;

@@ -1,6 +1,6 @@
-package sujoo.games.spacegame.datatypes.ship;
+package sujoo.games.spacegame.datatype.ship;
 
-import sujoo.games.spacegame.datatypes.CargoHold;
+import sujoo.games.spacegame.datatype.cargo.CargoHold;
 
 public abstract class Ship {
 	private ShipType type;

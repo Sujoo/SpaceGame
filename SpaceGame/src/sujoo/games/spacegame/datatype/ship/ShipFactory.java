@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatypes.ship;
+package sujoo.games.spacegame.datatype.ship;
 
 public class ShipFactory {
 	public static Ship buildShip(ShipType type) {
@@ -6,6 +6,9 @@ public class ShipFactory {
 		switch(type) {
 		case SMALL_TRANS:
 			ship = new SmallTransportShip();
+			break;
+		case STATION:
+			ship = new StationShip();
 			break;
 		}
 		return ship;

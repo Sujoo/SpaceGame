@@ -1,9 +1,9 @@
 package sujoo.games.spacegame.manager;
 
-import sujoo.games.spacegame.datatypes.CargoEnum;
-import sujoo.games.spacegame.datatypes.CargoHold;
-import sujoo.games.spacegame.datatypes.Station;
-import sujoo.games.spacegame.datatypes.player.Player;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
+import sujoo.games.spacegame.datatype.cargo.CargoHold;
+import sujoo.games.spacegame.datatype.player.Player;
+import sujoo.games.spacegame.datatype.player.Station;
 
 public class TransactionManager {
 	
@@ -19,7 +19,7 @@ public class TransactionManager {
 		int result = -1;
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
-		int stationSellValue = station.getPrice(cargoEnum)*amount;
+		int stationSellValue = station.getTransactionPrice(cargoEnum)*amount;
 		// Does player have enough money?
 		if (player.getWallet().getCredits() >= stationSellValue) {
 			// Does station have enough cargo?
@@ -52,7 +52,7 @@ public class TransactionManager {
 		int result = -1;
 		CargoHold playerHold = player.getShip().getCargoHold();
 		CargoHold stationHold = station.getCargoHold();
-		int stationBuyValue = station.getPrice(cargoEnum)*amount;
+		int stationBuyValue = station.getTransactionPrice(cargoEnum)*amount;
 		// Does player have enough money?
 		if (station.getWallet().getCredits() >= stationBuyValue) {
 			// Does player have enough cargo?
@@ -85,7 +85,7 @@ public class TransactionManager {
 	public static void performBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {		
 		transactCargoTrade(station.getCargoHold(), player.getShip().getCargoHold(), cargoEnum, amount);
 		
-		int stationSellValue = station.getPrice(cargoEnum)*amount;
+		int stationSellValue = station.getTransactionPrice(cargoEnum)*amount;
 		station.getWallet().addCredits(stationSellValue);
 		player.getWallet().removeCredits(stationSellValue);
 		player.setPurchasePrice(stationSellValue, cargoEnum);
@@ -103,7 +103,7 @@ public class TransactionManager {
 	public static void performSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
 		transactCargoTrade(player.getShip().getCargoHold(), station.getCargoHold(), cargoEnum, amount);
 		
-		int stationBuyValue = station.getPrice(cargoEnum)*amount;
+		int stationBuyValue = station.getTransactionPrice(cargoEnum)*amount;
 		player.getWallet().addCredits(stationBuyValue);
 		station.getWallet().removeCredits(stationBuyValue);
 	}

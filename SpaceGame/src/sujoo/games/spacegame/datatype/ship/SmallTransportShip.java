@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatypes.ship;
+package sujoo.games.spacegame.datatype.ship;
 
 public class SmallTransportShip extends Ship {
 	

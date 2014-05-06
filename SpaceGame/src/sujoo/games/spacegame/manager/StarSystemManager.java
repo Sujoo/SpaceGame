@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Random;
 
 import sujoo.games.spacegame.ai.StationManagerAI;
-import sujoo.games.spacegame.datatypes.Star;
-import sujoo.games.spacegame.datatypes.planet.PlanetFactory;
-import sujoo.games.spacegame.datatypes.planet.PlanetType;
+import sujoo.games.spacegame.datatype.general.Star;
+import sujoo.games.spacegame.datatype.planet.PlanetFactory;
+import sujoo.games.spacegame.datatype.planet.PlanetType;
 
 import com.google.common.collect.Lists;
 

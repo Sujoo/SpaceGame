@@ -3,10 +3,10 @@ package sujoo.games.spacegame.ai;
 import java.util.List;
 import java.util.Random;
 
-import sujoo.games.spacegame.datatypes.CargoEnum;
-import sujoo.games.spacegame.datatypes.CargoHold;
-import sujoo.games.spacegame.datatypes.Station;
-import sujoo.games.spacegame.datatypes.planet.Planet;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
+import sujoo.games.spacegame.datatype.cargo.CargoHold;
+import sujoo.games.spacegame.datatype.planet.Planet;
+import sujoo.games.spacegame.datatype.player.Station;
 
 public class StationManagerAI {
 	private static final Random random = new Random();
@@ -38,9 +38,9 @@ public class StationManagerAI {
 		for (CargoEnum cargoEnum : CargoEnum.getList()) {
 			int baseValue = cargoEnum.getBaseValue();
 			if (hold.getCargoAmount(cargoEnum) > 0) {
-				station.setPrice(baseValue - random.nextInt(baseValue / priceVariance), cargoEnum);
+				station.setTransactionPrice(baseValue - random.nextInt(baseValue / priceVariance), cargoEnum);
 			} else {
-				station.setPrice(baseValue + random.nextInt(baseValue / priceVariance), cargoEnum);
+				station.setTransactionPrice(baseValue + random.nextInt(baseValue / priceVariance), cargoEnum);
 			}
 			
 		}

@@ -1,6 +1,6 @@
-package sujoo.games.spacegame.datatypes.player;
+package sujoo.games.spacegame.datatype.player;
 
-import sujoo.games.spacegame.datatypes.ship.Ship;
+import sujoo.games.spacegame.datatype.ship.Ship;
 
 public class HumanPlayer extends Player {
 	

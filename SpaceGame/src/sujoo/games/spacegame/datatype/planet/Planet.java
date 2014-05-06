@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatypes.planet;
+package sujoo.games.spacegame.datatype.planet;
 
 public abstract class Planet {
 	private PlanetType type;

@@ -1,7 +1,8 @@
-package sujoo.games.spacegame.datatypes.ship;
+package sujoo.games.spacegame.datatype.ship;
 
 public enum ShipType {
-	SMALL_TRANS("Small Transport", 100, 50, 100, 25, 20);
+	SMALL_TRANS("Small Transport", 100, 50, 100, 25, 20),
+	STATION("Station", 50000, 1000, 5000, 50, 0);
 	
 	private String desc;
 	private int holdSize;

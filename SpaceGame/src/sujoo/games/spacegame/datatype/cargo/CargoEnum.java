@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatypes;
+package sujoo.games.spacegame.datatype.cargo;
 
 import java.util.List;
 

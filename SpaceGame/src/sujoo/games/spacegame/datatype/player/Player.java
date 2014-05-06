@@ -1,9 +1,10 @@
-package sujoo.games.spacegame.datatypes.player;
+package sujoo.games.spacegame.datatype.player;
 
-import sujoo.games.spacegame.datatypes.CargoEnum;
-import sujoo.games.spacegame.datatypes.Star;
-import sujoo.games.spacegame.datatypes.Wallet;
-import sujoo.games.spacegame.datatypes.ship.Ship;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
+import sujoo.games.spacegame.datatype.cargo.CargoHold;
+import sujoo.games.spacegame.datatype.general.Star;
+import sujoo.games.spacegame.datatype.general.Wallet;
+import sujoo.games.spacegame.datatype.ship.Ship;
 
 public abstract class Player implements Comparable<Player> {
 	private final String name;
@@ -51,6 +52,18 @@ public abstract class Player implements Comparable<Player> {
 	
 	public void setPurchasePrice(int price, CargoEnum cargoEnum) {
 		ship.getCargoHold().setRecentPurchasePrice(price, cargoEnum);
+	}
+	
+	public void setTransactionPrice(int price, CargoEnum cargoEnum) {
+		ship.getCargoHold().setTransactionPrice(price, cargoEnum);
+	}
+	
+	public int getTransactionPrice(CargoEnum cargoEnum) {
+		return ship.getCargoHold().getTransactionPrice(cargoEnum);
+	}
+	
+	public CargoHold getCargoHold() {
+		return ship.getCargoHold();
 	}
 	
 	public String getName() {

@@ -1,6 +1,6 @@
-package sujoo.games.spacegame.datatypes.planet;
+package sujoo.games.spacegame.datatype.planet;
 
-import sujoo.games.spacegame.datatypes.CargoEnum;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 
 public enum PlanetType {	
 	CLASS_T("T","Terrestrial",

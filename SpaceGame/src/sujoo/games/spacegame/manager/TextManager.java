@@ -1,21 +1,18 @@
 package sujoo.games.spacegame.manager;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.JTextPane;
-
-import sujoo.games.spacegame.datatypes.CargoEnum;
-import sujoo.games.spacegame.datatypes.CargoHold;
-import sujoo.games.spacegame.datatypes.Command;
-import sujoo.games.spacegame.datatypes.Star;
-import sujoo.games.spacegame.datatypes.Station;
-import sujoo.games.spacegame.datatypes.Wallet;
-import sujoo.games.spacegame.datatypes.planet.Planet;
-import sujoo.games.spacegame.datatypes.player.Player;
-import sujoo.games.spacegame.datatypes.ship.Ship;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
+import sujoo.games.spacegame.datatype.cargo.CargoHold;
+import sujoo.games.spacegame.datatype.command.Command;
+import sujoo.games.spacegame.datatype.general.Star;
+import sujoo.games.spacegame.datatype.general.Wallet;
+import sujoo.games.spacegame.datatype.planet.Planet;
+import sujoo.games.spacegame.datatype.player.Player;
+import sujoo.games.spacegame.datatype.player.Station;
+import sujoo.games.spacegame.datatype.ship.Ship;
 import sujoo.games.spacegame.gui.STextArea;
 
 public class TextManager {
@@ -33,27 +30,20 @@ public class TextManager {
 	
 	private static final String dust = "Dust and Echoes";
 	
-	private static Component wrapText(STextArea textArea) {
-		JTextPane textPane = new JTextPane(textArea);
-		textPane.setEditable(false);
-		textPane.setBackground(Color.BLACK);
-		return textPane;
-	}
-	
 	//Public Methods
-	public static Component getScanPlayerUpperPanel(Player player) {
+	public static STextArea getScanPlayerUpperPanel(Player player) {
 		STextArea textArea = new STextArea();
 		includeShipText(textArea, player);
-		return wrapText(textArea);
+		return textArea;
 	}
 	
-	public static Component getScanPlayerLowerPanel(Player player) {
+	public static STextArea getScanPlayerLowerPanel(Player player) {
 		STextArea textArea = new STextArea();
 		includeCargoText(textArea, player);
-		return wrapText(textArea);
+		return textArea;
 	}
 	
-	public static Component getScanSystemLowerPanel(Star star, String connectionString, List<Player> players) {		
+	public static STextArea getScanSystemLowerPanel(Star star, String connectionString, List<Player> players) {		
 	    STextArea textArea = new STextArea();
 
 	    textArea.append(starTag, Color.YELLOW);
@@ -65,10 +55,10 @@ public class TextManager {
 	    textArea.append(playersTag, Color.BLUE);
 	    textArea.append(getPlayerNamesString(players), Color.BLUE);
 	    
-	    return wrapText(textArea);
+	    return textArea;
 	}
 	
-	public static Component getScoreLowerPanel(List<Player> players) {
+	public static STextArea getScoreLowerPanel(List<Player> players) {
 		STextArea textArea = new STextArea();
 		
 		int longestNameLength = getLongestTextLength(players.toArray());
@@ -79,58 +69,58 @@ public class TextManager {
 			textArea.appendLine(frontPad(player.toString(), longestNameLength) + " : " + player.getScore());
 		}
 		
-		return wrapText(textArea);
+		return textArea;
 	}
 	
-	public static Component getStatusUpperPanel(Player player) {
+	public static STextArea getStatusUpperPanel(Player player) {
 		STextArea textArea = new STextArea();
 		includeShipText(textArea, player);
-		return wrapText(textArea);
+		return textArea;
 	}
 	
-	public static Component getStatusLowerPanel(Player player) {
+	public static STextArea getStatusLowerPanel(Player player) {
 		STextArea textArea = new STextArea();
 		includeCargoText(textArea, player);
-		return wrapText(textArea);
+		return textArea;
 	}
 	
-	public static Component getDockUpperPanel(Station station) {
+	public static STextArea getDockUpperPanel(Station station) {
 		STextArea textArea = new STextArea();
 		includeCargoText(textArea, station);
-		return wrapText(textArea);
+		return textArea;
 	}
 	
-	public static Component getDockLowerPanel(Player player) {
+	public static STextArea getDockLowerPanel(Player player) {
 		STextArea textArea = new STextArea();
 		includeCargoText(textArea, player);
-		return wrapText(textArea);
+		return textArea;
 	}
 	
-	public static Component getHelpUpperPanel() {
+	public static STextArea getHelpUpperPanel() {
 		STextArea textArea = new STextArea();
 		includeTitleText(textArea, "List of Commands");
 		for (Command command : Command.getList()) {
 			textArea.appendLine(command.getCode());
 		}
-		return wrapText(textArea);
+		return textArea;
 	}	
 	
-	public static Component getHelpLowerPanel(Command command) {
+	public static STextArea getHelpLowerPanel(Command command) {
 		STextArea textArea = new STextArea();
 		includeTitleText(textArea, "Command Help");
 		for (String text : command.getExplanation()) {
 			textArea.appendLine(text);
 		}
-		return wrapText(textArea);
+		return textArea;
 	}
 
 	// Support Methods
 	private static void includeCargoText(STextArea textArea, Station station) {
-		includeCargoText(textArea, "Station", station.getWallet(), station.getCargoHold(), true);
+		includeCargoText(textArea, station.getName(), station.getWallet(), station.getCargoHold(), true);
 	}
 	
 	private static void includeCargoText(STextArea textArea, Player player) {
-		includeCargoText(textArea, player.getName(), player.getWallet(), player.getShip().getCargoHold(), false);
+		includeCargoText(textArea, player.getName(), player.getWallet(), player.getCargoHold(), false);
 	}
 	
 	private static void includeCargoText(STextArea textArea, String name, Wallet wallet, CargoHold hold, boolean isStation) {

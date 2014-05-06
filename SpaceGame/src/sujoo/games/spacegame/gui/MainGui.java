@@ -13,10 +13,13 @@ import java.awt.Shape;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 
-import sujoo.games.spacegame.datatypes.Star;
-import sujoo.games.spacegame.datatypes.player.Player;
+import sujoo.games.spacegame.datatype.command.Command;
+import sujoo.games.spacegame.datatype.general.Star;
+import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.manager.GameManager;
+import sujoo.games.spacegame.manager.TextManager;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -24,6 +27,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JTextField;
 
 import java.awt.Color;
+import java.util.List;
 
 import javax.swing.border.EtchedBorder;
 
@@ -108,16 +112,33 @@ public class MainGui extends JFrame {
 		contentPane.add(textField, gbc_textField);
 	}
 	
-	public void setLowerPanel(Component panel) {
+	private void setLowerPanel(STextArea textArea) {
+		JTextPane textPane = getStandardTextPane(textArea);
+		setLowerPanel(textPane);
+	}
+	
+	private void setLowerPanel(Component panel) {
 		lowerPanel.removeAll();
 		lowerPanel.add(panel, BorderLayout.CENTER);
 		redraw();
 	}
 	
-	public void setUpperPanel(Component panel) {
+	private void setUpperPanel(STextArea textArea) {
+		JTextPane textPane = getStandardTextPane(textArea);
+		setUpperPanel(textPane);
+	}
+	
+	private void setUpperPanel(Component panel) {
 		upperPanel.removeAll();
 		upperPanel.add(panel, BorderLayout.CENTER);
 		redraw();
+	}
+	
+	private JTextPane getStandardTextPane(STextArea textArea) {
+		JTextPane textPane = new JTextPane(textArea);
+		textPane.setEditable(false);
+		textPane.setBackground(Color.BLACK);
+		return textPane;
 	}
 	
 	private void redraw() {
@@ -163,5 +184,33 @@ public class MainGui extends JFrame {
 	private void enterCommand(String text) {
 		textField.setText("");
 		controller.enterCommand(text, player);
+	}
+	
+	public void displayScanSystem(Player player, String connections, List<Player> players) {
+		setLowerPanel(TextManager.getScanSystemLowerPanel(player.getCurrentStar(), connections, players));
+	}
+	
+	public void displayScanPlayer(Player player) {
+		setUpperPanel(TextManager.getScanPlayerUpperPanel(player));
+		setLowerPanel(TextManager.getScanPlayerLowerPanel(player));
+	}
+	
+	public void displayStatus(Player player) {
+		setUpperPanel(TextManager.getStatusUpperPanel(player));
+		setLowerPanel(TextManager.getStatusLowerPanel(player));
+	}
+	
+	public void displayDockCargo(Player player) {
+		setUpperPanel(TextManager.getDockUpperPanel(player.getCurrentStar().getStation()));
+		setLowerPanel(TextManager.getDockLowerPanel(player));
+	}
+	
+	public void displayScore(List<Player> players) {
+		setLowerPanel(TextManager.getScoreLowerPanel(players));
+	}
+	
+	public void displayHelp(Command secondCommand) {
+		setUpperPanel(TextManager.getHelpUpperPanel());
+		setLowerPanel(TextManager.getHelpLowerPanel(secondCommand));
 	}
 }

@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatypes.planet;
+package sujoo.games.spacegame.datatype.planet;
 
 public class ClassDPlanet extends Planet {
 	

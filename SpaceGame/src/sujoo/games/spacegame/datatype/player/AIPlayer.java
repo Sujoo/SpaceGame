@@ -1,11 +1,11 @@
-package sujoo.games.spacegame.datatypes.player;
+package sujoo.games.spacegame.datatype.player;
 
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import sujoo.games.spacegame.datatypes.CargoEnum;
-import sujoo.games.spacegame.datatypes.ship.Ship;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
+import sujoo.games.spacegame.datatype.ship.Ship;
 
 public class AIPlayer extends Player {
 	private Set<CargoEnum> recentlyPurchased;
