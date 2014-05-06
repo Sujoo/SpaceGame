@@ -115,9 +115,12 @@ public class TextManager {
 		return wrapText(textArea);
 	}	
 	
-	public static Component getHelpLowerPanel() {
+	public static Component getHelpLowerPanel(Command command) {
 		STextArea textArea = new STextArea();
-		includeTitleText(textArea, "Enter a command name for more info");
+		includeTitleText(textArea, "Command Help");
+		for (String text : command.getExplanation()) {
+			textArea.appendLine(text);
+		}
 		return wrapText(textArea);
 	}
 

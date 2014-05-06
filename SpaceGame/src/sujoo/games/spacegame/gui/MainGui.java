@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import sujoo.games.spacegame.datatypes.Star;
+import sujoo.games.spacegame.datatypes.player.Player;
 import sujoo.games.spacegame.manager.GameManager;
 
 import java.awt.event.KeyAdapter;
@@ -46,13 +47,16 @@ public class MainGui extends JFrame {
 	private JTextField textField;
 	
 	private GameManager controller;
+	private Player player;
 
 	/**
 	 * Create the frame.
 	 */
-	public MainGui(GameManager controller) {
-		setResizable(false);
+	public MainGui(GameManager controller, Player player) {
 		this.controller = controller;
+		this.player = player;
+		
+		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 350, 500);
 		setLocationRelativeTo(null);
@@ -158,6 +162,6 @@ public class MainGui extends JFrame {
 	
 	private void enterCommand(String text) {
 		textField.setText("");
-		controller.enterCommand(text);
+		controller.enterCommand(text, player);
 	}
 }
