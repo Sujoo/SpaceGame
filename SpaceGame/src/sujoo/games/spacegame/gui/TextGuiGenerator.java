@@ -6,6 +6,7 @@ import java.util.List;
 
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
+import sujoo.games.spacegame.datatype.command.AttackSubCommand;
 import sujoo.games.spacegame.datatype.command.PrimaryCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.general.Wallet;
@@ -171,10 +172,10 @@ public class TextGuiGenerator {
 	private static void includeShipText(STextArea textArea, Player player) {
 		includeTitleText(textArea, player.getName() + " Ship");
 		Ship ship = player.getShip();
-		includeShieldCapacityText(textArea, ship.getCurrentShieldPoints(), ship.getMaxShieldPoints());
-		includeHullCapacityText(textArea, ship.getCurrentHullPoints(), ship.getMaxHullPoints());
-		textArea.appendLine("Engine Power: " + ship.getEnginePower());
-		textArea.appendLine("Weapon Power: " + ship.getWeaponAttack());
+		includeShieldCapacityText(textArea, ship.getCurrentComponentValue(AttackSubCommand.SHIELD), ship.getCurrentMaxComponentValue(AttackSubCommand.SHIELD));
+		includeHullCapacityText(textArea, ship.getCurrentComponentValue(AttackSubCommand.HULL), ship.getCurrentMaxComponentValue(AttackSubCommand.HULL));
+		textArea.appendLine("Engine Power: " + ship.getCurrentComponentValue(AttackSubCommand.ENGINE));
+		textArea.appendLine("Weapon Power: " + ship.getCurrentComponentValue(AttackSubCommand.WEAPON));
 	}
 	
 	private static void includeCreditsText(STextArea textArea, Wallet wallet) {

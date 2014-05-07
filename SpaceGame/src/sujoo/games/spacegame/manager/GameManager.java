@@ -144,8 +144,8 @@ public class GameManager {
 
     private void continueBattle(Player player) {
         battleCounter++;
-        BattleManager.performShieldRecharge(player.getShip(), battleCounter);
-        BattleManager.performShieldRecharge(battlePlayer.getShip(), battleCounter);
+        player.getShip().performShieldRecharge(battleCounter);
+        battlePlayer.getShip().performShieldRecharge(battleCounter);
         displayBattle(player);
     }
 
@@ -157,7 +157,7 @@ public class GameManager {
         if (commandString.length > 1) {
             AttackSubCommand secondCommand = AttackSubCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
-                feedback = BattleManager.takeDamage(secondCommand, battlePlayer.getShip(), player.getShip().getWeaponAttack());
+                feedback = battlePlayer.getShip().damageComponent(secondCommand, player.getShip().getCurrentComponentValue(AttackSubCommand.WEAPON));
             } else {
                 gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
             }
@@ -175,7 +175,7 @@ public class GameManager {
         if (commandString.length > 1) {
             AttackSubCommand secondCommand = AttackSubCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
-                feedback = BattleManager.repairDamage(secondCommand, player.getShip());
+                feedback = player.getShip().repairComponent(secondCommand);
             } else {
                 gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
             }
@@ -190,7 +190,7 @@ public class GameManager {
     // *************************
     private BattleFeedbackEnum escape(Player player) {
         BattleFeedbackEnum feedback = null;
-        if (BattleManager.isEscapePossible(player.getShip(), battleCounter)) {
+        if (player.getShip().isEscapePossible(battleCounter)) {
             feedback = BattleFeedbackEnum.ESCAPE;
         } else {
             // add to battle log "you cannot escape at this time"
@@ -201,7 +201,7 @@ public class GameManager {
     private void handleBattleFeedback(BattleFeedbackEnum feedback, Player attacker, Player defender, boolean aiFeedback) {
         switch (feedback) {
         case SHIP_DESTROYED:
-            attacker.getShip().fullRestore();
+            attacker.getShip().restoreAllComponents();
             playerKilled(defender);
             endBattle();
             if (aiFeedback) {
@@ -231,8 +231,8 @@ public class GameManager {
         case SHIELD_RECHARGE:
             break;
         case ESCAPE:
-            attacker.getShip().fullRestore();
-            battlePlayer.getShip().fullRestore();
+            attacker.getShip().restoreAllComponents();
+            battlePlayer.getShip().restoreAllComponents();
             endBattle();
             gui.displayStatus(attacker);
             break;

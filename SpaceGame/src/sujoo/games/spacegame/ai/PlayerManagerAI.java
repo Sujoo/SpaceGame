@@ -18,7 +18,6 @@ import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.ShipFactory;
 import sujoo.games.spacegame.datatype.ship.ShipType;
 import sujoo.games.spacegame.gui.BattleFeedbackEnum;
-import sujoo.games.spacegame.manager.BattleManager;
 import sujoo.games.spacegame.manager.StarSystemManager;
 import sujoo.games.spacegame.manager.TransactionManager;
 
@@ -142,12 +141,8 @@ public class PlayerManagerAI {
     }
 
     public static BattleFeedbackEnum attackPlayer(AIPlayer aiPlayer, Player player) {
-        AttackSubCommand location;
-        if (player.getShip().isShieldUp()) {
-            location = AttackSubCommand.HULL;
-        } else {
-            location = AttackSubCommand.getList().get(random.nextInt(AttackSubCommand.getList().size()));
-        }
-        return BattleManager.takeDamage(location, player.getShip(), aiPlayer.getShip().getWeaponAttack());
+        AttackSubCommand location = AttackSubCommand.getList().get(random.nextInt(AttackSubCommand.getList().size()));
+
+        return player.getShip().damageComponent(location, aiPlayer.getShip().getCurrentComponentValue(AttackSubCommand.WEAPON));
     }
 }
