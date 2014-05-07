@@ -5,39 +5,40 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum AttackSubCommand {
-	ENGINE("engine", new String[]{"words"}),
-	WEAPON("weapon", new String[]{"words"}),
-	SHIELD("shield", new String[]{"words"}),
-	HULL("hull", new String[]{"words"});
+    ENGINE("engine", new String[] { "words" }),
+    WEAPON("weapon", new String[] { "words" }),
+    SHIELD("shield", new String[] { "words" }),
+    HULL("hull", new String[] { "words" });
 
-	private String code;
-	private String[] explanation;
+    private String code;
+    private String[] explanation;
+
     private AttackSubCommand(String code, String[] explanation) {
         this.code = code;
         this.explanation = explanation;
     }
-    
+
     public String getCode() {
         return code;
     }
-    
+
     public List<String> getExplanation() {
-    	return Lists.newArrayList(explanation);
+        return Lists.newArrayList(explanation);
     }
-    
+
     public String toString() {
-    	return code;
+        return code;
     }
 
     /**
-     * Attempts to match an input String with a command
-     * If no match is found, the null is returned
+     * Attempts to match an input String with a command If no match is found,
+     * the null is returned
      * 
      * @param code
      * @return
      */
     public static AttackSubCommand toCommand(String code) {
-    	AttackSubCommand result = null;
+        AttackSubCommand result = null;
         for (AttackSubCommand attackSubCommand : AttackSubCommand.values()) {
             if (attackSubCommand.getCode().equalsIgnoreCase(code)) {
                 result = attackSubCommand;
@@ -45,16 +46,16 @@ public enum AttackSubCommand {
         }
         return result;
     }
-    
+
     public static boolean isAttackSubCommand(String code) {
-    	if (toCommand(code) != null) {
-    		return true;
-    	} else {
-    		return false;
-    	}
+        if (toCommand(code) != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
-    
+
     public static List<AttackSubCommand> getList() {
-    	return Lists.newArrayList(AttackSubCommand.values());
+        return Lists.newArrayList(AttackSubCommand.values());
     }
 }

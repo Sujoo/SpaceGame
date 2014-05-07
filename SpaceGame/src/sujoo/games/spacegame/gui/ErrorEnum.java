@@ -9,7 +9,8 @@ public enum ErrorEnum {
 	INVALID_PLAYER_NAME("Invalid player name"),
 	PLAYER_NOT_IN_SYSTEM("Player is not in system"),
 	INVALID_PRIMARY_COMMAND("Invalid primary command"),
-	INVALID_SECONDARY_COMMAND("Invalid secondary command");
+	INVALID_SECONDARY_COMMAND("Invalid secondary command"),
+	NOT_ENOUGH_INPUT("Command requires additional input");
 	
 	private String code;
 	private ErrorEnum(String code) {

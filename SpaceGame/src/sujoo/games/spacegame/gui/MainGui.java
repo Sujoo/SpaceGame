@@ -42,221 +42,230 @@ import javax.swing.JScrollPane;
 
 public class MainGui extends JFrame {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -2672177212106851596L;
-	private JPanel contentPane;
-	private JPanel upperPanel;
-	private JPanel lowerPanel;
-	private JPanel infoPanel;
-	private STextArea infoTextArea;
-	private JTextPane infoPane;
-	private JTextField textField;
-	
-	private GameManager controller;
-	private Player player;
+    private static MainGui guiInstance = null;
 
-	/**
-	 * Create the frame.
-	 */
-	public MainGui(GameManager controller, Player player) {
-		this.controller = controller;
-		this.player = player;
-		
-		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 350, 500);
-		setLocationRelativeTo(null);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[]{350};
-		gbl_contentPane.rowHeights = new int[]{100,200,50,10};
-		gbl_contentPane.columnWeights = new double[]{};
-		gbl_contentPane.rowWeights = new double[]{};
-		contentPane.setLayout(gbl_contentPane);
-		
-		upperPanel = new JPanel();
-		upperPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
-		GridBagConstraints gbc_upperPanel = new GridBagConstraints();
-		gbc_upperPanel.anchor = GridBagConstraints.NORTH;
-		gbc_upperPanel.fill = GridBagConstraints.BOTH;
-		gbc_upperPanel.insets = new Insets(0, 0, 5, 0);
-		gbc_upperPanel.gridx = 0;
-		gbc_upperPanel.gridy = 0;
-		contentPane.add(upperPanel, gbc_upperPanel);
-		upperPanel.setLayout(new BorderLayout(0, 0));
-		
-		
-		lowerPanel = new JPanel();
-		lowerPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
-		GridBagConstraints gbc_lowerPanel = new GridBagConstraints();
-		gbc_lowerPanel.insets = new Insets(0, 0, 5, 0);
-		gbc_lowerPanel.fill = GridBagConstraints.BOTH;
-		gbc_lowerPanel.gridx = 0;
-		gbc_lowerPanel.gridy = 1;
-		contentPane.add(lowerPanel, gbc_lowerPanel);
-		lowerPanel.setLayout(new BorderLayout(0 ,0));
-		
-		infoPanel = new JPanel();
-		infoPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
-		GridBagConstraints gbc_infoPanel = new GridBagConstraints();
-		gbc_infoPanel.insets = new Insets(0, 0, 5, 0);
-		gbc_infoPanel.fill = GridBagConstraints.BOTH;
-		gbc_infoPanel.gridx = 0;
-		gbc_infoPanel.gridy = 2;
-		contentPane.add(infoPanel, gbc_infoPanel);
-		infoPanel.setLayout(new BorderLayout(0 ,0));
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setPreferredSize(new Dimension(350, 50));
-		scrollPane.setAutoscrolls(true);
-		infoPanel.add(scrollPane, BorderLayout.CENTER);
-		
-		infoTextArea = new STextArea();
-		infoPane = getStandardTextPane(infoTextArea);
-		scrollPane.setViewportView(infoPane);
-		
-		textField = new JTextField();
-		textField.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					enterCommand(textField.getText());
-				}
-			}
-		});
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.fill = GridBagConstraints.BOTH;
-		gbc_textField.gridx = 0;
-		gbc_textField.gridy = 3;
-		contentPane.add(textField, gbc_textField);
-	}
-	
-	public void setPlayer(Player player) {
-		this.player = player;
-	}
-	
-	private void setLowerPanel(STextArea textArea) {
-		JTextPane textPane = getStandardTextPane(textArea);
-		setLowerPanel(textPane);
-	}
-	
-	private void setUpperPanel(STextArea textArea) {
-		JTextPane textPane = getStandardTextPane(textArea);
-		setUpperPanel(textPane);
-	}
-	
-	private JTextPane getStandardTextPane(STextArea textArea) {
-		JTextPane textPane = new JTextPane(textArea);
-		textPane.setEditable(false);
-		textPane.setBackground(Color.BLACK);
-		return textPane;
-	}
-	
-	private void setLowerPanel(Component panel) {
-		lowerPanel.removeAll();
-		lowerPanel.add(panel, BorderLayout.CENTER);
-		redraw();
-	}
-	
-	private void setUpperPanel(Component panel) {
-		upperPanel.removeAll();
-		upperPanel.add(panel, BorderLayout.CENTER);
-		redraw();
-	}
-	
-	private void redraw() {
-		pack();
-		textField.requestFocusInWindow();
-	}
-	
-	private void addTextToInfoPane(String text) {
-		infoTextArea.preAppendLine(text);
-		infoPane.setCaretPosition(0);
-	}
-	
-	private void enterCommand(String text) {
-		textField.setText("");
-		controller.enterCommand(text, player);
-	}
-	
-	public void displayLoss() {
-		setUpperPanel(TextGuiGenerator.getLoseUpperPanel());
-		setLowerPanel(TextGuiGenerator.getLoseLowerPanel());
-	}
-	
-	public void displayError(ErrorEnum error) {
-		addTextToInfoPane(error.getCode());
-	}
-	
-	public void displayScanSystem(Player player, String connections, List<Player> players) {
-		setLowerPanel(TextGuiGenerator.getScanSystemLowerPanel(player.getCurrentStar(), connections, players));
-	}
-	
-	public void displayScanPlayer(Player player) {
-		setUpperPanel(TextGuiGenerator.getScanPlayerUpperPanel(player));
-		setLowerPanel(TextGuiGenerator.getScanPlayerLowerPanel(player));
-	}
-	
-	public void displayStatus(Player player) {
-		setUpperPanel(TextGuiGenerator.getStatusUpperPanel(player));
-		setLowerPanel(TextGuiGenerator.getStatusLowerPanel(player));
-	}
-	
-	public void displayDockCargo(Player player) {
-		setUpperPanel(TextGuiGenerator.getDockUpperPanel(player.getCurrentStar().getStation()));
-		setLowerPanel(TextGuiGenerator.getDockLowerPanel(player));
-	}
-	
-	public void displayScore(List<Player> players) {
-		setLowerPanel(TextGuiGenerator.getScoreLowerPanel(players));
-	}
-	
-	public void displayHelp(PrimaryCommand secondCommand) {
-		setUpperPanel(TextGuiGenerator.getHelpUpperPanel());
-		setLowerPanel(TextGuiGenerator.getHelpLowerPanel(secondCommand));
-	}
-	
-	public void displayBattle(Player user, Player other) {
-		setUpperPanel(TextGuiGenerator.getScanPlayerUpperPanel(other));
-		setLowerPanel(TextGuiGenerator.getStatusUpperPanel(user));
-	}
-	
-	public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {
-		FRLayout<Star, String> layout = new FRLayout<Star, String>(graph);
-		layout.setMaxIterations(10000);
-		layout.setRepulsionMultiplier(1.5);
-		VisualizationViewer<Star, String> vs = 
-				new VisualizationViewer<Star, String>(layout, new Dimension(300,200));
-		vs.setPreferredSize(new Dimension(320,250));
-		
-		Transformer<Star, Paint> vertexPaint = new Transformer<Star, Paint>() {
-			public Paint transform(Star star) {
-				if (star.equals(currentStar)) {
-					return Color.WHITE;
-				} else if (star.equals(previousStar)) {
-					return Color.LIGHT_GRAY;
-				} else {
-					return Colors.paleGreen;
-				}
-			}
-		};
+    private static final long serialVersionUID = -2672177212106851596L;
+    private JPanel contentPane;
+    private JPanel upperPanel;
+    private JPanel lowerPanel;
+    private JPanel infoPanel;
+    private STextArea infoTextArea;
+    private JTextPane infoPane;
+    private JTextField textField;
 
-		final Shape shape = new Rectangle(35,20);
-		Transformer<Star, Shape> vertexShapeTransformer = new Transformer<Star, Shape>() {
-			public Shape transform(Star s) {
-				return shape;
-			}
-		};
+    private GameManager controller;
+    private Player player;
 
-		vs.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		vs.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<Star>());
-		vs.getRenderContext().setVertexShapeTransformer(vertexShapeTransformer);
-		vs.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-		
-		setUpperPanel(vs);
-	}
+    /**
+     * Create the frame.
+     */
+    private MainGui(GameManager controller) {
+        this.controller = controller;
+        this.player = null;
+
+        setResizable(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(0, 0, 350, 500);
+        setLocationRelativeTo(null);
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        GridBagLayout gbl_contentPane = new GridBagLayout();
+        gbl_contentPane.columnWidths = new int[] { 350 };
+        gbl_contentPane.rowHeights = new int[] { 100, 200, 50, 10 };
+        gbl_contentPane.columnWeights = new double[] {};
+        gbl_contentPane.rowWeights = new double[] {};
+        contentPane.setLayout(gbl_contentPane);
+
+        upperPanel = new JPanel();
+        upperPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
+        GridBagConstraints gbc_upperPanel = new GridBagConstraints();
+        gbc_upperPanel.anchor = GridBagConstraints.NORTH;
+        gbc_upperPanel.fill = GridBagConstraints.BOTH;
+        gbc_upperPanel.insets = new Insets(0, 0, 5, 0);
+        gbc_upperPanel.gridx = 0;
+        gbc_upperPanel.gridy = 0;
+        contentPane.add(upperPanel, gbc_upperPanel);
+        upperPanel.setLayout(new BorderLayout(0, 0));
+
+        lowerPanel = new JPanel();
+        lowerPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
+        GridBagConstraints gbc_lowerPanel = new GridBagConstraints();
+        gbc_lowerPanel.insets = new Insets(0, 0, 5, 0);
+        gbc_lowerPanel.fill = GridBagConstraints.BOTH;
+        gbc_lowerPanel.gridx = 0;
+        gbc_lowerPanel.gridy = 1;
+        contentPane.add(lowerPanel, gbc_lowerPanel);
+        lowerPanel.setLayout(new BorderLayout(0, 0));
+
+        infoPanel = new JPanel();
+        infoPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
+        GridBagConstraints gbc_infoPanel = new GridBagConstraints();
+        gbc_infoPanel.insets = new Insets(0, 0, 5, 0);
+        gbc_infoPanel.fill = GridBagConstraints.BOTH;
+        gbc_infoPanel.gridx = 0;
+        gbc_infoPanel.gridy = 2;
+        contentPane.add(infoPanel, gbc_infoPanel);
+        infoPanel.setLayout(new BorderLayout(0, 0));
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setPreferredSize(new Dimension(350, 50));
+        scrollPane.setAutoscrolls(true);
+        infoPanel.add(scrollPane, BorderLayout.CENTER);
+
+        infoTextArea = new STextArea();
+        infoPane = getStandardTextPane(infoTextArea);
+        scrollPane.setViewportView(infoPane);
+
+        textField = new JTextField();
+        textField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    enterCommand(textField.getText());
+                }
+            }
+        });
+        GridBagConstraints gbc_textField = new GridBagConstraints();
+        gbc_textField.fill = GridBagConstraints.BOTH;
+        gbc_textField.gridx = 0;
+        gbc_textField.gridy = 3;
+        contentPane.add(textField, gbc_textField);
+    }
+
+    private void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    public static MainGui getInstance(GameManager gameManager, Player player) {
+        if (guiInstance == null) {
+            guiInstance = new MainGui(gameManager);
+        }
+        guiInstance.setPlayer(player);
+        return guiInstance;
+    }
+
+    private void setLowerPanel(STextArea textArea) {
+        JTextPane textPane = getStandardTextPane(textArea);
+        setLowerPanel(textPane);
+    }
+
+    private void setUpperPanel(STextArea textArea) {
+        JTextPane textPane = getStandardTextPane(textArea);
+        setUpperPanel(textPane);
+    }
+
+    private JTextPane getStandardTextPane(STextArea textArea) {
+        JTextPane textPane = new JTextPane(textArea);
+        textPane.setEditable(false);
+        textPane.setBackground(Color.BLACK);
+        return textPane;
+    }
+
+    private void setLowerPanel(Component panel) {
+        lowerPanel.removeAll();
+        lowerPanel.add(panel, BorderLayout.CENTER);
+        redraw();
+    }
+
+    private void setUpperPanel(Component panel) {
+        upperPanel.removeAll();
+        upperPanel.add(panel, BorderLayout.CENTER);
+        redraw();
+    }
+
+    private void redraw() {
+        pack();
+        textField.requestFocusInWindow();
+    }
+
+    private void addTextToInfoPane(String text) {
+        infoTextArea.preAppendLine(text);
+        infoPane.setCaretPosition(0);
+    }
+
+    private void enterCommand(String text) {
+        textField.setText("");
+        controller.enterCommand(text, player);
+    }
+
+    public void displayLoss() {
+        setUpperPanel(TextGuiGenerator.getLoseUpperPanel());
+        setLowerPanel(TextGuiGenerator.getLoseLowerPanel());
+    }
+
+    public void displayError(ErrorEnum error) {
+        addTextToInfoPane(error.getCode());
+    }
+
+    public void displayScanSystem(Player player, String connections, List<Player> players) {
+        setLowerPanel(TextGuiGenerator.getScanSystemLowerPanel(player.getCurrentStar(), connections, players));
+    }
+
+    public void displayScanPlayer(Player player) {
+        setUpperPanel(TextGuiGenerator.getScanPlayerUpperPanel(player));
+        setLowerPanel(TextGuiGenerator.getScanPlayerLowerPanel(player));
+    }
+
+    public void displayStatus(Player player) {
+        setUpperPanel(TextGuiGenerator.getStatusUpperPanel(player));
+        setLowerPanel(TextGuiGenerator.getStatusLowerPanel(player));
+    }
+
+    public void displayDockCargo(Player player) {
+        setUpperPanel(TextGuiGenerator.getDockUpperPanel(player.getCurrentStar().getStation()));
+        setLowerPanel(TextGuiGenerator.getDockLowerPanel(player));
+    }
+
+    public void displayScore(List<Player> players) {
+        setLowerPanel(TextGuiGenerator.getScoreLowerPanel(players));
+    }
+
+    public void displayHelp(PrimaryCommand secondCommand) {
+        setUpperPanel(TextGuiGenerator.getHelpUpperPanel());
+        setLowerPanel(TextGuiGenerator.getHelpLowerPanel(secondCommand));
+    }
+
+    public void displayBattle(Player user, Player other) {
+        setUpperPanel(TextGuiGenerator.getScanPlayerUpperPanel(other));
+        setLowerPanel(TextGuiGenerator.getStatusUpperPanel(user));
+    }
+
+    public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {
+        FRLayout<Star, String> layout = new FRLayout<Star, String>(graph);
+        layout.setMaxIterations(10000);
+        layout.setRepulsionMultiplier(1.5);
+        VisualizationViewer<Star, String> vs =
+                new VisualizationViewer<Star, String>(layout, new Dimension(300, 200));
+        vs.setPreferredSize(new Dimension(320, 250));
+
+        Transformer<Star, Paint> vertexPaint = new Transformer<Star, Paint>() {
+            public Paint transform(Star star) {
+                if (star.equals(currentStar)) {
+                    return Color.WHITE;
+                } else if (star.equals(previousStar)) {
+                    return Color.LIGHT_GRAY;
+                } else {
+                    return Colors.paleGreen;
+                }
+            }
+        };
+
+        final Shape shape = new Rectangle(35, 20);
+        Transformer<Star, Shape> vertexShapeTransformer = new Transformer<Star, Shape>() {
+            public Shape transform(Star s) {
+                return shape;
+            }
+        };
+
+        vs.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+        vs.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<Star>());
+        vs.getRenderContext().setVertexShapeTransformer(vertexShapeTransformer);
+        vs.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
+
+        setUpperPanel(vs);
+    }
 }
