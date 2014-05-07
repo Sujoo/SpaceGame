@@ -15,7 +15,7 @@ public class STextArea extends DefaultStyledDocument {
 	private static final long serialVersionUID = -3288664979018625961L;
 	
 	private SimpleAttributeSet attr;
-	private final Color defaultColor = Color.WHITE;
+	private final Color defaultColor = new Color(255,255,255);
 
 	public STextArea() {
 		super();

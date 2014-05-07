@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.manager;
+package sujoo.games.spacegame.gui;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -13,9 +13,8 @@ import sujoo.games.spacegame.datatype.planet.Planet;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.Ship;
-import sujoo.games.spacegame.gui.STextArea;
 
-public class TextManager {
+public class TextGuiGenerator {
 	private static final String nl = System.lineSeparator();
 	private static final String starTag =        "System : ";
 	private static final String connectionsTag = "Exits  : ";
@@ -46,14 +45,14 @@ public class TextManager {
 	public static STextArea getScanSystemLowerPanel(Star star, String connectionString, List<Player> players) {		
 	    STextArea textArea = new STextArea();
 
-	    textArea.append(starTag, Color.YELLOW);
-	    textArea.appendLine(String.valueOf(star.getId()), Color.WHITE);
-	    textArea.append(connectionsTag, Color.YELLOW);
-	    textArea.appendLine(connectionString, Color.GREEN);
-	    textArea.append(planetsTag, Color.WHITE);
-	    textArea.appendLine(getPlanetInSystemString(star), Color.WHITE);
-	    textArea.append(playersTag, Color.BLUE);
-	    textArea.append(getPlayerNamesString(players), Color.BLUE);
+	    textArea.append(starTag, Colors.gold);
+	    textArea.appendLine(String.valueOf(star.getId()));
+	    textArea.append(connectionsTag, Colors.gold);
+	    textArea.appendLine(connectionString, Colors.paleGreen);
+	    textArea.append(planetsTag);
+	    textArea.appendLine(getPlanetInSystemString(star));
+	    textArea.append(playersTag, Colors.deepSkyBlue);
+	    textArea.append(getPlayerNamesString(players), Colors.deepSkyBlue);
 	    
 	    return textArea;
 	}
@@ -165,22 +164,22 @@ public class TextManager {
 	}
 	
 	private static void includeCreditsText(STextArea textArea, Wallet wallet) {
-		textArea.appendLine(creditsTag + wallet.getCredits(), Color.YELLOW);
+		textArea.appendLine(creditsTag + wallet.getCredits(), Colors.gold);
 	}
 	
 	private static void includeCargoCapacityText(STextArea textArea, int spaceUsage, int totalSize) {
 		textArea.append(cargoSpaceTag);
-		includeCapacityText(textArea, spaceUsage, totalSize, new Color[]{Color.GREEN,Color.ORANGE,Color.RED});
+		includeCapacityText(textArea, spaceUsage, totalSize, new Color[]{Colors.forestGreen,Colors.orange,Colors.crimson});
 	}
 	
 	private static void includeShieldCapacityText(STextArea textArea, int currentShields, int maxShields) {
 		textArea.append(shieldTag);
-		includeCapacityText(textArea, currentShields, maxShields, new Color[]{Color.RED,Color.ORANGE,Color.GREEN});
+		includeCapacityText(textArea, currentShields, maxShields, new Color[]{Colors.crimson,Colors.orange,Colors.forestGreen});
 	}
 	
 	private static void includeHullCapacityText(STextArea textArea, int currentHull, int maxHull) {
 		textArea.append(hullTag);
-		includeCapacityText(textArea, currentHull, maxHull, new Color[]{Color.RED,Color.ORANGE,Color.GREEN});
+		includeCapacityText(textArea, currentHull, maxHull, new Color[]{Colors.crimson,Colors.orange,Colors.forestGreen});
 	}
 	
 	private static void includeCapacityText(STextArea textArea, int usage, int max, Color[] colors) {

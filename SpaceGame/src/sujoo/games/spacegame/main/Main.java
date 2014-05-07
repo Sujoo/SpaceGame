@@ -1,4 +1,4 @@
-package sujoo.games.spacegame;
+package sujoo.games.spacegame.main;
 
 import sujoo.games.spacegame.manager.GameManager;
 

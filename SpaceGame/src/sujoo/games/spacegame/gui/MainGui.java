@@ -19,7 +19,6 @@ import sujoo.games.spacegame.datatype.command.PrimaryCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.manager.GameManager;
-import sujoo.games.spacegame.manager.TextManager;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -185,31 +184,31 @@ public class MainGui extends JFrame {
 	}
 	
 	public void displayScanSystem(Player player, String connections, List<Player> players) {
-		setLowerPanel(TextManager.getScanSystemLowerPanel(player.getCurrentStar(), connections, players));
+		setLowerPanel(TextGuiGenerator.getScanSystemLowerPanel(player.getCurrentStar(), connections, players));
 	}
 	
 	public void displayScanPlayer(Player player) {
-		setUpperPanel(TextManager.getScanPlayerUpperPanel(player));
-		setLowerPanel(TextManager.getScanPlayerLowerPanel(player));
+		setUpperPanel(TextGuiGenerator.getScanPlayerUpperPanel(player));
+		setLowerPanel(TextGuiGenerator.getScanPlayerLowerPanel(player));
 	}
 	
 	public void displayStatus(Player player) {
-		setUpperPanel(TextManager.getStatusUpperPanel(player));
-		setLowerPanel(TextManager.getStatusLowerPanel(player));
+		setUpperPanel(TextGuiGenerator.getStatusUpperPanel(player));
+		setLowerPanel(TextGuiGenerator.getStatusLowerPanel(player));
 	}
 	
 	public void displayDockCargo(Player player) {
-		setUpperPanel(TextManager.getDockUpperPanel(player.getCurrentStar().getStation()));
-		setLowerPanel(TextManager.getDockLowerPanel(player));
+		setUpperPanel(TextGuiGenerator.getDockUpperPanel(player.getCurrentStar().getStation()));
+		setLowerPanel(TextGuiGenerator.getDockLowerPanel(player));
 	}
 	
 	public void displayScore(List<Player> players) {
-		setLowerPanel(TextManager.getScoreLowerPanel(players));
+		setLowerPanel(TextGuiGenerator.getScoreLowerPanel(players));
 	}
 	
 	public void displayHelp(PrimaryCommand secondCommand) {
-		setUpperPanel(TextManager.getHelpUpperPanel());
-		setLowerPanel(TextManager.getHelpLowerPanel(secondCommand));
+		setUpperPanel(TextGuiGenerator.getHelpUpperPanel());
+		setLowerPanel(TextGuiGenerator.getHelpLowerPanel(secondCommand));
 	}
 	
 	public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {
@@ -227,7 +226,7 @@ public class MainGui extends JFrame {
 				} else if (star.equals(previousStar)) {
 					return Color.LIGHT_GRAY;
 				} else {
-					return Color.GREEN;
+					return Colors.paleGreen;
 				}
 			}
 		};
