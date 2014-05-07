@@ -11,6 +11,7 @@ import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.command.PrimaryCommand;
 import sujoo.games.spacegame.datatype.command.TransactionSubCommand;
 import sujoo.games.spacegame.datatype.general.Star;
+import sujoo.games.spacegame.datatype.player.AIPlayer;
 import sujoo.games.spacegame.datatype.player.HumanPlayer;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
@@ -20,7 +21,7 @@ import sujoo.games.spacegame.gui.ErrorEnum;
 import sujoo.games.spacegame.gui.MainGui;
 
 public class GameManager {
-	private final int totalStarSystems = 10;
+	private final int totalStarSystems = 2;
 	private final int maximumConnections = 4;
 	private final int minStarId = 1000;
 	private final int numberOfAIPlayers = 5;
@@ -28,48 +29,98 @@ public class GameManager {
 	
 	private final int turnsUntilStationRefreshBase = 50;
 	private final int turnsUntilModifier = totalStarSystems / numberOfAIPlayers;
-	private final int turnsUntilStationRefresh = turnsUntilStationRefreshBase * turnsUntilModifier;
+	private final int turnsUntilStationRefresh = turnsUntilStationRefreshBase * turnsUntilModifier + 1;
 	
 	private StarSystemManager starSystemManager;
-	private PlayerManagerAI playerManagerAI;
+	private BattleManager battleManager;
 	private MainGui gui;
 	
+	private List<Player> allPlayers;
+	private List<AIPlayer> aiPlayers;
 	private int turnCounter;
-	private List<Player> players;
+	
+	private boolean youAreDead = false;
 	
 	public GameManager() {
-		starSystemManager = new StarSystemManager(minStarId, totalStarSystems, maximumConnections);
-		playerManagerAI = new PlayerManagerAI(numberOfAIPlayers, starSystemManager);
+		initializeGame();
+	}
+	
+	private void initializeGame() {
+		starSystemManager = initializeGalaxy();
+		aiPlayers = initializeAI();
 		
-		Player humanPlayer = new HumanPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, "You");
+		Player humanPlayer = initializeHumanPlayer();
 		humanPlayer.setNewCurrentStar(starSystemManager.getRandomStarSystem());
 		
-		players = Lists.newArrayList();
-		players.add(humanPlayer);
-		players.addAll(playerManagerAI.getAIPlayers());
+		allPlayers = Lists.newArrayList();
+		allPlayers.add(humanPlayer);
+		allPlayers.addAll(aiPlayers);
 		
 		gui = new MainGui(this, humanPlayer);
+		battleManager = new BattleManager(gui, this);
 		gui.setVisible(true);
 		turnCounter = 0;
+	}
+	
+	private StarSystemManager initializeGalaxy() {
+		return new StarSystemManager(minStarId, totalStarSystems, maximumConnections);
+	}
+	
+	private List<AIPlayer> initializeAI() {
+		return PlayerManagerAI.createAIPlayers(numberOfAIPlayers, starSystemManager);
+	}
+	
+	private Player initializeHumanPlayer() {
+		return new HumanPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, "You");
+	}
+	
+	private void rebootGame() {
+		starSystemManager = initializeGalaxy();
+		aiPlayers = initializeAI();
+		
+		Player humanPlayer = initializeHumanPlayer();
+		humanPlayer.setNewCurrentStar(starSystemManager.getRandomStarSystem());
+		gui.setPlayer(humanPlayer);
+		turnCounter = 0;
+		youAreDead = false;
+		play();
 	}
 	
 	//*************************
 	//* Start the game, then wait for gui input
 	//*************************
 	public void play() {
-		scanSystem(players.get(0));
+		scanSystem(allPlayers.get(0));
+	}
+	
+	public void playerKilled(Player player) {
+		if (player instanceof AIPlayer) {
+			aiPlayers.remove(player);
+			allPlayers.remove(player);
+		} else {
+			gui.displayLoss();
+			youAreDead = true;
+		}
 	}
 	
 	//*************************
 	//* Entry point for command input
 	//*************************
 	public void enterCommand(String command, Player player) {
+		if (youAreDead) {
+			if (command.equalsIgnoreCase("y") || command.equalsIgnoreCase("yes")) {
+				rebootGame();
+			}
+		} else {
 		String[] commandString = command.split(" ");
-		PrimaryCommand firstCommand = PrimaryCommand.toCommand(commandString[0]);
-		if (firstCommand != null) {
+		if (PrimaryCommand.isPrimaryCommand(commandString[0]) && !battleManager.isInBattle()) {
+			PrimaryCommand firstCommand = PrimaryCommand.toCommand(commandString[0]);
 			switch (firstCommand) {
 			case JUMP:
 				jump(commandString, player);
+				break;
+			case ATTACK:
+				attack(commandString, player);
 				break;
 			case SCAN:
 				scan(commandString, player);
@@ -102,8 +153,11 @@ public class GameManager {
 				help(commandString);
 				break;
 			}
+		} else if (battleManager.isInBattle()) {
+			battleManager.enterCommand(commandString);
 		} else {
 			help(commandString);
+		}
 		}
 	}
 	
@@ -122,13 +176,44 @@ public class GameManager {
 	}
 	
 	//*************************
+	//* Attack Command Logic
+	//*************************
+	private void attack(String[] commandString, Player player) {
+		if (commandString.length > 1) {
+			Player otherPlayer = getAIPlayer(commandString[1]);
+			if (otherPlayer != null) {
+				if (player.getCurrentStar().equals(otherPlayer.getCurrentStar())) {
+					battleManager.startBattle(player, otherPlayer);
+				} else {
+					gui.displayError(ErrorEnum.PLAYER_NOT_IN_SYSTEM);
+				}
+			} else {
+				gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
+			}
+		} else {
+			// must specify player
+		}
+	}
+	
+	private Player getAIPlayer(String name) {
+		Player aiPlayer = null;
+		for (Player player : aiPlayers) {
+			if (player.getName().equalsIgnoreCase(name)) {
+				aiPlayer = player;
+				break;
+			}
+		}
+		return aiPlayer;
+	}
+	
+	//*************************
 	//* Scan Command Logic
 	//*************************
-	private void scan(String[] stringCommand, Player player) {
-		if (stringCommand.length == 1) {
+	private void scan(String[] commandString, Player player) {
+		if (commandString.length == 1) {
 			scanSystem(player);
-		} else if (stringCommand.length > 1) {
-			Player otherPlayer = playerManagerAI.getAIPlayer(stringCommand[1]);
+		} else if (commandString.length > 1) {
+			Player otherPlayer = getAIPlayer(commandString[1]);
 			if (otherPlayer != null) {
 				if (player.getCurrentStar().equals(otherPlayer.getCurrentStar())) {
 					scanPlayer(otherPlayer);
@@ -147,7 +232,17 @@ public class GameManager {
 	}
 	
 	private void displayScanSystem(Player player) {
-		gui.displayScanSystem(player, starSystemManager.getNeighborsString(player.getCurrentStar()), playerManagerAI.getAIPlayersInStarSystem(player.getCurrentStar()));
+		gui.displayScanSystem(player, starSystemManager.getNeighborsString(player.getCurrentStar()), getAIPlayersInStarSystem(player.getCurrentStar()));
+	}
+	
+	private List<Player> getAIPlayersInStarSystem(Star star) {
+		List<Player> resultList = Lists.newArrayList();
+		for (Player player : aiPlayers) {
+			if (player.getCurrentStar().equals(star)) {
+				resultList.add(player);
+			}
+		}
+		return resultList;
 	}
 	
 	private void scanPlayer(Player player) {
@@ -256,7 +351,7 @@ public class GameManager {
 	//* Score Command Logic
 	//*************************
 	private void score() {
-		gui.displayScore(players);
+		gui.displayScore(allPlayers);
 	}
 	
 	//*************************
@@ -293,7 +388,7 @@ public class GameManager {
 	//* End turn timing and logic
 	//*************************
 	private void advanceTurn() {
-		playerManagerAI.performAIPlayerTurns();
+		PlayerManagerAI.performAIPlayerTurns(aiPlayers, starSystemManager);
 		turnCounter++;
 		if (turnCounter % turnsUntilStationRefresh == 0) {
 			starSystemManager.refreshStationCargo();

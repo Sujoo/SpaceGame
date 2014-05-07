@@ -135,6 +135,10 @@ public class MainGui extends JFrame {
 		contentPane.add(textField, gbc_textField);
 	}
 	
+	public void setPlayer(Player player) {
+		this.player = player;
+	}
+	
 	private void setLowerPanel(STextArea textArea) {
 		JTextPane textPane = getStandardTextPane(textArea);
 		setLowerPanel(textPane);
@@ -179,6 +183,11 @@ public class MainGui extends JFrame {
 		controller.enterCommand(text, player);
 	}
 	
+	public void displayLoss() {
+		setUpperPanel(TextGuiGenerator.getLoseUpperPanel());
+		setLowerPanel(TextGuiGenerator.getLoseLowerPanel());
+	}
+	
 	public void displayError(ErrorEnum error) {
 		addTextToInfoPane(error.getCode());
 	}
@@ -209,6 +218,11 @@ public class MainGui extends JFrame {
 	public void displayHelp(PrimaryCommand secondCommand) {
 		setUpperPanel(TextGuiGenerator.getHelpUpperPanel());
 		setLowerPanel(TextGuiGenerator.getHelpLowerPanel(secondCommand));
+	}
+	
+	public void displayBattle(Player user, Player other) {
+		setUpperPanel(TextGuiGenerator.getScanPlayerUpperPanel(other));
+		setLowerPanel(TextGuiGenerator.getStatusUpperPanel(user));
 	}
 	
 	public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {

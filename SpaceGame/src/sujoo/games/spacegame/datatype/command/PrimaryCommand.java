@@ -54,6 +54,14 @@ public enum PrimaryCommand {
         return result;
     }
     
+    public static boolean isPrimaryCommand(String code) {
+    	if (toCommand(code) != null) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+    
     public static List<PrimaryCommand> getList() {
     	return Lists.newArrayList(PrimaryCommand.values());
     }

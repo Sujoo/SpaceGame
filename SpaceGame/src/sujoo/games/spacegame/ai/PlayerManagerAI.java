@@ -10,40 +10,36 @@ import com.google.common.collect.Lists;
 
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
+import sujoo.games.spacegame.datatype.command.AttackSubCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.player.AIPlayer;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.ShipFactory;
 import sujoo.games.spacegame.datatype.ship.ShipType;
+import sujoo.games.spacegame.manager.BattleManager;
 import sujoo.games.spacegame.manager.StarSystemManager;
 import sujoo.games.spacegame.manager.TransactionManager;
 
 public class PlayerManagerAI {
-	private final int initCredits = 1000;
+	private static final Random random = new Random();
+	private static final int initCredits = 1000;
 	
-	private List<AIPlayer> aiPlayers;
-	private StarSystemManager starSystemManager;
-	private Random random;
+	//private List<AIPlayer> aiPlayers;
+	//private StarSystemManager starSystemManager;
 	
-	public PlayerManagerAI(int numberOfAI, StarSystemManager starSystemManager) {
-		aiPlayers = Lists.newArrayList();
-		this.starSystemManager = starSystemManager;
-		random = new Random();
-		
-		createAIPlayers(numberOfAI);
-	}
-	
-	private void createAIPlayers(int numberOfAI) {
+	public static List<AIPlayer> createAIPlayers(int numberOfAI, StarSystemManager starSystemManager) {
+		List<AIPlayer> aiPlayers = Lists.newArrayList();
 		List<String> traderNames = getNames("resources\\TraderNames.txt");
 		for (int i = 0; i < numberOfAI; i++) {
 			AIPlayer p = new AIPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, traderNames.get(i));
 			p.setNewCurrentStar(starSystemManager.getRandomStarSystem());
 			aiPlayers.add(p);
 		}
+		return aiPlayers;
 	}
 	
-	private List<String> getNames(String fileName) {
+	private static List<String> getNames(String fileName) {
 		List<String> names = Lists.newArrayList();
 		
 		try {
@@ -60,20 +56,20 @@ public class PlayerManagerAI {
 		return names;
 	}
 	
-	public void performAIPlayerTurns() {
+	public static void performAIPlayerTurns(List<AIPlayer> aiPlayers, StarSystemManager starSystemManager) {
 		for (AIPlayer player : aiPlayers) {
 			trade(player);
-			jumpToNewSystem(player);
+			jumpToNewSystem(player, starSystemManager);
 			player.clearRecentlyPurchased();
 		}
 	}
 	
-	private void trade(AIPlayer player) {
+	private static void trade(AIPlayer player) {
 		sellToStation(player);
 		buyFromStation(player);
 	}
 	
-	private void buyFromStation(AIPlayer player) {
+	private static void buyFromStation(AIPlayer player) {
 		Station station = player.getCurrentStar().getStation();
 		int credits = player.getWallet().getCredits();
 		CargoHold hold = player.getCargoHold();
@@ -104,7 +100,7 @@ public class PlayerManagerAI {
 		}
 	}
 	
-	private void sellToStation(AIPlayer player) {
+	private static void sellToStation(AIPlayer player) {
 		Station station = player.getCurrentStar().getStation();
 		CargoHold hold = player.getCargoHold();
 		
@@ -135,37 +131,20 @@ public class PlayerManagerAI {
 		}
 	}
 	
-	private void jumpToNewSystem(AIPlayer player) {
+	private static void jumpToNewSystem(AIPlayer player, StarSystemManager starSystemManager) {
 		List<Star> neighbors = starSystemManager.getNeighbors(player.getCurrentStar());
 		Star nextJump;
 		nextJump = neighbors.get(random.nextInt(neighbors.size()));
 		player.setNewCurrentStar(nextJump);
 	}
 	
-	public List<Player> getAIPlayersInStarSystem(Star star) {
-		List<Player> resultList = Lists.newArrayList();
-		for (Player player : aiPlayers) {
-			if (player.getCurrentStar().equals(star)) {
-				resultList.add(player);
-			}
+	public static void attackPlayer(AIPlayer aiPlayer, Player player, BattleManager battleManager) {
+		AttackSubCommand location;
+		if (player.getShip().isShieldUp()) {
+			location = AttackSubCommand.HULL;
+		} else {
+			location = AttackSubCommand.getList().get(random.nextInt(AttackSubCommand.getList().size()));
 		}
-		return resultList;
-	}
-	
-	public List<Player> getAIPlayers() {
-		List<Player> result = Lists.newArrayList();
-		result.addAll(aiPlayers);
-		return result;
-	}
-	
-	public Player getAIPlayer(String name) {
-		Player aiPlayer = null;
-		for (Player player : aiPlayers) {
-			if (player.getName().equalsIgnoreCase(name)) {
-				aiPlayer = player;
-				break;
-			}
-		}
-		return aiPlayer;
+		battleManager.inflictDamage(location, aiPlayer, player);
 	}
 }

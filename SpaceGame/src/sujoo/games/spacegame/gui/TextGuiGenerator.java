@@ -30,6 +30,20 @@ public class TextGuiGenerator {
 	private static final String dust = "Dust and Echoes";
 	
 	//Public Methods
+	public static STextArea getLoseUpperPanel() {
+		STextArea textArea = new STextArea();
+		textArea.appendLine("You...");
+		textArea.appendLine("have...");
+		textArea.appendLine("DIED!");
+		return textArea;
+	}
+	
+	public static STextArea getLoseLowerPanel() {
+		STextArea textArea = new STextArea();
+		textArea.appendLine("Play Again?");
+		return textArea;
+	}
+	
 	public static STextArea getScanPlayerUpperPanel(Player player) {
 		STextArea textArea = new STextArea();
 		includeShipText(textArea, player);
