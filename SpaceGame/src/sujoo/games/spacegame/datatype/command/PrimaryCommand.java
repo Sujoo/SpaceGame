@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 
 public enum PrimaryCommand {
 	JUMP("Jump", new String[]{"Travel between systems","Usage: jump <system>","Example: jump 1000"}),
+	ATTACK("Attack", new String[]{"Attack a player or station","Usage: attack <player>","Example: attack sujoo"}),
 	SCAN("Scan", new String[]{"Display system information", "Usage: scan", "", "Display player information", "Usage: scan <player name>", "Example: scan sujoo"}),
 	STATUS("Status", new String[]{"Display your information", "Usage: status"}),
 	DOCK("Dock", new String[]{"Display station information","Usage: dock"}),
