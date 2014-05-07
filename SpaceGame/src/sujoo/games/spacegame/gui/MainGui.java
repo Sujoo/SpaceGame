@@ -38,8 +38,6 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
-import javax.swing.JScrollPane;
-
 public class MainGui extends JFrame {
 
     /**
@@ -52,9 +50,9 @@ public class MainGui extends JFrame {
     private JPanel upperPanel;
     private JPanel lowerPanel;
     private JPanel infoPanel;
-    private STextArea infoTextArea;
-    private JTextPane infoPane;
     private JTextField textField;
+    private ScrollLog errorLog;
+    private ScrollLog battleLog;
 
     private GameManager controller;
     private Player player;
@@ -66,6 +64,9 @@ public class MainGui extends JFrame {
         this.controller = controller;
         this.player = null;
 
+        errorLog = new ScrollLog(new Dimension(350, 25));
+        battleLog = new ScrollLog(new Dimension(350, 75));
+
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0, 0, 350, 500);
@@ -75,7 +76,7 @@ public class MainGui extends JFrame {
         setContentPane(contentPane);
         GridBagLayout gbl_contentPane = new GridBagLayout();
         gbl_contentPane.columnWidths = new int[] { 350 };
-        gbl_contentPane.rowHeights = new int[] { 100, 200, 50, 10 };
+        gbl_contentPane.rowHeights = new int[] { 100, 100, 25, 10 };
         gbl_contentPane.columnWeights = new double[] {};
         gbl_contentPane.rowWeights = new double[] {};
         contentPane.setLayout(gbl_contentPane);
@@ -103,6 +104,7 @@ public class MainGui extends JFrame {
 
         infoPanel = new JPanel();
         infoPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
+        infoPanel.setBackground(Colors.textBackground);
         GridBagConstraints gbc_infoPanel = new GridBagConstraints();
         gbc_infoPanel.insets = new Insets(0, 0, 5, 0);
         gbc_infoPanel.fill = GridBagConstraints.BOTH;
@@ -111,16 +113,9 @@ public class MainGui extends JFrame {
         contentPane.add(infoPanel, gbc_infoPanel);
         infoPanel.setLayout(new BorderLayout(0, 0));
 
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setPreferredSize(new Dimension(350, 50));
-        scrollPane.setAutoscrolls(true);
-        infoPanel.add(scrollPane, BorderLayout.CENTER);
-
-        infoTextArea = new STextArea();
-        infoPane = getStandardTextPane(infoTextArea);
-        scrollPane.setViewportView(infoPane);
-
         textField = new JTextField();
+        textField.setBackground(Colors.textBackground);
+        textField.setForeground(Colors.defaultTextColor);
         textField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -136,55 +131,12 @@ public class MainGui extends JFrame {
         contentPane.add(textField, gbc_textField);
     }
 
-    private void setPlayer(Player player) {
-        this.player = player;
-    }
-
     public static MainGui getInstance(GameManager gameManager, Player player) {
         if (guiInstance == null) {
             guiInstance = new MainGui(gameManager);
         }
         guiInstance.setPlayer(player);
         return guiInstance;
-    }
-
-    private void setLowerPanel(STextArea textArea) {
-        JTextPane textPane = getStandardTextPane(textArea);
-        setLowerPanel(textPane);
-    }
-
-    private void setUpperPanel(STextArea textArea) {
-        JTextPane textPane = getStandardTextPane(textArea);
-        setUpperPanel(textPane);
-    }
-
-    private JTextPane getStandardTextPane(STextArea textArea) {
-        JTextPane textPane = new JTextPane(textArea);
-        textPane.setEditable(false);
-        textPane.setBackground(Color.BLACK);
-        return textPane;
-    }
-
-    private void setLowerPanel(Component panel) {
-        lowerPanel.removeAll();
-        lowerPanel.add(panel, BorderLayout.CENTER);
-        redraw();
-    }
-
-    private void setUpperPanel(Component panel) {
-        upperPanel.removeAll();
-        upperPanel.add(panel, BorderLayout.CENTER);
-        redraw();
-    }
-
-    private void redraw() {
-        pack();
-        textField.requestFocusInWindow();
-    }
-
-    private void addTextToInfoPane(String text) {
-        infoTextArea.preAppendLine(text);
-        infoPane.setCaretPosition(0);
     }
 
     private void enterCommand(String text) {
@@ -198,7 +150,11 @@ public class MainGui extends JFrame {
     }
 
     public void displayError(ErrorEnum error) {
-        addTextToInfoPane(error.getCode());
+        useErrorLog(error.getCode());
+    }
+    
+    public void displayBattleFeedback(BattleFeedbackEnum feedback) {
+        useBattleLog(feedback.getCode());
     }
 
     public void displayScanSystem(Player player, String connections, List<Player> players) {
@@ -245,7 +201,7 @@ public class MainGui extends JFrame {
         Transformer<Star, Paint> vertexPaint = new Transformer<Star, Paint>() {
             public Paint transform(Star star) {
                 if (star.equals(currentStar)) {
-                    return Color.WHITE;
+                    return Colors.defaultTextColor;
                 } else if (star.equals(previousStar)) {
                     return Color.LIGHT_GRAY;
                 } else {
@@ -267,5 +223,57 @@ public class MainGui extends JFrame {
         vs.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
         setUpperPanel(vs);
+    }
+
+    private void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    private void setLowerPanel(STextArea textArea) {
+        JTextPane textPane = getStandardTextPane(textArea);
+        setLowerPanel(textPane);
+    }
+
+    private void setUpperPanel(STextArea textArea) {
+        JTextPane textPane = getStandardTextPane(textArea);
+        setUpperPanel(textPane);
+    }
+
+    private JTextPane getStandardTextPane(STextArea textArea) {
+        JTextPane textPane = new JTextPane(textArea);
+        textPane.setEditable(false);
+        textPane.setBackground(Colors.textBackground);
+        return textPane;
+    }
+
+    private void setLowerPanel(Component panel) {
+        lowerPanel.removeAll();
+        lowerPanel.add(panel, BorderLayout.CENTER);
+        redraw();
+    }
+
+    private void setUpperPanel(Component panel) {
+        upperPanel.removeAll();
+        upperPanel.add(panel, BorderLayout.CENTER);
+        redraw();
+    }
+    
+    private void useErrorLog(String text) {
+        errorLog.addText(text);
+        infoPanel.removeAll();
+        infoPanel.add(errorLog, BorderLayout.CENTER);
+        redraw();
+    }
+    
+    private void useBattleLog(String text) {
+        battleLog.addText(text);
+        infoPanel.removeAll();
+        infoPanel.add(battleLog, BorderLayout.CENTER);
+        redraw();
+    }
+
+    private void redraw() {
+        pack();
+        textField.requestFocusInWindow();
     }
 }

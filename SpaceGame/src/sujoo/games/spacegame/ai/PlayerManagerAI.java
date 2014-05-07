@@ -141,6 +141,7 @@ public class PlayerManagerAI {
     }
 
     public static BattleFeedbackEnum attackPlayer(AIPlayer aiPlayer, Player player) {
+        // THIS WILL CAUSE AN ISSUE AS SOON AS A SHIP DOESN'T HAVE EVERY COMPONENT
         AttackSubCommand location = AttackSubCommand.getList().get(random.nextInt(AttackSubCommand.getList().size()));
 
         return player.getShip().damageComponent(location, aiPlayer.getShip().getCurrentComponentValue(AttackSubCommand.WEAPON));

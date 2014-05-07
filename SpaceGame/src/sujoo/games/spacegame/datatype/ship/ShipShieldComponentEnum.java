@@ -3,25 +3,39 @@ package sujoo.games.spacegame.datatype.ship;
 import sujoo.games.spacegame.datatype.command.AttackSubCommand;
 
 public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
-    BASE_SHIELD(50, 3, 1, 4, AttackSubCommand.SHIELD),
-    ADVANCED_SHIELD(100, 3, 4, 1, AttackSubCommand.SHIELD);
+    BASE_SHIELD(50, 3, 1, AttackSubCommand.SHIELD, 4, 2, 4),
+    ADVANCED_SHIELD(100, 3, 1, AttackSubCommand.SHIELD, 1, 3, 4);
 
     private int absoluteMaxValue;
     private int repairFraction;
     private int toughness;
-    private int rechargeTime;
     private AttackSubCommand location;
 
-    private ShipShieldComponentEnum(int absoluteMaxValue, int repairFraction, int toughness, int rechargeTime, AttackSubCommand location) {
+    private int rechargeTime;
+    private int maxValueToughness;
+    private int restoreFraction;
+
+    private ShipShieldComponentEnum(int absoluteMaxValue, int repairFraction, int toughness, AttackSubCommand location, int rechargeTime,
+            int maxValueToughness, int restoreFraction) {
         this.absoluteMaxValue = absoluteMaxValue;
         this.repairFraction = repairFraction;
         this.toughness = toughness;
-        this.rechargeTime = rechargeTime;
         this.location = location;
+        this.rechargeTime = rechargeTime;
+        this.maxValueToughness = maxValueToughness;
+        this.restoreFraction = restoreFraction;
     }
-    
+
     public int getRechargeTime() {
         return rechargeTime;
+    }
+
+    public int getMaxValueToughness() {
+        return maxValueToughness;
+    }
+    
+    public int getRestoreFraction() {
+        return restoreFraction;
     }
 
     public int getAbsoluteMaxValue() {
@@ -40,4 +54,3 @@ public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
         return location;
     }
 }
-    

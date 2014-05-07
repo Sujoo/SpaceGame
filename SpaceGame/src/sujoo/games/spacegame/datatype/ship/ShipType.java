@@ -5,10 +5,10 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum ShipType {
-    SMALL_TRANS("Small Transport", 100, new ShipComponentEnumIntf[] { ShipComponentEnum.BASE_HULL, ShipComponentEnum.BASE_WEAPON,
-            ShipComponentEnum.BASE_ENGINE, ShipShieldComponentEnum.BASE_SHIELD }),
-    STATION("Station", 50000, new ShipComponentEnumIntf[] { ShipComponentEnum.BASE_HULL, ShipComponentEnum.BASE_WEAPON,
-            ShipComponentEnum.BASE_ENGINE, ShipShieldComponentEnum.BASE_SHIELD });
+    SMALL_TRANS("Small Transport", 100, new ShipComponentEnumIntf[] { ShipShieldComponentEnum.BASE_SHIELD, ShipComponentEnum.BASE_HULL,
+            ShipComponentEnum.BASE_WEAPON, ShipComponentEnum.BASE_ENGINE }),
+    STATION("Station", 50000, new ShipComponentEnumIntf[] { ShipShieldComponentEnum.BASE_SHIELD, ShipComponentEnum.BASE_HULL,
+            ShipComponentEnum.BASE_WEAPON, ShipComponentEnum.BASE_ENGINE });
 
     private String desc;
     private int holdSize;
@@ -27,7 +27,7 @@ public enum ShipType {
     public int getHoldSize() {
         return holdSize;
     }
-    
+
     public List<ShipComponentEnumIntf> getComponents() {
         return Lists.newArrayList(components);
     }

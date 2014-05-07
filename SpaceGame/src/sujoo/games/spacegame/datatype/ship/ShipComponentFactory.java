@@ -5,7 +5,7 @@ import sujoo.games.spacegame.datatype.command.AttackSubCommand;
 public class ShipComponentFactory {
     public static ShipComponent buildShipComponent(AttackSubCommand location, ShipComponentEnumIntf intf) {
         ShipComponent shipComponent = null;
-        switch(location) {
+        switch (location) {
         case SHIELD:
             shipComponent = new ShipShieldComponent((ShipShieldComponentEnum) intf);
             break;

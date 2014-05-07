@@ -3,18 +3,17 @@ package sujoo.games.spacegame.datatype.ship;
 public class ShipComponent {
 
     private int currentValue;
-    private int currentMaxValue;
     private int absoluteMaxValue;
     private int repairFraction;
     private int toughness;
-    
+
     public ShipComponent(ShipComponentEnumIntf shipComponentEnum) {
         absoluteMaxValue = shipComponentEnum.getAbsoluteMaxValue();
         repairFraction = shipComponentEnum.getRepairFraction();
         toughness = shipComponentEnum.getToughness();
         restoreComponent();
     }
-    
+
     public void takeDamage(int damage) {
         damage = damage / toughness;
         if (currentValue - damage >= 0) {
@@ -23,31 +22,38 @@ public class ShipComponent {
             currentValue = 0;
         }
     }
-    
+
     public void repair() {
-        int repair = currentMaxValue / repairFraction;
-        if (currentValue + repair <= currentMaxValue) {
+        int repair = absoluteMaxValue / repairFraction;
+        if (currentValue + repair <= absoluteMaxValue) {
             currentValue += repair;
         } else {
-            currentValue = currentMaxValue;
+            currentValue = absoluteMaxValue;
         }
     }
-    
+
     public void restoreComponent() {
         currentValue = absoluteMaxValue;
-        currentMaxValue = absoluteMaxValue;
     }
 
     public int getCurrentValue() {
         return currentValue;
     }
 
-    public int getCurrentMaxValue() {
-        return currentMaxValue;
+    public void setCurrentValue(int value) {
+        currentValue = value;
     }
 
     public int getAbsoluteMaxValue() {
         return absoluteMaxValue;
+    }
+    
+    public int getCurrentMaxValue() {
+        return absoluteMaxValue;
+    }
+
+    public void setAbsoluteMaxValue(int value) {
+        absoluteMaxValue = value;
     }
 
     public int getRepairFraction() {

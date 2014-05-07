@@ -23,6 +23,14 @@ public abstract class Ship {
         }
     }
 
+    public boolean hasComponent(AttackSubCommand location) {
+        return components.containsKey(location);
+    }
+
+    public ShipComponent getComponent(AttackSubCommand location) {
+        return components.get(location);
+    }
+
     public int getCurrentComponentValue(AttackSubCommand location) {
         int result = 0;
         if (components.containsKey(location)) {
@@ -34,7 +42,7 @@ public abstract class Ship {
     public int getCurrentMaxComponentValue(AttackSubCommand location) {
         int result = 0;
         if (components.containsKey(location)) {
-            result = components.get(location).getCurrentMaxValue();
+            result = components.get(location).getAbsoluteMaxValue();
         }
         return result;
     }
@@ -45,7 +53,7 @@ public abstract class Ship {
         // command so leave feedback null
         if (components.containsKey(location)) {
             // If ship has shields, damage those first
-            if (components.containsKey(AttackSubCommand.SHIELD)) {
+            if (components.containsKey(AttackSubCommand.SHIELD) && location != AttackSubCommand.SHIELD) {
                 ShipComponent shield = components.get(AttackSubCommand.SHIELD);
                 // Can shield absorb all the damage?
                 if (shield.getCurrentValue() >= damage) {
@@ -57,10 +65,10 @@ public abstract class Ship {
                     shield.takeDamage(shield.getCurrentValue());
                 }
             }
-            if (damage > 0) {
-                components.get(location).takeDamage(damage);
-                result = BattleFeedbackEnum.ENGINE_DAMAGE; // CHANGE THIS!!!
-            }
+
+            components.get(location).takeDamage(damage);
+            result = BattleFeedbackEnum.COMPONENT_DAMAGE;
+
             if (isDestoryed()) {
                 result = BattleFeedbackEnum.SHIP_DESTROYED;
             }
@@ -72,11 +80,11 @@ public abstract class Ship {
         BattleFeedbackEnum result = null;
         if (components.containsKey(location)) {
             components.get(location).repair();
-            result = BattleFeedbackEnum.ENGINE_REPAIR; // CHANGE THIS!!!
+            result = BattleFeedbackEnum.COMPONENT_REPAIR;
         }
         return result;
     }
-    
+
     public BattleFeedbackEnum performShieldRecharge(int battleCounter) {
         BattleFeedbackEnum feedback = null;
         if (components.containsKey(AttackSubCommand.SHIELD)) {

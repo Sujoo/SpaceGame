@@ -24,7 +24,7 @@ import sujoo.games.spacegame.gui.ErrorEnum;
 import sujoo.games.spacegame.gui.MainGui;
 
 public class GameManager {
-    private final int totalStarSystems = 2;
+    private final int totalStarSystems = 10;
     private final int maximumConnections = 4;
     private final int minStarId = 1000;
     private final int numberOfAIPlayers = 5;
@@ -208,33 +208,27 @@ public class GameManager {
                 gui.displayLoss();
             } else {
                 gui.displayStatus(attacker);
+                gui.displayBattleFeedback(feedback);
             }
             break;
-        case HULL_HIT:
+        case COMPONENT_DAMAGE:
+            gui.displayBattleFeedback(feedback);
+            break;
+        case COMPONENT_REPAIR:
+            gui.displayBattleFeedback(feedback);
             break;
         case SHIELD_HIT:
-            break;
-        case SHIELD_DAMAGE:
-            break;
-        case WEAPON_DAMAGE:
-            break;
-        case ENGINE_DAMAGE:
-            break;
-        case SHIELD_REPAIR:
-            break;
-        case WEAPON_REPAIR:
-            break;
-        case ENGINE_REPAIR:
-            break;
-        case HULL_REPAIR:
+            gui.displayBattleFeedback(feedback);
             break;
         case SHIELD_RECHARGE:
+            gui.displayBattleFeedback(feedback);
             break;
         case ESCAPE:
             attacker.getShip().restoreAllComponents();
             battlePlayer.getShip().restoreAllComponents();
             endBattle();
             gui.displayStatus(attacker);
+            gui.displayBattleFeedback(feedback);
             break;
         }
 

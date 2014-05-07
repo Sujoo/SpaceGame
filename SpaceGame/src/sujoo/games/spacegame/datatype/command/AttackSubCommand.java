@@ -5,10 +5,10 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum AttackSubCommand {
-    ENGINE("engine", new String[] { "words" }),
-    WEAPON("weapon", new String[] { "words" }),
-    SHIELD("shield", new String[] { "words" }),
-    HULL("hull", new String[] { "words" });
+    ENGINE("Engine", new String[] { "words" }),
+    WEAPON("Weapon", new String[] { "words" }),
+    SHIELD("Shield", new String[] { "words" }),
+    HULL("Hull", new String[] { "words" });
 
     private String code;
     private String[] explanation;

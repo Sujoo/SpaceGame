@@ -1,16 +1,20 @@
 package sujoo.games.spacegame.gui;
 
 public enum BattleFeedbackEnum {
-    SHIP_DESTROYED,
-    HULL_HIT,
-    SHIELD_HIT,
-    SHIELD_DAMAGE,
-    WEAPON_DAMAGE,
-    ENGINE_DAMAGE,
-    SHIELD_REPAIR,
-    WEAPON_REPAIR,
-    ENGINE_REPAIR,
-    HULL_REPAIR,
-    SHIELD_RECHARGE,
-    ESCAPE;
+    COMPONENT_DAMAGE("Component was damaged"),
+    COMPONENT_REPAIR("Component was repaired"),
+    SHIELD_HIT("Player's shield was hit instead"),
+    SHIELD_RECHARGE("Player's shields have recharged"),
+    SHIP_DESTROYED("Player was destroyed"),
+    ESCAPE("Player escaped");
+
+    private String code;
+
+    private BattleFeedbackEnum(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
 }
