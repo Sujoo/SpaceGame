@@ -14,18 +14,20 @@ import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 
 public class StarSystemManager {
 	
-	private final int maximumPlanets = 4;
-	
 	private int minStarId;
 	private int totalStarSystems;
 	private int maximumConnections;
+	private int minPlanets;
+	private int maxPlanets;
 	private UndirectedSparseGraph<Star, String> starGraph;
 	private Random random;
 	
-	public StarSystemManager(int minStarId, int totalStarSystems, int maximumConnections) {
+	public StarSystemManager(int minStarId, int totalStarSystems, int maximumConnections, int minPlanets, int maxPlanets) {
 		this.minStarId = minStarId;
 		this.totalStarSystems = totalStarSystems;
 		this.maximumConnections = maximumConnections;
+		this.minPlanets = minPlanets;
+		this.maxPlanets = maxPlanets;
 		starGraph = new UndirectedSparseGraph<Star, String>();
 		random = new Random();
 		
@@ -63,7 +65,7 @@ public class StarSystemManager {
 	}
 	
 	private void generatePlanets(Star star) {
-		while (star.getPlanets().size() == 0 || (star.getPlanets().size() < maximumPlanets && random.nextBoolean())) {
+		while (star.getPlanets().size() < minPlanets || (star.getPlanets().size() < maxPlanets && random.nextBoolean())) {
 			star.addPlanet(PlanetFactory.buildPlanet(PlanetType.values()[random.nextInt(PlanetType.values().length)]));
 		}
 	}

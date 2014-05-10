@@ -197,6 +197,7 @@ public class MainGui extends JFrame {
         VisualizationViewer<Star, String> vs =
                 new VisualizationViewer<Star, String>(layout, new Dimension(300, 200));
         vs.setPreferredSize(new Dimension(320, 250));
+        vs.setBackground(Colors.textBackground);
 
         Transformer<Star, Paint> vertexPaint = new Transformer<Star, Paint>() {
             public Paint transform(Star star) {
@@ -209,6 +210,18 @@ public class MainGui extends JFrame {
                 }
             }
         };
+        
+        Transformer<Star, Paint> vertexPaint2 = new Transformer<Star, Paint>() {
+            public Paint transform(Star star) {
+                return Color.LIGHT_GRAY;
+            }
+        };
+        
+        Transformer<String, Paint> edgePaint = new Transformer<String, Paint>() {
+            public Paint transform(String star) {
+                return Colors.defaultTextColor;
+            }
+        };
 
         final Shape shape = new Rectangle(35, 20);
         Transformer<Star, Shape> vertexShapeTransformer = new Transformer<Star, Shape>() {
@@ -218,6 +231,8 @@ public class MainGui extends JFrame {
         };
 
         vs.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+        vs.getRenderContext().setVertexDrawPaintTransformer(vertexPaint2);
+        vs.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
         vs.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<Star>());
         vs.getRenderContext().setVertexShapeTransformer(vertexShapeTransformer);
         vs.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);

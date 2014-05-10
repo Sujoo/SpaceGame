@@ -28,6 +28,8 @@ public class GameManager {
     private final int maximumConnections = 4;
     private final int minStarId = 1000;
     private final int numberOfAIPlayers = 5;
+    private final int minPlanets = 1;
+    private final int maxPlanets = 4;
     private final int initCredits = 1000;
 
     private final int turnsUntilStationRefreshBase = 50;
@@ -52,7 +54,7 @@ public class GameManager {
     }
 
     private void initializeGame() {
-        starSystemManager = new StarSystemManager(minStarId, totalStarSystems, maximumConnections);
+        starSystemManager = new StarSystemManager(minStarId, totalStarSystems, maximumConnections, minPlanets, maxPlanets);
         aiPlayers = PlayerManagerAI.createAIPlayers(numberOfAIPlayers, starSystemManager);
 
         Player humanPlayer = new HumanPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, "Sujoo");

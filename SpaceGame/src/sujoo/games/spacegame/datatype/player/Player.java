@@ -101,6 +101,11 @@ public abstract class Player implements Comparable<Player> {
 	
 	@Override
 	public int compareTo(Player other) {
-		return Integer.compare(this.getScore(), other.getScore());
+		int i = Integer.compare(this.getScore(), other.getScore());
+		if (i == 0) {
+		    return other.getName().compareTo(name);
+		} else {
+		 return i;
+		}
 	}
 }
