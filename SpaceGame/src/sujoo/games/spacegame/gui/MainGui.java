@@ -149,8 +149,8 @@ public class MainGui extends JFrame {
         setLowerPanel(TextGuiGenerator.getLoseLowerPanel());
     }
 
-    public void displayError(ErrorEnum error) {
-        useErrorLog(error.getCode());
+    public void displayError(String errorMessage) {
+        useErrorLog(errorMessage);
     }
     
     public void displayBattleFeedback(BattleFeedbackEnum feedback) {

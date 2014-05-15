@@ -20,8 +20,8 @@ import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.ShipFactory;
 import sujoo.games.spacegame.datatype.ship.ShipType;
 import sujoo.games.spacegame.gui.BattleFeedbackEnum;
-import sujoo.games.spacegame.gui.ErrorEnum;
 import sujoo.games.spacegame.gui.MainGui;
+import sujoo.games.spacegame.message.CommandException;
 
 public class GameManager {
     private final int totalStarSystems = 10;
@@ -43,11 +43,10 @@ public class GameManager {
     private List<AIPlayer> aiPlayers;
     private int turnCounter;
 
-    private boolean youAreDead;
+    private GameState state;
 
     private Player battlePlayer;
     private int battleCounter;
-    private boolean inBattle;
 
     public GameManager() {
         initializeGame();
@@ -67,7 +66,7 @@ public class GameManager {
         gui = MainGui.getInstance(this, humanPlayer);
         gui.setVisible(true);
         turnCounter = 0;
-        youAreDead = true;
+        state = GameState.NEWGAME;
         endBattle();
     }
 
@@ -80,7 +79,7 @@ public class GameManager {
     // * Start the game, then wait for gui input
     // *************************
     public void play() {
-        youAreDead = false;
+        state = GameState.DEFAULT;
         scanSystem(allPlayers.get(0));
     }
 
@@ -89,7 +88,7 @@ public class GameManager {
             aiPlayers.remove(player);
             allPlayers.remove(player);
         } else {
-            youAreDead = true;
+            state = GameState.NEWGAME;
         }
     }
 
@@ -97,21 +96,29 @@ public class GameManager {
     // * Entry point for command input
     // *************************
     public void enterCommand(String command, Player player) {
-        if (youAreDead) {
-            if (command.equalsIgnoreCase("y") || command.equalsIgnoreCase("yes")) {
-                rebootGame();
+        try {
+            switch (state) {
+            case NEWGAME:
+                if (command.equalsIgnoreCase("y") || command.equalsIgnoreCase("yes")) {
+                    rebootGame();
+                }
+                break;
+            case BATTLE:
+                executeBattleCommand(command, player);
+                break;
+            case DEFAULT:
+                executePrimaryCommand(command, player);
+                break;
             }
-        } else if (inBattle) {
-            executeBattleCommand(command, player);
-        } else {
-            executePrimaryCommand(command, player);
+        } catch (CommandException e) {
+            gui.displayError(e.getMessage());
         }
     }
 
     // *************************
     // * Battle Commands
     // *************************
-    private void executeBattleCommand(String command, Player player) {
+    private void executeBattleCommand(String command, Player player) throws CommandException {
         String[] commandString = command.split(" ");
         if (AttackCommand.isAttackCommand(commandString[0])) {
             BattleFeedbackEnum feedback = null;
@@ -130,7 +137,7 @@ public class GameManager {
 
             if (feedback != null) {
                 handleBattleFeedback(feedback, player, battlePlayer, false);
-                if (inBattle) {
+                if (state == GameState.BATTLE) {
                     if (battlePlayer instanceof AIPlayer) {
                         handleBattleFeedback(PlayerManagerAI.attackPlayer((AIPlayer) battlePlayer, player), battlePlayer, player, true);
                     } else {
@@ -140,7 +147,7 @@ public class GameManager {
             }
         } else {
             // Get Attack Help
-            gui.displayError(ErrorEnum.INVALID_PRIMARY_COMMAND);
+            throw new CommandException("Invalid primary command: " + commandString[0]);
         }
     }
 
@@ -154,17 +161,17 @@ public class GameManager {
     // *************************
     // * Target Command
     // *************************
-    private BattleFeedbackEnum target(String[] commandString, Player player) {
+    private BattleFeedbackEnum target(String[] commandString, Player player) throws CommandException {
         BattleFeedbackEnum feedback = null;
         if (commandString.length > 1) {
             AttackSubCommand secondCommand = AttackSubCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
                 feedback = battlePlayer.getShip().damageComponent(secondCommand, player.getShip().getCurrentComponentValue(AttackSubCommand.WEAPON));
             } else {
-                gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
+                throw new CommandException("Invalid component name");
             }
         } else {
-            gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
+            throw new CommandException("Not enough input");
         }
         return feedback;
     }
@@ -172,17 +179,17 @@ public class GameManager {
     // *************************
     // * Repair Command
     // *************************
-    private BattleFeedbackEnum repair(String[] commandString, Player player) {
+    private BattleFeedbackEnum repair(String[] commandString, Player player) throws CommandException {
         BattleFeedbackEnum feedback = null;
         if (commandString.length > 1) {
             AttackSubCommand secondCommand = AttackSubCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
                 feedback = player.getShip().repairComponent(secondCommand);
             } else {
-                gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
+                throw new CommandException("Invalid component name");
             }
         } else {
-            gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
+            throw new CommandException("Not enough input");
         }
         return feedback;
     }
@@ -204,8 +211,8 @@ public class GameManager {
         switch (feedback) {
         case SHIP_DESTROYED:
             attacker.getShip().restoreAllComponents();
-            playerKilled(defender);
             endBattle();
+            playerKilled(defender);
             if (aiFeedback) {
                 gui.displayLoss();
             } else {
@@ -234,7 +241,7 @@ public class GameManager {
             break;
         }
 
-        if (inBattle && aiFeedback) {
+        if (state == GameState.BATTLE && aiFeedback) {
             continueBattle(defender);
         }
     }
@@ -242,7 +249,7 @@ public class GameManager {
     // *************************
     // * Primary Commands
     // *************************
-    private void executePrimaryCommand(String command, Player player) {
+    private void executePrimaryCommand(String command, Player player) throws CommandException {
         String[] commandString = command.split(" ");
         if (PrimaryCommand.isPrimaryCommand(commandString[0])) {
             PrimaryCommand firstCommand = PrimaryCommand.toCommand(commandString[0]);
@@ -284,31 +291,31 @@ public class GameManager {
                 help(commandString);
                 break;
             }
-        } else {
-            help(commandString);
         }
     }
 
     // *************************
     // * Jump Command Logic
     // *************************
-    private void jump(String[] commandString, Player player) {
+    private void jump(String[] commandString, Player player) throws CommandException {
         if (commandString.length > 1 && StringUtils.isNumeric(commandString[1])) {
             Star jumpToStar = starSystemManager.getStarSystem(Integer.parseInt(commandString[1]));
             if (jumpToStar != null && starSystemManager.isNeighbor(player.getCurrentStar(), jumpToStar)) {
                 player.setNewCurrentStar(jumpToStar);
                 advanceTurn();
                 scanSystem(player);
+            } else {
+                throw new CommandException("Invalid secondary command: " + commandString[1]);
             }
         } else {
-            gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
+            throw new CommandException("Not enough input");
         }
     }
 
     // *************************
     // * Attack Command Logic
     // *************************
-    private void attack(String[] commandString, Player player) {
+    private void attack(String[] commandString, Player player) throws CommandException {
         if (commandString.length > 1) {
             Player otherPlayer = getAIPlayer(commandString[1]);
             if (otherPlayer != null) {
@@ -316,26 +323,26 @@ public class GameManager {
                     initializeBattle(otherPlayer);
                     displayBattle(player);
                 } else {
-                    gui.displayError(ErrorEnum.PLAYER_NOT_IN_SYSTEM);
+                    throw new CommandException("Player <" + commandString[1] + "> not in system");
                 }
             } else {
-                gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
+                throw new CommandException("Invalid player name: " + commandString[1]);
             }
         } else {
-            gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
+            throw new CommandException("Command <attack> required additional input");
         }
     }
 
     public void initializeBattle(Player opponent) {
         battlePlayer = opponent;
         battleCounter = 1;
-        inBattle = true;
+        state = GameState.BATTLE;
     }
 
     private void endBattle() {
         battlePlayer = null;
         battleCounter = 0;
-        inBattle = false;
+        state = GameState.DEFAULT;
     }
 
     private Player getAIPlayer(String name) {
@@ -356,7 +363,7 @@ public class GameManager {
     // *************************
     // * Scan Command Logic
     // *************************
-    private void scan(String[] commandString, Player player) {
+    private void scan(String[] commandString, Player player) throws CommandException {
         if (commandString.length == 1) {
             scanSystem(player);
         } else if (commandString.length > 1) {
@@ -365,10 +372,10 @@ public class GameManager {
                 if (player.getCurrentStar().equals(otherPlayer.getCurrentStar())) {
                     scanPlayer(otherPlayer);
                 } else {
-                    gui.displayError(ErrorEnum.PLAYER_NOT_IN_SYSTEM);
+                    throw new CommandException("Player <" + commandString[1] + "> not in system");
                 }
             } else {
-                gui.displayError(ErrorEnum.INVALID_PLAYER_NAME);
+                throw new CommandException("Invalid player name: " + commandString[1]);
             }
         }
     }
@@ -418,7 +425,7 @@ public class GameManager {
     // *************************
     // * Buy Command Logic
     // *************************
-    private void buy(String[] commandString, Player player) {
+    private void buy(String[] commandString, Player player) throws CommandException {
         if (commandString.length >= 3) {
             CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
             if (cargoEnum != null) {
@@ -431,26 +438,24 @@ public class GameManager {
                     TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
                     break;
                 case 1:
-                    gui.displayError(ErrorEnum.PLAYER_NO_CARGO_SPACE);
-                    break;
+                    // gui.displayError(ErrorEnum.PLAYER_NO_CARGO_SPACE);
+                    throw new CommandException("<" + player.getName() + "> has insufficient cargo space");
                 case 2:
-                    gui.displayError(ErrorEnum.STATION_NO_CARGO_SPACE);
-                    break;
+                    throw new CommandException("<" + station.getName() + "> has insufficient cargo space");
                 case 3:
-                    gui.displayError(ErrorEnum.PLAYER_NO_MONEY);
-                    break;
+                    throw new CommandException("<" + player.getName() + "> has insufficient money");
                 }
                 displayDockCargo(player);
             }
         } else {
-            gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
+            throw new CommandException("Not enough input");
         }
     }
 
     // *************************
     // * Sell Command Logic
     // *************************
-    private void sell(String[] commandString, Player player) {
+    private void sell(String[] commandString, Player player) throws CommandException {
         if (commandString.length >= 3) {
             CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
             if (cargoEnum != null) {
@@ -463,30 +468,28 @@ public class GameManager {
                     TransactionManager.performSellToStationTransaction(player, station, cargoEnum, amountToSell);
                     break;
                 case 1:
-                    gui.displayError(ErrorEnum.STATION_NO_CARGO_SPACE);
-                    break;
+                    throw new CommandException("<" + station.getName() + "> has insufficient cargo space");
                 case 2:
-                    gui.displayError(ErrorEnum.PLAYER_NO_CARGO_SPACE);
-                    break;
+                    throw new CommandException("<" + player.getName() + "> has insufficient cargo space");
                 case 3:
-                    gui.displayError(ErrorEnum.STATION_NO_MONEY);
-                    break;
+                    throw new CommandException("<" + station.getName() + "> has insufficient money");
                 }
                 displayDockCargo(player);
             }
         } else {
-            gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
+            throw new CommandException("Not enough input");
         }
     }
 
-    private int getAmount(String command, int buyerCredits, int cargoPrice, int remainingCargoSpace, int cargoSize, int maxStock) {
+    private int getAmount(String command, int buyerCredits, int cargoPrice, int remainingCargoSpace, int cargoSize, int maxStock)
+            throws CommandException {
         int amount = 0;
         if (StringUtils.isNumeric(command)) {
             amount = Integer.parseInt(command);
         } else if (TransactionSubCommand.isMaxAllCommand(command)) {
             amount = TransactionManager.getMaximumAmount(buyerCredits, cargoPrice, remainingCargoSpace, cargoSize, maxStock);
         } else {
-            gui.displayError(ErrorEnum.INVALID_TRANSACTION_AMOUNT);
+            throw new CommandException("Invalid transcation amount: " + command);
         }
         return amount;
     }
@@ -510,17 +513,17 @@ public class GameManager {
     // *************************
     private void help(String[] commandString) {
         if (PrimaryCommand.toCommand(commandString[0]) == null) {
-            gui.displayError(ErrorEnum.INVALID_PRIMARY_COMMAND);
+            // gui.displayError(ErrorEnum.INVALID_PRIMARY_COMMAND);
         } else {
             PrimaryCommand secondCommand = PrimaryCommand.HELP;
             if (commandString.length >= 2) {
                 if (PrimaryCommand.toCommand(commandString[1]) != null) {
                     secondCommand = PrimaryCommand.toCommand(commandString[1]);
                 } else {
-                    gui.displayError(ErrorEnum.INVALID_SECONDARY_COMMAND);
+                    // gui.displayError(ErrorEnum.INVALID_SECONDARY_COMMAND);
                 }
             } else {
-                gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
+                // gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
             }
             gui.displayHelp(secondCommand);
         }
