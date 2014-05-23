@@ -1,6 +1,6 @@
 package sujoo.games.spacegame.datatype.ship;
 
-import sujoo.games.spacegame.datatype.command.AttackSubCommand;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
 public interface ShipComponentEnumIntf {
     public int getAbsoluteMaxValue();
@@ -9,5 +9,5 @@ public interface ShipComponentEnumIntf {
 
     public int getToughness();
 
-    public AttackSubCommand getLocation();
+    public ShipLocationCommand getLocation();
 }

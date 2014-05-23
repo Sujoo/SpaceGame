@@ -15,7 +15,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 
-import sujoo.games.spacegame.datatype.command.PrimaryCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.manager.GameManager;
@@ -76,7 +75,7 @@ public class MainGui extends JFrame {
         setContentPane(contentPane);
         GridBagLayout gbl_contentPane = new GridBagLayout();
         gbl_contentPane.columnWidths = new int[] { 350 };
-        gbl_contentPane.rowHeights = new int[] { 100, 100, 25, 10 };
+        gbl_contentPane.rowHeights = new int[] { 100, 100, 0, 10 };
         gbl_contentPane.columnWeights = new double[] {};
         gbl_contentPane.rowWeights = new double[] {};
         contentPane.setLayout(gbl_contentPane);
@@ -104,7 +103,7 @@ public class MainGui extends JFrame {
 
         infoPanel = new JPanel();
         infoPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, Color.DARK_GRAY, Color.LIGHT_GRAY));
-        infoPanel.setBackground(Colors.textBackground);
+        infoPanel.setBackground(Colors.defaultBackgroundColor);
         GridBagConstraints gbc_infoPanel = new GridBagConstraints();
         gbc_infoPanel.insets = new Insets(0, 0, 5, 0);
         gbc_infoPanel.fill = GridBagConstraints.BOTH;
@@ -114,7 +113,7 @@ public class MainGui extends JFrame {
         infoPanel.setLayout(new BorderLayout(0, 0));
 
         textField = new JTextField();
-        textField.setBackground(Colors.textBackground);
+        textField.setBackground(Colors.defaultBackgroundColor);
         textField.setForeground(Colors.defaultTextColor);
         textField.addKeyListener(new KeyAdapter() {
             @Override
@@ -141,6 +140,7 @@ public class MainGui extends JFrame {
 
     private void enterCommand(String text) {
         textField.setText("");
+        removeLog();
         controller.enterCommand(text, player);
     }
 
@@ -154,7 +154,9 @@ public class MainGui extends JFrame {
     }
     
     public void displayBattleFeedback(BattleFeedbackEnum feedback) {
-        useBattleLog(feedback.getCode());
+        if (feedback != null) {
+            useBattleLog(feedback.getCode());
+        }
     }
 
     public void displayScanSystem(Player player, String connections, List<Player> players) {
@@ -180,9 +182,9 @@ public class MainGui extends JFrame {
         setLowerPanel(TextGuiGenerator.getScoreLowerPanel(players));
     }
 
-    public void displayHelp(PrimaryCommand secondCommand) {
-        setUpperPanel(TextGuiGenerator.getHelpUpperPanel());
-        setLowerPanel(TextGuiGenerator.getHelpLowerPanel(secondCommand));
+    public void displayHelp(String code, List<String> listOfCommands, List<String> commandExplanation) {
+        setUpperPanel(TextGuiGenerator.getHelpUpperPanel(listOfCommands));
+        setLowerPanel(TextGuiGenerator.getHelpLowerPanel(code, commandExplanation));
     }
 
     public void displayBattle(Player user, Player other) {
@@ -197,7 +199,7 @@ public class MainGui extends JFrame {
         VisualizationViewer<Star, String> vs =
                 new VisualizationViewer<Star, String>(layout, new Dimension(300, 200));
         vs.setPreferredSize(new Dimension(320, 250));
-        vs.setBackground(Colors.textBackground);
+        vs.setBackground(Colors.defaultBackgroundColor);
 
         Transformer<Star, Paint> vertexPaint = new Transformer<Star, Paint>() {
             public Paint transform(Star star) {
@@ -257,7 +259,7 @@ public class MainGui extends JFrame {
     private JTextPane getStandardTextPane(STextArea textArea) {
         JTextPane textPane = new JTextPane(textArea);
         textPane.setEditable(false);
-        textPane.setBackground(Colors.textBackground);
+        textPane.setBackground(Colors.defaultBackgroundColor);
         return textPane;
     }
 
@@ -285,6 +287,10 @@ public class MainGui extends JFrame {
         infoPanel.removeAll();
         infoPanel.add(battleLog, BorderLayout.CENTER);
         redraw();
+    }
+    
+    private void removeLog() {
+        infoPanel.removeAll();
     }
 
     private void redraw() {

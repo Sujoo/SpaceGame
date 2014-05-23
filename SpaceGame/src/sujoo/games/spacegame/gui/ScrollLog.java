@@ -21,7 +21,7 @@ public class ScrollLog extends JScrollPane {
     private JTextPane getStandardTextPane(STextArea textArea) {
         JTextPane textPane = new JTextPane(textArea);
         textPane.setEditable(false);
-        textPane.setBackground(Colors.textBackground);
+        textPane.setBackground(Colors.defaultBackgroundColor);
         return textPane;
     }
 

@@ -5,9 +5,9 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum AttackCommand {
-	TARGET("target", new String[]{"words"}),
-	REPAIR("repair", new String[]{"words"}),
-	ESCAPE("escape", new String[]{"words"});
+	TARGET("Target", new String[]{"Fire weapons at a specific location","Usage: target <location>","Example: target hull"}),
+	REPAIR("Repair", new String[]{"Repair a specific location","Usage: repair <location>","Example: repair weapon"}),
+	ESCAPE("Escape", new String[]{"Attempt to escape combat","Usage: escape"});
 
 	private String code;
 	private String[] explanation;
@@ -63,5 +63,14 @@ public enum AttackCommand {
     
     public static List<AttackCommand> getList() {
     	return Lists.newArrayList(AttackCommand.values());
+    }
+    
+    public static List<String> getCodeList() {
+        List<String> codeList = Lists.newArrayList();
+        AttackCommand[] list = AttackCommand.values();
+        for (int i = 0; i < list.length; i++) {
+            codeList.add(list[i].getCode());
+        }
+        return codeList;
     }
 }

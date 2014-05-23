@@ -1,9 +1,9 @@
 package sujoo.games.spacegame.datatype.ship;
 
-import sujoo.games.spacegame.datatype.command.AttackSubCommand;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
 public class ShipComponentFactory {
-    public static ShipComponent buildShipComponent(AttackSubCommand location, ShipComponentEnumIntf intf) {
+    public static ShipComponent buildShipComponent(ShipLocationCommand location, ShipComponentEnumIntf intf) {
         ShipComponent shipComponent = null;
         switch (location) {
         case SHIELD:

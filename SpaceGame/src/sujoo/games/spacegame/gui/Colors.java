@@ -11,7 +11,7 @@ public class Colors {
     public static final Color crimson = new Color(220, 20, 60);
 
     public static final Color defaultTextColor = Color.WHITE;
-    public static final Color textBackground = Color.BLACK;
+    public static final Color defaultBackgroundColor = Color.BLACK;
 
     public static final Color[] gyrList = new Color[] { Colors.forestGreen, Colors.orange, Colors.crimson };
     public static final Color[] rygList = new Color[] { Colors.crimson, Colors.orange, Colors.forestGreen };

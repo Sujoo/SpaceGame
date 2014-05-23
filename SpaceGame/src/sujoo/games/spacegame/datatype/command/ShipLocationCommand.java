@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public enum AttackSubCommand {
+public enum ShipLocationCommand {
     ENGINE("Engine", new String[] { "words" }),
     WEAPON("Weapon", new String[] { "words" }),
     SHIELD("Shield", new String[] { "words" }),
@@ -13,7 +13,7 @@ public enum AttackSubCommand {
     private String code;
     private String[] explanation;
 
-    private AttackSubCommand(String code, String[] explanation) {
+    private ShipLocationCommand(String code, String[] explanation) {
         this.code = code;
         this.explanation = explanation;
     }
@@ -37,9 +37,9 @@ public enum AttackSubCommand {
      * @param code
      * @return
      */
-    public static AttackSubCommand toCommand(String code) {
-        AttackSubCommand result = null;
-        for (AttackSubCommand attackSubCommand : AttackSubCommand.values()) {
+    public static ShipLocationCommand toCommand(String code) {
+        ShipLocationCommand result = null;
+        for (ShipLocationCommand attackSubCommand : ShipLocationCommand.values()) {
             if (attackSubCommand.getCode().equalsIgnoreCase(code)) {
                 result = attackSubCommand;
             }
@@ -47,7 +47,7 @@ public enum AttackSubCommand {
         return result;
     }
 
-    public static boolean isAttackSubCommand(String code) {
+    public static boolean isShipLocationCommand(String code) {
         if (toCommand(code) != null) {
             return true;
         } else {
@@ -55,7 +55,7 @@ public enum AttackSubCommand {
         }
     }
 
-    public static List<AttackSubCommand> getList() {
-        return Lists.newArrayList(AttackSubCommand.values());
+    public static List<ShipLocationCommand> getList() {
+        return Lists.newArrayList(ShipLocationCommand.values());
     }
 }

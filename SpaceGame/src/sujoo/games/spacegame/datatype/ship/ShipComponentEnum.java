@@ -1,18 +1,18 @@
 package sujoo.games.spacegame.datatype.ship;
 
-import sujoo.games.spacegame.datatype.command.AttackSubCommand;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
 public enum ShipComponentEnum implements ShipComponentEnumIntf {
-    BASE_HULL(100, 3, 1, AttackSubCommand.HULL),
-    BASE_WEAPON(25, 3, 4, AttackSubCommand.WEAPON),
-    BASE_ENGINE(20, 3, 3, AttackSubCommand.ENGINE);
+    BASE_HULL(100, 3, 1, ShipLocationCommand.HULL),
+    BASE_WEAPON(25, 3, 4, ShipLocationCommand.WEAPON),
+    BASE_ENGINE(20, 3, 3, ShipLocationCommand.ENGINE);
 
     private int absoluteMaxValue;
     private int repairFraction;
     private int toughness;
-    private AttackSubCommand location;
+    private ShipLocationCommand location;
 
-    private ShipComponentEnum(int absoluteMaxValue, int repairFraction, int toughness, AttackSubCommand location) {
+    private ShipComponentEnum(int absoluteMaxValue, int repairFraction, int toughness, ShipLocationCommand location) {
         this.absoluteMaxValue = absoluteMaxValue;
         this.repairFraction = repairFraction;
         this.toughness = toughness;
@@ -31,7 +31,7 @@ public enum ShipComponentEnum implements ShipComponentEnumIntf {
         return toughness;
     }
 
-    public AttackSubCommand getLocation() {
+    public ShipLocationCommand getLocation() {
         return location;
     }
 }

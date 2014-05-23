@@ -5,14 +5,12 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
-import sujoo.games.spacegame.datatype.command.AttackSubCommand;
-import sujoo.games.spacegame.gui.BattleFeedbackEnum;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
 public abstract class Ship {
     private ShipType type;
     private CargoHold hold;
-
-    private Map<AttackSubCommand, ShipComponent> components;
+    private Map<ShipLocationCommand, ShipComponent> components;
 
     public Ship(ShipType type) {
         this.type = type;
@@ -23,84 +21,42 @@ public abstract class Ship {
         }
     }
 
-    public boolean hasComponent(AttackSubCommand location) {
+    public boolean hasComponent(ShipLocationCommand location) {
         return components.containsKey(location);
     }
 
-    public ShipComponent getComponent(AttackSubCommand location) {
+    public ShipComponent getComponent(ShipLocationCommand location) {
         return components.get(location);
     }
 
-    public int getCurrentComponentValue(AttackSubCommand location) {
+    public int getCurrentComponentValue(ShipLocationCommand location) {
         int result = 0;
-        if (components.containsKey(location)) {
-            result = components.get(location).getCurrentValue();
+        if (hasComponent(location)) {
+            result = getComponent(location).getCurrentValue();
         }
         return result;
     }
 
-    public int getCurrentMaxComponentValue(AttackSubCommand location) {
+    public int getCurrentMaxComponentValue(ShipLocationCommand location) {
         int result = 0;
-        if (components.containsKey(location)) {
-            result = components.get(location).getAbsoluteMaxValue();
+        if (hasComponent(location)) {
+            result = getComponent(location).getAbsoluteMaxValue();
         }
         return result;
     }
-
-    public BattleFeedbackEnum damageComponent(AttackSubCommand location, int damage) {
-        BattleFeedbackEnum result = null;
-        // if the component isn't on the ship, than the player input the wrong
-        // command so leave feedback null
-        if (components.containsKey(location)) {
-            // If ship has shields, damage those first
-            if (components.containsKey(AttackSubCommand.SHIELD) && location != AttackSubCommand.SHIELD) {
-                ShipComponent shield = components.get(AttackSubCommand.SHIELD);
-                // Can shield absorb all the damage?
-                if (shield.getCurrentValue() >= damage) {
-                    shield.takeDamage(damage);
-                    damage = 0;
-                    result = BattleFeedbackEnum.SHIELD_HIT;
-                } else { // No
-                    damage = damage - shield.getCurrentValue();
-                    shield.takeDamage(shield.getCurrentValue());
-                }
-            }
-
-            components.get(location).takeDamage(damage);
-            result = BattleFeedbackEnum.COMPONENT_DAMAGE;
-
-            if (isDestoryed()) {
-                result = BattleFeedbackEnum.SHIP_DESTROYED;
-            }
+    
+    public boolean isShieldUp() {
+        if (hasComponent(ShipLocationCommand.SHIELD) && getComponent(ShipLocationCommand.SHIELD).getCurrentValue() != 0) {
+            return true;
+        } else {
+            return false;
         }
-        return result;
     }
 
-    public BattleFeedbackEnum repairComponent(AttackSubCommand location) {
-        BattleFeedbackEnum result = null;
-        if (components.containsKey(location)) {
-            components.get(location).repair();
-            result = BattleFeedbackEnum.COMPONENT_REPAIR;
-        }
-        return result;
-    }
-
-    public BattleFeedbackEnum performShieldRecharge(int battleCounter) {
-        BattleFeedbackEnum feedback = null;
-        if (components.containsKey(AttackSubCommand.SHIELD)) {
-            ShipShieldComponent shield = (ShipShieldComponent) components.get(AttackSubCommand.SHIELD);
-            if (battleCounter % shield.getRechargeTime() == 0) {
-                shield.restoreShield();
-                feedback = BattleFeedbackEnum.SHIELD_RECHARGE;
-            }
-        }
-        return feedback;
-    }
-
-    private boolean isDestoryed() {
+    public boolean isDestoryed() {
         boolean result = false;
-        if (components.containsKey(AttackSubCommand.HULL)) {
-            if (components.get(AttackSubCommand.HULL).getCurrentValue() == 0) {
+        if (hasComponent(ShipLocationCommand.HULL)) {
+            if (getComponent(ShipLocationCommand.HULL).getCurrentValue() == 0) {
                 result = true;
             }
         }
@@ -115,7 +71,7 @@ public abstract class Ship {
 
     public boolean isEscapePossible(int battleCounter) {
         boolean result = false;
-        if (components.containsKey(AttackSubCommand.ENGINE)) {
+        if (hasComponent(ShipLocationCommand.ENGINE)) {
             if (battleCounter >= 4) {
                 result = true;
             }

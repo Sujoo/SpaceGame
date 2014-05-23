@@ -6,8 +6,7 @@ import java.util.List;
 
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
-import sujoo.games.spacegame.datatype.command.AttackSubCommand;
-import sujoo.games.spacegame.datatype.command.PrimaryCommand;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.general.Wallet;
 import sujoo.games.spacegame.datatype.planet.Planet;
@@ -107,19 +106,19 @@ public class TextGuiGenerator {
         return textArea;
     }
 
-    public static STextArea getHelpUpperPanel() {
+    public static STextArea getHelpUpperPanel(List<String> listOfCommands) {
         STextArea textArea = new STextArea();
         includeTitleText(textArea, "List of Commands");
-        for (PrimaryCommand primaryCommand : PrimaryCommand.getList()) {
-            textArea.appendLine(primaryCommand.getCode());
+        for (String code : listOfCommands) {
+            textArea.appendLine(code);
         }
         return textArea;
     }
 
-    public static STextArea getHelpLowerPanel(PrimaryCommand primaryCommand) {
+    public static STextArea getHelpLowerPanel(String code, List<String> codeExplanation) {
         STextArea textArea = new STextArea();
-        includeTitleText(textArea, primaryCommand.getCode() + " Command");
-        for (String text : primaryCommand.getExplanation()) {
+        includeTitleText(textArea, code + " Command");
+        for (String text : codeExplanation) {
             textArea.appendLine(text);
         }
         return textArea;
@@ -176,10 +175,10 @@ public class TextGuiGenerator {
     private static void includeShipText(STextArea textArea, Player player) {
         includeTitleText(textArea, player.getName() + " Ship");
         Ship ship = player.getShip();
-        includeComponentCapacity(textArea, ship, AttackSubCommand.SHIELD);
-        includeComponentCapacity(textArea, ship, AttackSubCommand.HULL);
-        includeComponentCapacity(textArea, ship, AttackSubCommand.ENGINE);
-        includeComponentCapacity(textArea, ship, AttackSubCommand.WEAPON);
+        includeComponentCapacity(textArea, ship, ShipLocationCommand.SHIELD);
+        includeComponentCapacity(textArea, ship, ShipLocationCommand.HULL);
+        includeComponentCapacity(textArea, ship, ShipLocationCommand.ENGINE);
+        includeComponentCapacity(textArea, ship, ShipLocationCommand.WEAPON);
     }
 
     private static void includeCreditsText(STextArea textArea, Wallet wallet) {
@@ -191,9 +190,9 @@ public class TextGuiGenerator {
         includeCapacityText(textArea, spaceUsage, totalSize, Colors.gyrList);
     }
 
-    private static void includeComponentCapacity(STextArea textArea, Ship ship, AttackSubCommand location) {
+    private static void includeComponentCapacity(STextArea textArea, Ship ship, ShipLocationCommand location) {
         if (ship.hasComponent(location)) {
-            textArea.append(frontPad(location.getCode(), getLongestTextLength(AttackSubCommand.values())) + " : ");
+            textArea.append(frontPad(location.getCode(), getLongestTextLength(ShipLocationCommand.values())) + " : ");
             includeCapacityText(textArea, ship.getComponent(location).getCurrentValue(), ship.getComponent(location).getCurrentMaxValue(),
                     Colors.rygList);
         }

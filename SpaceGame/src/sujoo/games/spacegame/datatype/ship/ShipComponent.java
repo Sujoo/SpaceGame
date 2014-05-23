@@ -14,22 +14,24 @@ public class ShipComponent {
         restoreComponent();
     }
 
-    public void takeDamage(int damage) {
+    public int takeDamage(int damage) {
         damage = damage / toughness;
         if (currentValue - damage >= 0) {
             currentValue -= damage;
         } else {
             currentValue = 0;
         }
+        return damage;
     }
 
-    public void repair() {
+    public int repair() {
         int repair = absoluteMaxValue / repairFraction;
         if (currentValue + repair <= absoluteMaxValue) {
             currentValue += repair;
         } else {
             currentValue = absoluteMaxValue;
         }
+        return repair;
     }
 
     public void restoreComponent() {

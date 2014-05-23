@@ -9,9 +9,10 @@ import com.google.common.collect.Lists;
 import sujoo.games.spacegame.ai.PlayerManagerAI;
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.command.AttackCommand;
-import sujoo.games.spacegame.datatype.command.AttackSubCommand;
+import sujoo.games.spacegame.datatype.command.DockCommand;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 import sujoo.games.spacegame.datatype.command.PrimaryCommand;
-import sujoo.games.spacegame.datatype.command.TransactionSubCommand;
+import sujoo.games.spacegame.datatype.command.SubCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.player.AIPlayer;
 import sujoo.games.spacegame.datatype.player.HumanPlayer;
@@ -24,7 +25,7 @@ import sujoo.games.spacegame.gui.MainGui;
 import sujoo.games.spacegame.message.CommandException;
 
 public class GameManager {
-    private final int totalStarSystems = 10;
+    private final int totalStarSystems = 2;
     private final int maximumConnections = 4;
     private final int minStarId = 1000;
     private final int numberOfAIPlayers = 5;
@@ -83,7 +84,7 @@ public class GameManager {
         scanSystem(allPlayers.get(0));
     }
 
-    public void playerKilled(Player player) {
+    private void playerKilled(Player player) {
         if (player instanceof AIPlayer) {
             aiPlayers.remove(player);
             allPlayers.remove(player);
@@ -97,18 +98,26 @@ public class GameManager {
     // *************************
     public void enterCommand(String command, Player player) {
         try {
-            switch (state) {
-            case NEWGAME:
-                if (command.equalsIgnoreCase("y") || command.equalsIgnoreCase("yes")) {
-                    rebootGame();
+            String[] commandString = command.split(" ");
+            if (SubCommand.isHelpCommand(commandString[0]) || commandString[0].equals("")) {
+                help(commandString);
+            } else {
+                switch (state) {
+                case NEWGAME:
+                    if (SubCommand.isYesCommand(commandString[0])) {
+                        rebootGame();
+                    }
+                    break;
+                case BATTLE:
+                    executeBattleCommand(commandString, player);
+                    break;
+                case DOCKED:
+                    executeDockCommand(commandString, player);
+                    break;
+                case DEFAULT:
+                    executePrimaryCommand(commandString, player);
+                    break;
                 }
-                break;
-            case BATTLE:
-                executeBattleCommand(command, player);
-                break;
-            case DEFAULT:
-                executePrimaryCommand(command, player);
-                break;
             }
         } catch (CommandException e) {
             gui.displayError(e.getMessage());
@@ -118,8 +127,7 @@ public class GameManager {
     // *************************
     // * Battle Commands
     // *************************
-    private void executeBattleCommand(String command, Player player) throws CommandException {
-        String[] commandString = command.split(" ");
+    private void executeBattleCommand(String[] commandString, Player player) throws CommandException {
         if (AttackCommand.isAttackCommand(commandString[0])) {
             BattleFeedbackEnum feedback = null;
             AttackCommand firstCommand = AttackCommand.toCommand(commandString[0]);
@@ -146,16 +154,8 @@ public class GameManager {
                 }
             }
         } else {
-            // Get Attack Help
-            throw new CommandException("Invalid primary command: " + commandString[0]);
+            throw new CommandException("Invalid battle command: " + commandString[0]);
         }
-    }
-
-    private void continueBattle(Player player) {
-        battleCounter++;
-        player.getShip().performShieldRecharge(battleCounter);
-        battlePlayer.getShip().performShieldRecharge(battleCounter);
-        displayBattle(player);
     }
 
     // *************************
@@ -164,9 +164,9 @@ public class GameManager {
     private BattleFeedbackEnum target(String[] commandString, Player player) throws CommandException {
         BattleFeedbackEnum feedback = null;
         if (commandString.length > 1) {
-            AttackSubCommand secondCommand = AttackSubCommand.toCommand(commandString[1]);
+            ShipLocationCommand secondCommand = ShipLocationCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
-                feedback = battlePlayer.getShip().damageComponent(secondCommand, player.getShip().getCurrentComponentValue(AttackSubCommand.WEAPON));
+                feedback = BattleManager.damageComponent(battlePlayer, secondCommand, player.getShip().getCurrentComponentValue(ShipLocationCommand.WEAPON));
             } else {
                 throw new CommandException("Invalid component name");
             }
@@ -182,9 +182,9 @@ public class GameManager {
     private BattleFeedbackEnum repair(String[] commandString, Player player) throws CommandException {
         BattleFeedbackEnum feedback = null;
         if (commandString.length > 1) {
-            AttackSubCommand secondCommand = AttackSubCommand.toCommand(commandString[1]);
+            ShipLocationCommand secondCommand = ShipLocationCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
-                feedback = player.getShip().repairComponent(secondCommand);
+                feedback = BattleManager.repairComponent(player, secondCommand);
             } else {
                 throw new CommandException("Invalid component name");
             }
@@ -213,6 +213,7 @@ public class GameManager {
             attacker.getShip().restoreAllComponents();
             endBattle();
             playerKilled(defender);
+            attacker.getWallet().addCredits(2000);
             if (aiFeedback) {
                 gui.displayLoss();
             } else {
@@ -246,11 +247,17 @@ public class GameManager {
         }
     }
 
+    private void continueBattle(Player player) {
+        battleCounter++;
+        gui.displayBattleFeedback(BattleManager.performShieldRecharge(player, battleCounter));
+        gui.displayBattleFeedback(BattleManager.performShieldRecharge(battlePlayer, battleCounter));
+        displayBattle(player);
+    }
+
     // *************************
     // * Primary Commands
     // *************************
-    private void executePrimaryCommand(String command, Player player) throws CommandException {
-        String[] commandString = command.split(" ");
+    private void executePrimaryCommand(String[] commandString, Player player) throws CommandException {
         if (PrimaryCommand.isPrimaryCommand(commandString[0])) {
             PrimaryCommand firstCommand = PrimaryCommand.toCommand(commandString[0]);
             switch (firstCommand) {
@@ -269,12 +276,6 @@ public class GameManager {
             case DOCK:
                 dock(player);
                 break;
-            case BUY:
-                buy(commandString, player);
-                break;
-            case SELL:
-                sell(commandString, player);
-                break;
             case WAIT:
                 waitTurn();
                 break;
@@ -287,10 +288,9 @@ public class GameManager {
             case FULL_MAP:
                 displayGlobalSystemMap(player.getCurrentStar(), player.getPreviousStar());
                 break;
-            case HELP:
-                help(commandString);
-                break;
             }
+        } else {
+            throw new CommandException("Invalid command: " + commandString[0]);
         }
     }
 
@@ -333,7 +333,7 @@ public class GameManager {
         }
     }
 
-    public void initializeBattle(Player opponent) {
+    private void initializeBattle(Player opponent) {
         battlePlayer = opponent;
         battleCounter = 1;
         state = GameState.BATTLE;
@@ -415,7 +415,13 @@ public class GameManager {
     // * Dock Command Logic
     // *************************
     private void dock(Player player) {
+        state = GameState.DOCKED;
         displayDockCargo(player);
+    }
+    
+    private void undock(Player player) {
+        state = GameState.DEFAULT;
+        scanSystem(player);
     }
 
     private void displayDockCargo(Player player) {
@@ -486,7 +492,7 @@ public class GameManager {
         int amount = 0;
         if (StringUtils.isNumeric(command)) {
             amount = Integer.parseInt(command);
-        } else if (TransactionSubCommand.isMaxAllCommand(command)) {
+        } else if (SubCommand.isMaxAllCommand(command)) {
             amount = TransactionManager.getMaximumAmount(buyerCredits, cargoPrice, remainingCargoSpace, cargoSize, maxStock);
         } else {
             throw new CommandException("Invalid transcation amount: " + command);
@@ -507,26 +513,84 @@ public class GameManager {
     private void score() {
         gui.displayScore(allPlayers);
     }
+    
+    private void executeDockCommand(String[] commandString, Player player) throws CommandException {
+        if (DockCommand.isDockCommand(commandString[0])) {
+            DockCommand firstCommand = DockCommand.toCommand(commandString[0]);
+            switch (firstCommand) {
+            case UNDOCK:
+                undock(player);
+                break;
+            case BUY:
+                buy(commandString, player);
+                break;
+            case SELL:
+                sell(commandString, player);
+                break;
+            case CARGO:
+                displayDockCargo(player);
+                break;
+            case STORE:
+                break;
+            }
+        } else {
+            throw new CommandException("Invalid dock command: " + commandString[0]);
+        }
+    }
 
     // *************************
     // * Help Command Logic
     // *************************
-    private void help(String[] commandString) {
-        if (PrimaryCommand.toCommand(commandString[0]) == null) {
-            // gui.displayError(ErrorEnum.INVALID_PRIMARY_COMMAND);
-        } else {
-            PrimaryCommand secondCommand = PrimaryCommand.HELP;
-            if (commandString.length >= 2) {
-                if (PrimaryCommand.toCommand(commandString[1]) != null) {
-                    secondCommand = PrimaryCommand.toCommand(commandString[1]);
-                } else {
-                    // gui.displayError(ErrorEnum.INVALID_SECONDARY_COMMAND);
-                }
-            } else {
-                // gui.displayError(ErrorEnum.NOT_ENOUGH_INPUT);
-            }
-            gui.displayHelp(secondCommand);
+    private void help(String[] commandString) throws CommandException {
+        String code = "";
+        List<String> listOfCommands = Lists.newArrayList();
+        List<String> commandExplanation = Lists.newArrayList();
+        if (state == GameState.DEFAULT) {
+            listOfCommands = PrimaryCommand.getCodeList();
+        } else if (state == GameState.BATTLE) {
+            listOfCommands = AttackCommand.getCodeList();
+        } else if (state == GameState.DOCKED) {
+            listOfCommands = DockCommand.getCodeList();
         }
+        
+        
+        if (commandString.length > 1) {
+            if (state == GameState.DEFAULT) {
+                PrimaryCommand subCommand = PrimaryCommand.toCommand(commandString[1]); 
+                if (subCommand != null) {
+                    code = subCommand.getCode();
+                    commandExplanation = subCommand.getExplanation();
+                } else {
+                    code = SubCommand.HELP.getCode();
+                    commandExplanation = SubCommand.HELP.getExplanation();
+                }
+            } else if (state == GameState.BATTLE) {
+                AttackCommand subCommand = AttackCommand.toCommand(commandString[1]); 
+                if (subCommand != null) {
+                    code = subCommand.getCode();
+                    commandExplanation = subCommand.getExplanation();
+                } else {
+                    code = SubCommand.HELP.getCode();
+                    commandExplanation = SubCommand.HELP.getExplanation();
+                }
+            } else if (state == GameState.DOCKED) {
+                DockCommand subCommand = DockCommand.toCommand(commandString[1]); 
+                if (subCommand != null) {
+                    code = subCommand.getCode();
+                    commandExplanation = subCommand.getExplanation();
+                } else {
+                    code = SubCommand.HELP.getCode();
+                    commandExplanation = SubCommand.HELP.getExplanation();
+                }
+            }
+        } else if (commandString[0].equals("") || SubCommand.isHelpCommand(commandString[0])) {
+            code = SubCommand.HELP.getCode();
+            commandExplanation = SubCommand.HELP.getExplanation();
+        } else {
+            throw new CommandException("Invalid help command");
+        }
+        
+        gui.displayHelp(code, listOfCommands, commandExplanation);
     }
 
     // *************************

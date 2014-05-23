@@ -19,13 +19,14 @@ public class ShipShieldComponent extends ShipComponent {
         return rechargeTime;
     }
     
-    public void restoreShield() {
+    public int restoreShield() {
         int restoreValue = currentMaxValue / restoreFraction;
         if (getCurrentValue() + restoreValue <= currentMaxValue) {
             setCurrentValue(getCurrentValue() + restoreValue);
         } else {
             setCurrentValue(currentMaxValue);
         }
+        return restoreValue;
     }
     
     @Override
@@ -40,10 +41,13 @@ public class ShipShieldComponent extends ShipComponent {
     }
     
     @Override
-    public void takeDamage(int damage) {
+    public int takeDamage(int damage) {
+        // Fix error:
+        // when currentValueDamage > current value, the else block disregards toughness
         int currentValueDamage = damage / getToughness();
         if (getCurrentValue() - currentValueDamage >= 0) {
             setCurrentValue(getCurrentValue() - currentValueDamage);
+            return currentValueDamage; 
         } else {
             setCurrentValue(0);
             int maxValueDamage = damage / maxValueToughness;
@@ -52,16 +56,18 @@ public class ShipShieldComponent extends ShipComponent {
             } else {
                 currentMaxValue = 0;
             }
+            return maxValueDamage;
         }
     }
     
     @Override
-    public void repair() {
+    public int repair() {
         int repair = currentMaxValue / getRepairFraction();
         if (currentMaxValue + repair <= getAbsoluteMaxValue()) {
             currentMaxValue += repair;
         } else {
             currentMaxValue = getAbsoluteMaxValue();
         }
+        return repair;
     }
 }

@@ -10,13 +10,10 @@ public enum PrimaryCommand {
 	SCAN("Scan", new String[]{"Display system information", "Usage: scan", "", "Display player information", "Usage: scan <player name>", "Example: scan sujoo"}),
 	STATUS("Status", new String[]{"Display your information", "Usage: status"}),
 	DOCK("Dock", new String[]{"Display station information","Usage: dock"}),
-	BUY("Buy", new String[]{"Buy cargo from a station", "Usage: buy <number> or <all> or <max> <cargo>", "Example: buy 10 fuel", "Example: buy max ammo"}),
-	SELL("Sell", new String[]{"Sell cargo to a station", "Usage: sell <number> or <all> or <max> <cargo>", "Example: sell 10 fuel", "Example: sell all ammo"}),
 	MAP("Map", new String[]{"Display system map, but think scan is better"}),
     FULL_MAP("Fullscan", new String[]{"Secret Developer Haxxor"}),
     WAIT("Wait", new String[]{"Do nothing and let AI do their thing"}),
-    SCORE("Score", new String[]{"Display score screen", "Usage: score"}),
-    HELP("Help", new String[]{"Use this command to learn the others", "Usage: help <command>", "Example: help jump"});
+    SCORE("Score", new String[]{"Display score screen", "Usage: score"});
 
 	private String code;
 	private String[] explanation;
@@ -64,5 +61,14 @@ public enum PrimaryCommand {
     
     public static List<PrimaryCommand> getList() {
     	return Lists.newArrayList(PrimaryCommand.values());
+    }
+    
+    public static List<String> getCodeList() {
+        List<String> codeList = Lists.newArrayList();
+        PrimaryCommand[] list = PrimaryCommand.values();
+        for (int i = 0; i < list.length; i++) {
+            codeList.add(list[i].getCode());
+        }
+        return codeList;
     }
 }

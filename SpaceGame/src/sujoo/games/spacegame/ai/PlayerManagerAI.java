@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
-import sujoo.games.spacegame.datatype.command.AttackSubCommand;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.player.AIPlayer;
 import sujoo.games.spacegame.datatype.player.Player;
@@ -18,6 +18,7 @@ import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.ShipFactory;
 import sujoo.games.spacegame.datatype.ship.ShipType;
 import sujoo.games.spacegame.gui.BattleFeedbackEnum;
+import sujoo.games.spacegame.manager.BattleManager;
 import sujoo.games.spacegame.manager.StarSystemManager;
 import sujoo.games.spacegame.manager.TransactionManager;
 
@@ -142,8 +143,8 @@ public class PlayerManagerAI {
 
     public static BattleFeedbackEnum attackPlayer(AIPlayer aiPlayer, Player player) {
         // THIS WILL CAUSE AN ISSUE AS SOON AS A SHIP DOESN'T HAVE EVERY COMPONENT
-        AttackSubCommand location = AttackSubCommand.getList().get(random.nextInt(AttackSubCommand.getList().size()));
+        ShipLocationCommand location = ShipLocationCommand.getList().get(random.nextInt(ShipLocationCommand.getList().size()));
 
-        return player.getShip().damageComponent(location, aiPlayer.getShip().getCurrentComponentValue(AttackSubCommand.WEAPON));
+        return BattleManager.damageComponent(player, location, aiPlayer.getShip().getCurrentComponentValue(ShipLocationCommand.WEAPON));
     }
 }
