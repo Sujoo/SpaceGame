@@ -6,6 +6,9 @@ import com.google.common.collect.Maps;
 
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponentEnumIntf;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponentFactory;
 
 public abstract class Ship {
     private ShipType type;

@@ -2,6 +2,10 @@ package sujoo.games.spacegame.datatype.ship;
 
 import java.util.List;
 
+import sujoo.games.spacegame.datatype.ship.component.ShipComponentEnum;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponentEnumIntf;
+import sujoo.games.spacegame.datatype.ship.component.ShipShieldComponentEnum;
+
 import com.google.common.collect.Lists;
 
 public enum ShipType {

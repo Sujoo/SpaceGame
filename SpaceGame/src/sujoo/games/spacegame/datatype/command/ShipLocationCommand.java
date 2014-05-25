@@ -8,7 +8,8 @@ public enum ShipLocationCommand {
     ENGINE("Engine", new String[] { "words" }),
     WEAPON("Weapon", new String[] { "words" }),
     SHIELD("Shield", new String[] { "words" }),
-    HULL("Hull", new String[] { "words" });
+    HULL("Hull", new String[] { "words" }),
+    CARGO("Cargo", new String[] { "words" });
 
     private String code;
     private String[] explanation;

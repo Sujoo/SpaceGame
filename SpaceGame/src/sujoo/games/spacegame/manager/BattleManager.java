@@ -3,12 +3,12 @@ package sujoo.games.spacegame.manager;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.ship.Ship;
-import sujoo.games.spacegame.datatype.ship.ShipComponent;
-import sujoo.games.spacegame.datatype.ship.ShipShieldComponent;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
+import sujoo.games.spacegame.datatype.ship.component.ShipShieldComponent;
 import sujoo.games.spacegame.gui.BattleFeedbackEnum;
 
 public class BattleManager {
-    
+
     public static BattleFeedbackEnum damageComponent(Player player, ShipLocationCommand location, int damage) {
         Ship ship = player.getShip();
         BattleFeedbackEnum feedback = null;
@@ -21,21 +21,22 @@ public class BattleManager {
                 if (shield.getCurrentValue() >= damage) {
                     int damageTaken = ship.getComponent(ShipLocationCommand.SHIELD).takeDamage(damage);
                     feedback = BattleFeedbackEnum.SHIELD_HIT;
-                    feedback.setCode(player.getName() + " shield absorbed " + damageTaken + " damage");
+                    feedback.setCode(player.getName() + " Shield absorbed " + damageTaken + " damage");
                 } else {
                     int shieldDamage = shield.getCurrentValue();
                     int remainingDamage = damage - shieldDamage;
                     int shieldDamageTaken = shield.takeDamage(shieldDamage);
                     int componentDamageTaken = ship.getComponent(location).takeDamage(remainingDamage);
                     feedback = BattleFeedbackEnum.COMPONENT_DAMAGE;
-                    feedback.setCode(player.getName() + " shield absorbed " + shieldDamageTaken + " damage, " + location.getCode() + " took " + componentDamageTaken + " damage");
+                    feedback.setCode(player.getName() + " Shield absorbed " + shieldDamageTaken + " damage"
+                            + System.lineSeparator() + player.getName() + " " + location.getCode() + " took "
+                            + componentDamageTaken + " damage");
                 }
             } else {
                 int damageTaken = ship.getComponent(location).takeDamage(damage);
                 feedback = BattleFeedbackEnum.COMPONENT_DAMAGE;
                 feedback.setCode(player.getName() + " " + location.getCode() + " took " + damageTaken + " damage");
             }
-
 
             if (ship.isDestoryed()) {
                 feedback = BattleFeedbackEnum.SHIP_DESTROYED;

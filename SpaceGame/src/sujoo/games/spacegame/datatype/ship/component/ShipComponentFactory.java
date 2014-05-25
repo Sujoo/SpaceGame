@@ -1,4 +1,4 @@
-package sujoo.games.spacegame.datatype.ship;
+package sujoo.games.spacegame.datatype.ship.component;
 
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
@@ -17,6 +17,8 @@ public class ShipComponentFactory {
             break;
         case WEAPON:
             shipComponent = new ShipComponent(intf);
+            break;
+        case CARGO:
             break;
         }
         return shipComponent;

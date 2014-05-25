@@ -1,11 +1,11 @@
-package sujoo.games.spacegame.datatype.ship;
+package sujoo.games.spacegame.datatype.ship.component;
 
 public class ShipShieldComponent extends ShipComponent {
 
     private int rechargeTime;
     private int currentMaxValue;
-    private int maxValueToughness;
-    private int restoreFraction;
+    private double maxValueToughness;
+    private double restoreFraction;
 
     public ShipShieldComponent(ShipShieldComponentEnum shipComponentEnum) {
         super(shipComponentEnum);
@@ -20,7 +20,7 @@ public class ShipShieldComponent extends ShipComponent {
     }
     
     public int restoreShield() {
-        int restoreValue = currentMaxValue / restoreFraction;
+        int restoreValue = (int) (currentMaxValue * restoreFraction);
         if (getCurrentValue() + restoreValue <= currentMaxValue) {
             setCurrentValue(getCurrentValue() + restoreValue);
         } else {
@@ -44,16 +44,18 @@ public class ShipShieldComponent extends ShipComponent {
     public int takeDamage(int damage) {
         // Fix error:
         // when currentValueDamage > current value, the else block disregards toughness
-        int currentValueDamage = damage / getToughness();
+        // Actually: this error is handled by the BattleManager isShieldUp logic block
+        int currentValueDamage = (int) (damage * getToughness());
         if (getCurrentValue() - currentValueDamage >= 0) {
             setCurrentValue(getCurrentValue() - currentValueDamage);
             return currentValueDamage; 
         } else {
+            int maxValueDamage = (int) (damage * maxValueToughness);
             setCurrentValue(0);
-            int maxValueDamage = damage / maxValueToughness;
             if (currentMaxValue - maxValueDamage >= 0) {
                 currentMaxValue -= maxValueDamage;
             } else {
+                maxValueDamage = currentMaxValue;
                 currentMaxValue = 0;
             }
             return maxValueDamage;
@@ -62,10 +64,11 @@ public class ShipShieldComponent extends ShipComponent {
     
     @Override
     public int repair() {
-        int repair = currentMaxValue / getRepairFraction();
+        int repair = (int) (currentMaxValue * getRepairFraction());
         if (currentMaxValue + repair <= getAbsoluteMaxValue()) {
             currentMaxValue += repair;
         } else {
+            repair = getAbsoluteMaxValue() - currentMaxValue;
             currentMaxValue = getAbsoluteMaxValue();
         }
         return repair;
