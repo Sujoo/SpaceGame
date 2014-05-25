@@ -10,4 +10,9 @@ public abstract class Planet {
 	public PlanetType getType() {
 		return type;
 	}
+	
+	@Override
+	public String toString() {
+	    return getType().getShortDesc();
+	}
 }

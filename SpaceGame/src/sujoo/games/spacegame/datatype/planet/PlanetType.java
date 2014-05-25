@@ -3,31 +3,31 @@ package sujoo.games.spacegame.datatype.planet;
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 
 public enum PlanetType {	
-	CLASS_T("T","Terrestrial",
+	TERRESTRIAL("T","Terrestrial",
 			new CargoEnum[]{CargoEnum.FUEL,CargoEnum.AMMO,CargoEnum.ALLOY,CargoEnum.PARTS,CargoEnum.ELECTRONICS,CargoEnum.ORGANICS},
 			new int[]{750,750,500,500,250,250}),
 			
-	CLASS_G("G","Gas Giant",
+	GAS("G","Gas Giant",
 			new CargoEnum[]{CargoEnum.FUEL,CargoEnum.AMMO,CargoEnum.ORGANICS},
 			new int[]{1500,1500,500}),
 			
-	CLASS_V("V","Volcanic",
+	VOLCANIC("V","Volcanic",
 			new CargoEnum[]{CargoEnum.FUEL,CargoEnum.PARTS,CargoEnum.ALLOY},
 			new int[]{1500,1000,500}),
 			
-	CLASS_J("J","Jungle",
+	JUNGLE("J","Jungle",
 			new CargoEnum[]{CargoEnum.FUEL,CargoEnum.AMMO,CargoEnum.ORGANICS},
 			new int[]{1500,1500,500}),
 			
-	CLASS_D("D","Desert",
+	DESERT("D","Desert",
 			new CargoEnum[]{CargoEnum.AMMO,CargoEnum.PARTS,CargoEnum.ORGANICS},
 			new int[]{1500,1000,500}),
 			
-	CLASS_I("I","Ice",
+	ICE("I","Ice",
 			new CargoEnum[]{CargoEnum.FUEL,CargoEnum.AMMO,CargoEnum.ALLOY},
 			new int[]{1500,1500,1000}),
 			
-	CLASS_S("S","Silicon",
+	SILICON("S","Silicon",
 			new CargoEnum[]{CargoEnum.ALLOY,CargoEnum.PARTS,CargoEnum.ELECTRONICS},
 			new int[]{1000,1000,500});
 	

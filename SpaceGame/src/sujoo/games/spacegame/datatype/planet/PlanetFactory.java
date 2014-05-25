@@ -4,26 +4,26 @@ public class PlanetFactory {
 	public static Planet buildPlanet(PlanetType type) {
 		Planet planet = null;
 		switch(type) {
-		case CLASS_T:
-			planet = new ClassTPlanet();
+		case TERRESTRIAL:
+			planet = new TerrestrialPlanet();
 			break;
-		case CLASS_G:
-			planet = new ClassGPlanet();
+		case GAS:
+			planet = new GasPlanet();
 			break;
-		case CLASS_V:
-			planet = new ClassVPlanet();
+		case VOLCANIC:
+			planet = new VolcanicPlanet();
 			break;
-		case CLASS_J:
-			planet = new ClassJPlanet();
+		case JUNGLE:
+			planet = new JunglePlanet();
 			break;
-		case CLASS_D:
-			planet = new ClassDPlanet();
+		case DESERT:
+			planet = new DesertPlanet();
 			break;
-		case CLASS_I:
-			planet = new ClassIPlanet();
+		case ICE:
+			planet = new IcePlanet();
 			break;
-		case CLASS_S:
-			planet = new ClassSPlanet();
+		case SILICON:
+			planet = new SiliconPlanet();
 			break;
 		}
 		return planet;
