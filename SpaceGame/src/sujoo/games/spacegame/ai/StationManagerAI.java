@@ -5,8 +5,11 @@ import java.util.Random;
 
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.cargo.CargoHold;
+import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 import sujoo.games.spacegame.datatype.planet.Planet;
 import sujoo.games.spacegame.datatype.player.Station;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponentEnum;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponentFactory;
 
 public class StationManagerAI {
 	private static final Random random = new Random();
@@ -17,6 +20,7 @@ public class StationManagerAI {
 	public static void fillStationWithCargo(Station station, List<Planet> planets) {
 		CargoHold hold = station.getCargoHold();
 		
+		// Fill station with CargoEnum cargo
 		for (Planet planet : planets) {
 			CargoEnum[] cargoEnums = planet.getType().getStationCargoEnums();
 			for (int i = 0; i < cargoEnums.length; i++) {
@@ -30,6 +34,9 @@ public class StationManagerAI {
 			}
 		}
 		updateStationPrices(station);
+		
+		// Fill station with ShipComponent Cargo
+		hold.addComponent(ShipComponentFactory.buildShipComponent(ShipLocationCommand.HULL, ShipComponentEnum.ADV_HULL));
 	}
 	
 	private static void updateStationPrices(Station station) {

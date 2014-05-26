@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 
 import sujoo.games.spacegame.ai.PlayerManagerAI;
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
+import sujoo.games.spacegame.datatype.cargo.CargoHold;
 import sujoo.games.spacegame.datatype.command.AttackCommand;
 import sujoo.games.spacegame.datatype.command.DockCommand;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
@@ -25,7 +26,7 @@ import sujoo.games.spacegame.gui.MainGui;
 import sujoo.games.spacegame.message.CommandException;
 
 public class GameManager {
-    private final int totalStarSystems = 2;
+    private final int totalStarSystems = 10;
     private final int maximumConnections = 4;
     private final int minStarId = 1000;
     private final int numberOfAIPlayers = 5;
@@ -417,6 +418,11 @@ public class GameManager {
     // *************************
     private void dock(Player player) {
         state = GameState.DOCKED;
+        CargoHold stationHold = player.getCurrentStar().getStation().getCargoHold();
+        CargoHold playerHold = player.getCargoHold();
+        for (CargoEnum cargoEnum : CargoEnum.getList()) {
+            playerHold.setTransactionPrice(stationHold.getTransactionPrice(cargoEnum), cargoEnum);
+        }
         displayDockCargo(player);
     }
 
@@ -448,11 +454,41 @@ public class GameManager {
                     // gui.displayError(ErrorEnum.PLAYER_NO_CARGO_SPACE);
                     throw new CommandException("<" + player.getName() + "> has insufficient cargo space");
                 case 2:
-                    throw new CommandException("<" + station.getName() + "> has insufficient cargo space");
+                    throw new CommandException("<" + station.getName() + "> has insufficient cargo");
                 case 3:
-                    throw new CommandException("<" + player.getName() + "> has insufficient money");
+                    throw new CommandException("<" + player.getName() + "> has insufficient funds");
                 }
                 displayDockCargo(player);
+            }
+        } else {
+            throw new CommandException("Not enough input");
+        }
+    }
+    
+    private void install(String[] commandString, Player player) throws CommandException {
+        if (commandString.length > 1) {
+            String componentName = ""; 
+            for (int i = 1; i < commandString.length; i++) {
+                componentName += " " + commandString[i];
+            }
+            componentName = componentName.trim();
+            if (!componentName.equals("")) {
+                Station station = player.getCurrentStar().getStation();
+                int validationCode = TransactionManager.validateInstallFromStationTransaction(player, station, componentName);
+                switch (validationCode) {
+                case 0:
+                    TransactionManager.performInstallFromStationTransaction(player, station, componentName);
+                    break;
+                case 1:
+                    throw new CommandException("<" + player.getName() + "> has insufficient materials");
+                case 2:
+                    throw new CommandException("<" + player.getName() + "> has insufficient funds");
+                case 3:
+                    throw new CommandException("<" + station.getName() + "> does not have component <" + componentName + ">");
+                case 4: 
+                    throw new CommandException("<" + station.getName() + "> has insufficient cargo space");
+                }
+                displayDockStore(player);
             }
         } else {
             throw new CommandException("Not enough input");
@@ -477,9 +513,9 @@ public class GameManager {
                 case 1:
                     throw new CommandException("<" + station.getName() + "> has insufficient cargo space");
                 case 2:
-                    throw new CommandException("<" + player.getName() + "> has insufficient cargo space");
+                    throw new CommandException("<" + player.getName() + "> has insufficient cargo amount");
                 case 3:
-                    throw new CommandException("<" + station.getName() + "> has insufficient money");
+                    throw new CommandException("<" + station.getName() + "> has insufficient funds");
                 }
                 displayDockCargo(player);
             }
@@ -532,11 +568,19 @@ public class GameManager {
                 displayDockCargo(player);
                 break;
             case STORE:
+                displayDockStore(player);
+                break;
+            case INSTALL:
+                install(commandString, player);
                 break;
             }
         } else {
             throw new CommandException("Invalid dock command: " + commandString[0]);
         }
+    }
+    
+    private void displayDockStore(Player player) {
+        gui.displayDockStore(player);
     }
 
     // *************************

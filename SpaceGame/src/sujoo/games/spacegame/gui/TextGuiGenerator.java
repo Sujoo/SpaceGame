@@ -13,6 +13,7 @@ import sujoo.games.spacegame.datatype.planet.Planet;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.Ship;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
 
 public class TextGuiGenerator {
     private static final String nl = System.lineSeparator();
@@ -106,6 +107,19 @@ public class TextGuiGenerator {
         return textArea;
     }
 
+    public static STextArea getDockStoreUpperPanel(Station station) {
+        STextArea textArea = new STextArea();
+        includeCargoComponentText(textArea, station);
+        return textArea;
+    }
+
+    public static STextArea getDockStoreLowerPanel(Player player) {
+        STextArea textArea = new STextArea();
+        includeShipText(textArea, player);
+        includeCargoText(textArea, player);
+        return textArea;
+    }
+
     public static STextArea getHelpUpperPanel(List<String> listOfCommands) {
         STextArea textArea = new STextArea();
         includeTitleText(textArea, "List of Commands");
@@ -125,6 +139,19 @@ public class TextGuiGenerator {
     }
 
     // Support Methods
+    private static void includeCargoComponentText(STextArea textArea, Player player) {
+        includeTitleText(textArea, player.getName() + " Cargo");
+        List<ShipComponent> components = player.getShip().getCargoHold().getComponentHoldList();
+        String titleBar = "| Name : Max Value : Repair : Toughness : Price : Material Costs |";
+        String bottomBar = getRepeatingCharacter("-", titleBar.length());
+        textArea.appendLine(bottomBar);
+        textArea.appendLine(titleBar);
+        textArea.appendLine(bottomBar);
+        for (ShipComponent c : components) {
+            textArea.appendLine("| " + c.getName() + " : " + c.getAbsoluteMaxValue() + " : " + c.getRepairFraction() + " : " + c.getToughness() + " : " + c.getPrice() + " : " + c.getMaterialCostString());
+        }
+    }
+
     private static void includeCargoText(STextArea textArea, Station station) {
         includeCargoText(textArea, station.getName(), station.getWallet(), station.getCargoHold(), true);
     }
@@ -154,13 +181,11 @@ public class TextGuiGenerator {
             textArea.appendLine("| "
                     + frontPad(cargoEnum.toString(), longestCargoString)
                     + " : "
-                    +
-                    frontPad(String.valueOf(hold.getCargoAmount(cargoEnum)), 4)
+                    + frontPad(String.valueOf(hold.getCargoAmount(cargoEnum)), 4)
                     + " : "
-                    +
-                    frontPad(
+                    + frontPad(
                             String.valueOf(isStation ? hold.getTransactionPrice(cargoEnum) : hold.getCargoAmount(cargoEnum)
-                                    * cargoEnum.getBaseValue()), 5) + " : ");
+                                    * hold.getTransactionPrice(cargoEnum)), 5) + " | ");
         }
 
         textArea.appendLine(bottomBar);
@@ -193,7 +218,8 @@ public class TextGuiGenerator {
     private static void includeComponentCapacity(STextArea textArea, Ship ship, ShipLocationCommand location) {
         if (ship.hasComponent(location)) {
             textArea.append(frontPad(location.getCode(), getLongestTextLength(ShipLocationCommand.values())) + " : ");
-            includeCapacityText(textArea, ship.getComponent(location).getCurrentValue(), ship.getComponent(location).getCurrentMaxValue(),
+            includeCapacityText(textArea, ship.getComponent(location).getCurrentValue(), ship.getComponent(location)
+                    .getCurrentMaxValue(),
                     Colors.rygList);
         }
     }

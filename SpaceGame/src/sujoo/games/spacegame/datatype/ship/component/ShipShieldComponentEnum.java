@@ -4,11 +4,12 @@ import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
 public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
-    BASE_SHIELD(50, 0.33, 1, ShipLocationCommand.SHIELD, 10, new CargoEnum[] { CargoEnum.FUEL }, new int[] { 100 }, 4, 0.5,
+    BASE_SHIELD("starter shield", 50, 0.33, 1, ShipLocationCommand.SHIELD, 10, new CargoEnum[] { CargoEnum.FUEL }, new int[] { 100 }, 4, 0.5,
             0.25),
-    ADVANCED_SHIELD(100, 0.33, 1, ShipLocationCommand.SHIELD, 10, new CargoEnum[] { CargoEnum.FUEL }, new int[] { 100 }, 1,
+    ADVANCED_SHIELD("adv shield", 100, 0.33, 1, ShipLocationCommand.SHIELD, 10, new CargoEnum[] { CargoEnum.FUEL }, new int[] { 100 }, 1,
             0.33, 0.25);
 
+    private String name;
     private int absoluteMaxValue;
     private double repairFraction;
     private double toughness;
@@ -21,7 +22,8 @@ public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
     private double maxValueToughness;
     private double restoreFraction;
 
-    private ShipShieldComponentEnum(int absoluteMaxValue, double repairFraction, double toughness, ShipLocationCommand location, int price, CargoEnum[] materials, int[] materialPrices, int rechargeTime, double maxValueToughness, double restoreFraction) {
+    private ShipShieldComponentEnum(String name, int absoluteMaxValue, double repairFraction, double toughness, ShipLocationCommand location, int price, CargoEnum[] materials, int[] materialPrices, int rechargeTime, double maxValueToughness, double restoreFraction) {
+        this.name = name;
         this.absoluteMaxValue = absoluteMaxValue;
         this.repairFraction = repairFraction;
         this.toughness = toughness;
@@ -33,6 +35,11 @@ public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
         this.rechargeTime = rechargeTime;
         this.maxValueToughness = maxValueToughness;
         this.restoreFraction = restoreFraction;
+    }
+    
+    @Override
+    public String getName() {
+        return name;
     }
 
     public int getRechargeTime() {

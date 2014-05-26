@@ -23,6 +23,15 @@ public abstract class Ship {
             components.put(component.getLocation(), ShipComponentFactory.buildShipComponent(component.getLocation(), component));
         }
     }
+    
+    public void removeComponent(ShipLocationCommand location) {
+        components.remove(location);
+    }
+    
+    public void replaceComponent(ShipLocationCommand location, ShipComponent component) {
+        removeComponent(location);
+        components.put(location, component);
+    }
 
     public boolean hasComponent(ShipLocationCommand location) {
         return components.containsKey(location);

@@ -4,6 +4,8 @@ import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
 public interface ShipComponentEnumIntf {
+    public String getName();
+    
     public int getAbsoluteMaxValue();
 
     public double getRepairFraction();

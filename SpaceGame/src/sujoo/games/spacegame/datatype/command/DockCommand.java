@@ -9,7 +9,8 @@ public enum DockCommand {
     CARGO("Cargo", new String[]{"Display Trading Info","Usage: cargo"}),
     BUY("Buy", new String[]{"Buy cargo from a station", "Usage: buy <number> or <all> or <max> <cargo>", "Example: buy 10 fuel", "Example: buy max ammo"}),
     SELL("Sell", new String[]{"Sell cargo to a station", "Usage: sell <number> or <all> or <max> <cargo>", "Example: sell 10 fuel", "Example: sell all ammo"}),
-    STORE("Store", new String[]{"Display station store","Usage: store"});
+    STORE("Store", new String[]{"Display station store","Usage: store"}),
+    INSTALL("Install", new String[]{"Purchase and install a component from the station store","Usage: install <component>","Example: install adv hull"});
 
     private String code;
     private String[] explanation;

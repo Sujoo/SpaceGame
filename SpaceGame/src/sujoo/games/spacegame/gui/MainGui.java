@@ -177,6 +177,11 @@ public class MainGui extends JFrame {
         setUpperPanel(TextGuiGenerator.getDockUpperPanel(player.getCurrentStar().getStation()));
         setLowerPanel(TextGuiGenerator.getDockLowerPanel(player));
     }
+    
+    public void displayDockStore(Player player) {
+        setUpperPanel(TextGuiGenerator.getDockStoreUpperPanel(player.getCurrentStar().getStation()));
+        setLowerPanel(TextGuiGenerator.getDockStoreLowerPanel(player));
+    }
 
     public void displayScore(List<Player> players) {
         setLowerPanel(TextGuiGenerator.getScoreLowerPanel(players));
