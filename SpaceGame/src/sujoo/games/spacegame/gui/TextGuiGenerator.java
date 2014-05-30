@@ -42,6 +42,14 @@ public class TextGuiGenerator {
         return textArea;
     }
 
+    public static STextArea getBattlePlayerInfo(Player player, int battleCounter) {
+        STextArea textArea = new STextArea();
+        includeShipText(textArea, player);
+        textArea.appendLine("Escape", player.getShip().isEscapePossible(battleCounter + 1) ? Colors.forestGreen
+                : Colors.crimson);
+        return textArea;
+    }
+
     public static STextArea getScanPlayerUpperPanel(Player player) {
         STextArea textArea = new STextArea();
         includeShipText(textArea, player);
@@ -142,13 +150,25 @@ public class TextGuiGenerator {
     private static void includeCargoComponentText(STextArea textArea, Player player) {
         includeTitleText(textArea, player.getName() + " Cargo");
         List<ShipComponent> components = player.getShip().getCargoHold().getComponentHoldList();
-        String titleBar = "| Name : Max Value : Repair : Toughness : Price : Material Costs |";
+        String[] componentNames = new String[components.size()];
+        String[] componentMats = new String[components.size()];
+        for (int i = 0; i < components.size(); i++) {
+            componentNames[i] = components.get(i).getName();
+            componentMats[i] = components.get(i).getMaterialCostString();
+        }
+        int longestComponentName = getLongestTextLength(componentNames);
+        int longestMatString = getLongestTextLength(componentMats);
+        String titleBar = "| " + frontPad("Name", longestComponentName) + " : Max Value : Repair : Toughness : Price : "
+                + frontPad("Material Costs", longestMatString) + " |";
         String bottomBar = getRepeatingCharacter("-", titleBar.length());
         textArea.appendLine(bottomBar);
         textArea.appendLine(titleBar);
         textArea.appendLine(bottomBar);
         for (ShipComponent c : components) {
-            textArea.appendLine("| " + c.getName() + " : " + c.getAbsoluteMaxValue() + " : " + c.getRepairFraction() + " : " + c.getToughness() + " : " + c.getPrice() + " : " + c.getMaterialCostString());
+            textArea.appendLine("| " + frontPad(c.getName(), longestComponentName) + " : "
+                    + frontPad(c.getAbsoluteMaxValue(), 9) + " : " + frontPad(c.getRepairFraction(), 6) + " : "
+                    + frontPad(c.getToughness(), 9) + " : " + frontPad(c.getPrice(), 5) + " : "
+                    + frontPad(c.getMaterialCostString(), longestMatString) + " |");
         }
     }
 
@@ -178,14 +198,31 @@ public class TextGuiGenerator {
         textArea.appendLine(bottomBar);
 
         for (CargoEnum cargoEnum : CargoEnum.getList()) {
-            textArea.appendLine("| "
-                    + frontPad(cargoEnum.toString(), longestCargoString)
-                    + " : "
-                    + frontPad(String.valueOf(hold.getCargoAmount(cargoEnum)), 4)
-                    + " : "
-                    + frontPad(
+            textArea.append("| ");
+            textArea.append(frontPad(cargoEnum.toString(), longestCargoString));
+            textArea.append(" : ");
+            textArea.append(frontPad(String.valueOf(hold.getCargoAmount(cargoEnum)), 4));
+            textArea.append(" : ");
+            Color valueColor = Colors.defaultTextColor;
+            if (isStation) {
+                if (hold.getTransactionPrice(cargoEnum) > cargoEnum.getBaseValue()) {
+                    valueColor = Colors.crimson;
+                } else {
+                    valueColor = Colors.forestGreen;
+                }
+            } else {
+                if (hold.getCargoAmount(cargoEnum) * hold.getTransactionPrice(cargoEnum) > hold.getCargoAmount(cargoEnum)
+                        * hold.getRecentPurchasePrice(cargoEnum)) {
+                    valueColor = Colors.forestGreen;
+                } else {
+                    valueColor = Colors.crimson;
+                }
+            }
+            textArea.append(
+                    frontPad(
                             String.valueOf(isStation ? hold.getTransactionPrice(cargoEnum) : hold.getCargoAmount(cargoEnum)
-                                    * hold.getTransactionPrice(cargoEnum)), 5) + " | ");
+                                    * hold.getTransactionPrice(cargoEnum)), 5), valueColor);
+            textArea.appendLine(" | ");
         }
 
         textArea.appendLine(bottomBar);
@@ -274,6 +311,10 @@ public class TextGuiGenerator {
             }
         }
         return longest;
+    }
+
+    private static String frontPad(Object s, int max) {
+        return frontPad(String.valueOf(s), max);
     }
 
     private static String frontPad(String s, int max) {

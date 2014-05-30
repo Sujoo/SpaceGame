@@ -152,7 +152,7 @@ public class MainGui extends JFrame {
     public void displayError(String errorMessage) {
         useErrorLog(errorMessage);
     }
-    
+
     public void displayBattleFeedback(BattleFeedbackEnum feedback) {
         if (feedback != null) {
             useBattleLog(feedback.getCode());
@@ -177,7 +177,7 @@ public class MainGui extends JFrame {
         setUpperPanel(TextGuiGenerator.getDockUpperPanel(player.getCurrentStar().getStation()));
         setLowerPanel(TextGuiGenerator.getDockLowerPanel(player));
     }
-    
+
     public void displayDockStore(Player player) {
         setUpperPanel(TextGuiGenerator.getDockStoreUpperPanel(player.getCurrentStar().getStation()));
         setLowerPanel(TextGuiGenerator.getDockStoreLowerPanel(player));
@@ -192,9 +192,9 @@ public class MainGui extends JFrame {
         setLowerPanel(TextGuiGenerator.getHelpLowerPanel(code, commandExplanation));
     }
 
-    public void displayBattle(Player user, Player other) {
-        setUpperPanel(TextGuiGenerator.getScanPlayerUpperPanel(other));
-        setLowerPanel(TextGuiGenerator.getStatusUpperPanel(user));
+    public void displayBattle(Player user, Player other, int battleCounter) {
+        setUpperPanel(TextGuiGenerator.getBattlePlayerInfo(other, battleCounter));
+        setLowerPanel(TextGuiGenerator.getBattlePlayerInfo(user, battleCounter));
     }
 
     public void loadSystemMap(UndirectedSparseGraph<Star, String> graph, final Star currentStar, final Star previousStar) {
@@ -217,13 +217,13 @@ public class MainGui extends JFrame {
                 }
             }
         };
-        
+
         Transformer<Star, Paint> vertexPaint2 = new Transformer<Star, Paint>() {
             public Paint transform(Star star) {
                 return Color.LIGHT_GRAY;
             }
         };
-        
+
         Transformer<String, Paint> edgePaint = new Transformer<String, Paint>() {
             public Paint transform(String star) {
                 return Colors.defaultTextColor;
@@ -279,21 +279,21 @@ public class MainGui extends JFrame {
         upperPanel.add(panel, BorderLayout.CENTER);
         redraw();
     }
-    
+
     private void useErrorLog(String text) {
         errorLog.addText(text);
         infoPanel.removeAll();
         infoPanel.add(errorLog, BorderLayout.CENTER);
         redraw();
     }
-    
+
     private void useBattleLog(String text) {
         battleLog.addText(text);
         infoPanel.removeAll();
         infoPanel.add(battleLog, BorderLayout.CENTER);
         redraw();
     }
-    
+
     private void removeLog() {
         infoPanel.removeAll();
     }

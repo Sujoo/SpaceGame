@@ -102,7 +102,10 @@ public class GameManager {
             String[] commandString = command.split(" ");
             if (SubCommand.isHelpCommand(commandString[0]) || commandString[0].equals("")) {
                 help(commandString);
-            } else {
+            } else if (SubCommand.isBackCommand(commandString[0])) {
+                displayDefault(player);
+            }
+            else {
                 switch (state) {
                 case NEWGAME:
                     if (SubCommand.isYesCommand(commandString[0])) {
@@ -148,7 +151,8 @@ public class GameManager {
                 handleBattleFeedback(feedback, player, battlePlayer, false);
                 if (state == GameState.BATTLE) {
                     if (battlePlayer instanceof AIPlayer) {
-                        handleBattleFeedback(PlayerManagerAI.attackPlayer((AIPlayer) battlePlayer, player), battlePlayer, player, true);
+                        handleBattleFeedback(PlayerManagerAI.attackPlayer((AIPlayer) battlePlayer, player, battleCounter),
+                                battlePlayer, player, true);
                     } else {
                         // future code for hotseat human battles
                     }
@@ -199,12 +203,12 @@ public class GameManager {
     // *************************
     // * Escape Command
     // *************************
-    private BattleFeedbackEnum escape(Player player) {
+    private BattleFeedbackEnum escape(Player player) throws CommandException {
         BattleFeedbackEnum feedback = null;
         if (player.getShip().isEscapePossible(battleCounter)) {
-            feedback = BattleFeedbackEnum.ESCAPE;
+            BattleManager.escape(player, battlePlayer);
         } else {
-            // add to battle log "you cannot escape at this time"
+            throw new CommandException("Escape is not yet available");
         }
         return feedback;
     }
@@ -279,7 +283,7 @@ public class GameManager {
                 dock(player);
                 break;
             case WAIT:
-                waitTurn();
+                waitTurn(player);
                 break;
             case SCORE:
                 score();
@@ -359,7 +363,7 @@ public class GameManager {
     }
 
     private void displayBattle(Player player) {
-        gui.displayBattle(player, battlePlayer);
+        gui.displayBattle(player, battlePlayer, battleCounter);
     }
 
     // *************************
@@ -443,9 +447,12 @@ public class GameManager {
             CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
             if (cargoEnum != null) {
                 Station station = player.getCurrentStar().getStation();
-                int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(), station.getTransactionPrice(cargoEnum), player
-                        .getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold().getCargoAmount(cargoEnum));
-                int validationCode = TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
+                int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(),
+                        station.getTransactionPrice(cargoEnum), player
+                                .getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold()
+                                .getCargoAmount(cargoEnum));
+                int validationCode = TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum,
+                        amountToBuy);
                 switch (validationCode) {
                 case 0:
                     TransactionManager.performBuyFromStationTransaction(player, station, cargoEnum, amountToBuy);
@@ -464,17 +471,18 @@ public class GameManager {
             throw new CommandException("Not enough input");
         }
     }
-    
+
     private void install(String[] commandString, Player player) throws CommandException {
         if (commandString.length > 1) {
-            String componentName = ""; 
+            String componentName = "";
             for (int i = 1; i < commandString.length; i++) {
                 componentName += " " + commandString[i];
             }
             componentName = componentName.trim();
             if (!componentName.equals("")) {
                 Station station = player.getCurrentStar().getStation();
-                int validationCode = TransactionManager.validateInstallFromStationTransaction(player, station, componentName);
+                int validationCode = TransactionManager
+                        .validateInstallFromStationTransaction(player, station, componentName);
                 switch (validationCode) {
                 case 0:
                     TransactionManager.performInstallFromStationTransaction(player, station, componentName);
@@ -485,7 +493,7 @@ public class GameManager {
                     throw new CommandException("<" + player.getName() + "> has insufficient funds");
                 case 3:
                     throw new CommandException("<" + station.getName() + "> does not have component <" + componentName + ">");
-                case 4: 
+                case 4:
                     throw new CommandException("<" + station.getName() + "> has insufficient cargo space");
                 }
                 displayDockStore(player);
@@ -503,9 +511,12 @@ public class GameManager {
             CargoEnum cargoEnum = CargoEnum.toCargoEnum(commandString[2]);
             if (cargoEnum != null) {
                 Station station = player.getCurrentStar().getStation();
-                int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(), station.getTransactionPrice(cargoEnum), station
-                        .getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), player.getCargoHold().getCargoAmount(cargoEnum));
-                int validationCode = TransactionManager.validateSellToStationTransaction(player, station, cargoEnum, amountToSell);
+                int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(),
+                        station.getTransactionPrice(cargoEnum), station
+                                .getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), player.getCargoHold()
+                                .getCargoAmount(cargoEnum));
+                int validationCode = TransactionManager.validateSellToStationTransaction(player, station, cargoEnum,
+                        amountToSell);
                 switch (validationCode) {
                 case 0:
                     TransactionManager.performSellToStationTransaction(player, station, cargoEnum, amountToSell);
@@ -524,7 +535,8 @@ public class GameManager {
         }
     }
 
-    private int getAmount(String command, int buyerCredits, int cargoPrice, int remainingCargoSpace, int cargoSize, int maxStock)
+    private int getAmount(String command, int buyerCredits, int cargoPrice, int remainingCargoSpace, int cargoSize,
+            int maxStock)
             throws CommandException {
         int amount = 0;
         if (StringUtils.isNumeric(command)) {
@@ -540,8 +552,19 @@ public class GameManager {
     // *************************
     // * Wait Command Logic
     // *************************
-    private void waitTurn() {
+    private void waitTurn(Player player) {
         advanceTurn();
+        displayDefault(player);
+    }
+
+    private void displayDefault(Player player) {
+        if (state == GameState.DEFAULT) {
+            score();
+        } else if (state == GameState.BATTLE) {
+            displayBattle(player);
+        } else if (state == GameState.DOCKED) {
+            displayDockCargo(player);
+        }
     }
 
     // *************************
@@ -578,7 +601,7 @@ public class GameManager {
             throw new CommandException("Invalid dock command: " + commandString[0]);
         }
     }
-    
+
     private void displayDockStore(Player player) {
         gui.displayDockStore(player);
     }
@@ -656,6 +679,7 @@ public class GameManager {
         turnCounter++;
         if (turnCounter % turnsUntilStationRefresh == 0) {
             starSystemManager.refreshStationCargo();
+            PlayerManagerAI.stationCargoHasBeenRefreshed(aiPlayers);
         }
     }
 }

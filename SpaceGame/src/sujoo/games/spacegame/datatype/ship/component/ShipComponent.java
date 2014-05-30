@@ -30,7 +30,7 @@ public class ShipComponent {
         price = shipComponentEnum.getPrice();
         restoreComponent();
     }
-    
+
     public ShipLocationCommand getLocation() {
         return location;
     }
@@ -47,9 +47,9 @@ public class ShipComponent {
     public String getMaterialCostString() {
         String result = "";
         for (int i = 0; i < materials.length; i++) {
-            result += materials[i].toString() + " : " + materialPrices[i] + " | ";
+            result += materials[i].toString() + "-" + materialPrices[i] + ", ";
         }
-        return result;
+        return result.substring(0, result.length() - 2);
     }
 
     public String getName() {

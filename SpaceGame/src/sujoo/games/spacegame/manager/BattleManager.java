@@ -9,6 +9,12 @@ import sujoo.games.spacegame.gui.BattleFeedbackEnum;
 
 public class BattleManager {
 
+    public static BattleFeedbackEnum escape(Player escapingPlayer, Player otherPlayer) {
+        BattleFeedbackEnum feedback = BattleFeedbackEnum.ESCAPE;
+        feedback.setCode(escapingPlayer.getName() + " escaped!");
+        return feedback;
+    }
+
     public static BattleFeedbackEnum damageComponent(Player player, ShipLocationCommand location, int damage) {
         Ship ship = player.getShip();
         BattleFeedbackEnum feedback = null;

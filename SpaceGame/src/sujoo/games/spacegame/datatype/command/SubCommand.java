@@ -5,12 +5,16 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum SubCommand {
-    MAX("Max", new String[] { "Results in max buy/sell amount of cargo type", "Usage: <buy/sell> max <cargo>", "Example: buy max fuel" }),
-    ALL("All", new String[] { "Results in buy/sell all of cargo type", "Usage: <buy/sell> all <cargo>", "Example: sell all fuel" }),
-    HELP("Help", new String[] { "Use this command to learn the others", "Usage: help <command>", "Example: help jump" }),
-    H("H", new String[] { "Use this command to learn the others", "Usage: help <command>", "Example: help jump" }),
+    BACK("Back", new String[] { "Back" }),
+    MAX("Max", new String[] { "Results in max buy/sell amount of cargo type", "Usage: <buy/sell> max <cargo>",
+            "Example: buy max fuel" }),
+    ALL("All", new String[] { "Results in buy/sell all of cargo type", "Usage: <buy/sell> all <cargo>",
+            "Example: sell all fuel" }),
+    HELP("Help", new String[] { "Use this command to learn the others", "Usage: help <command>", "Example: help jump",
+            "Note: type " + BACK.getCode() + " to exit help menu" }),
+    H("H", new String[] { HELP.getCode() }),
     YES("Yes", new String[] { "Yes" }),
-    Y("Y", new String[] { "Yes" });
+    Y("Y", new String[] { YES.getCode() });
 
     private String code;
     private String[] explanation;
@@ -70,6 +74,15 @@ public enum SubCommand {
     public static boolean isYesCommand(String code) {
         SubCommand command = toCommand(code);
         if (command != null && (command == YES || command == Y)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isBackCommand(String code) {
+        SubCommand command = toCommand(code);
+        if (command != null && (command == BACK)) {
             return true;
         } else {
             return false;

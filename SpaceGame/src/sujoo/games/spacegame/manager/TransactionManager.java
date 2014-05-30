@@ -139,9 +139,10 @@ public class TransactionManager {
         transactCargoTrade(station.getCargoHold(), player.getShip().getCargoHold(), cargoEnum, amount);
 
         int stationSellValue = station.getTransactionPrice(cargoEnum) * amount;
+        player.setTransactionPrice(station.getTransactionPrice(cargoEnum), cargoEnum);
+        player.setPurchasePrice(station.getTransactionPrice(cargoEnum), cargoEnum);
         station.getWallet().addCredits(stationSellValue);
         player.getWallet().removeCredits(stationSellValue);
-        player.setPurchasePrice(stationSellValue, cargoEnum);
     }
 
     public static void performInstallFromStationTransaction(Player player, Station station, String componentName) {
@@ -173,6 +174,7 @@ public class TransactionManager {
         transactCargoTrade(player.getShip().getCargoHold(), station.getCargoHold(), cargoEnum, amount);
 
         int stationBuyValue = station.getTransactionPrice(cargoEnum) * amount;
+        player.setTransactionPrice(station.getTransactionPrice(cargoEnum), cargoEnum);
         player.getWallet().addCredits(stationBuyValue);
         station.getWallet().removeCredits(stationBuyValue);
     }

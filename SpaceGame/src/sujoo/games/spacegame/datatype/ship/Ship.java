@@ -1,6 +1,7 @@
 package sujoo.games.spacegame.datatype.ship;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Maps;
 
@@ -20,14 +21,15 @@ public abstract class Ship {
         hold = new CargoHold(type.getHoldSize());
         components = Maps.newHashMap();
         for (ShipComponentEnumIntf component : type.getComponents()) {
-            components.put(component.getLocation(), ShipComponentFactory.buildShipComponent(component.getLocation(), component));
+            components.put(component.getLocation(),
+                    ShipComponentFactory.buildShipComponent(component.getLocation(), component));
         }
     }
-    
+
     public void removeComponent(ShipLocationCommand location) {
         components.remove(location);
     }
-    
+
     public void replaceComponent(ShipLocationCommand location, ShipComponent component) {
         removeComponent(location);
         components.put(location, component);
@@ -56,7 +58,7 @@ public abstract class Ship {
         }
         return result;
     }
-    
+
     public boolean isShieldUp() {
         if (hasComponent(ShipLocationCommand.SHIELD) && getComponent(ShipLocationCommand.SHIELD).getCurrentValue() != 0) {
             return true;
@@ -84,7 +86,12 @@ public abstract class Ship {
     public boolean isEscapePossible(int battleCounter) {
         boolean result = false;
         if (hasComponent(ShipLocationCommand.ENGINE)) {
-            if (battleCounter >= 4) {
+            int maximumComponentValue = 0;
+            for (Entry<ShipLocationCommand, ShipComponent> entry : components.entrySet()) {
+                maximumComponentValue += entry.getValue().getAbsoluteMaxValue();
+            }
+            int turnsToEscape = maximumComponentValue / ((getCurrentComponentValue(ShipLocationCommand.ENGINE) * 2) + 1);
+            if (battleCounter > turnsToEscape) {
                 result = true;
             }
         }
