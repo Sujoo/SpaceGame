@@ -1,7 +1,7 @@
 package sujoo.games.spacegame.datatype.planet;
 
 public class PlanetFactory {
-	public static Planet buildPlanet(PlanetType type) {
+	public static Planet buildPlanet(PlanetEnum type) {
 		Planet planet = null;
 		switch(type) {
 		case TERRESTRIAL:

@@ -6,7 +6,7 @@ import java.util.Random;
 import sujoo.games.spacegame.ai.StationManagerAI;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.planet.PlanetFactory;
-import sujoo.games.spacegame.datatype.planet.PlanetType;
+import sujoo.games.spacegame.datatype.planet.PlanetEnum;
 
 import com.google.common.collect.Lists;
 
@@ -66,7 +66,7 @@ public class StarSystemManager {
 	
 	private void generatePlanets(Star star) {
 		while (star.getPlanets().size() < minPlanets || (star.getPlanets().size() < maxPlanets && random.nextBoolean())) {
-			star.addPlanet(PlanetFactory.buildPlanet(PlanetType.values()[random.nextInt(PlanetType.values().length)]));
+			star.addPlanet(PlanetFactory.buildPlanet(PlanetEnum.values()[random.nextInt(PlanetEnum.values().length)]));
 		}
 	}
 	

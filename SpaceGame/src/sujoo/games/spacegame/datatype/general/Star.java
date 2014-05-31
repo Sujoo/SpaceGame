@@ -2,10 +2,11 @@ package sujoo.games.spacegame.datatype.general;
 
 import java.util.List;
 
+import sujoo.games.spacegame.ai.StationManagerAI;
 import sujoo.games.spacegame.datatype.planet.Planet;
 import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.ShipFactory;
-import sujoo.games.spacegame.datatype.ship.ShipType;
+import sujoo.games.spacegame.datatype.ship.ShipEnum;
 
 import com.google.common.collect.Lists;
 
@@ -14,12 +15,10 @@ public class Star implements Comparable<Star> {
 	private List<Planet> planets;
 	private Station station;
 	
-	private final int defaultCredits = 50000;
-	
 	public Star(int id) {
 		this.id = id;
 		planets = Lists.newArrayList();
-		station = new Station(ShipFactory.buildShip(ShipType.STATION), defaultCredits, "Station " + id);
+		station = new Station(ShipFactory.buildShip(ShipEnum.STATION), StationManagerAI.stationCashReload, "Station_" + id);
 	}
 	
 	public int getId() {

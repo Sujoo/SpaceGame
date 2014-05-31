@@ -1,10 +1,12 @@
 package sujoo.games.spacegame.datatype.player;
 
+import com.google.common.base.Optional;
+
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
-import sujoo.games.spacegame.datatype.cargo.CargoHold;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.general.Wallet;
 import sujoo.games.spacegame.datatype.ship.Ship;
+import sujoo.games.spacegame.datatype.ship.component.CargoHoldComponent;
 
 public abstract class Player implements Comparable<Player> {
 	private final String name;
@@ -22,7 +24,12 @@ public abstract class Player implements Comparable<Player> {
 	}
 	
 	public int getScore() {
-		return wallet.getCredits() + ship.getCargoHold().getTotalWorth();
+	    int score = wallet.getCredits();
+	    Optional<CargoHoldComponent> cargoHold = ship.getCargoHold();
+	    if (cargoHold.isPresent()) {
+	        score += cargoHold.get().getTotalWorth();
+	    }
+	    return score;
 	}
 	
 	public Ship getShip() {
@@ -47,23 +54,31 @@ public abstract class Player implements Comparable<Player> {
 	}
 	
 	public int getPurchasePrice(CargoEnum cargoEnum) {
-		return ship.getCargoHold().getRecentPurchasePrice(cargoEnum);
+		if (ship.getCargoHold().isPresent()) {
+            return ship.getCargoHold().get().getRecentPurchasePrice(cargoEnum);
+        } else {
+            return 0;
+        }
 	}
 	
 	public void setPurchasePrice(int price, CargoEnum cargoEnum) {
-		ship.getCargoHold().setRecentPurchasePrice(price, cargoEnum);
+		if (ship.getCargoHold().isPresent()) {
+            ship.getCargoHold().get().setRecentPurchasePrice(price, cargoEnum);
+        }
 	}
 	
 	public void setTransactionPrice(int price, CargoEnum cargoEnum) {
-		ship.getCargoHold().setTransactionPrice(price, cargoEnum);
+	    if (ship.getCargoHold().isPresent()) {
+	        ship.getCargoHold().get().setTransactionPrice(price, cargoEnum);
+	    }
 	}
 	
 	public int getTransactionPrice(CargoEnum cargoEnum) {
-		return ship.getCargoHold().getTransactionPrice(cargoEnum);
-	}
-	
-	public CargoHold getCargoHold() {
-		return ship.getCargoHold();
+	    if (ship.getCargoHold().isPresent()) {
+	        return ship.getCargoHold().get().getTransactionPrice(cargoEnum);
+	    } else {
+	        return 0;
+	    }
 	}
 	
 	public String getName() {

@@ -7,7 +7,7 @@ public class ShipComponentFactory {
         ShipComponent shipComponent = null;
         switch (location) {
         case SHIELD:
-            shipComponent = new ShipShieldComponent((ShipShieldComponentEnum) intf);
+            shipComponent = new ShieldComponent((ShieldComponentEnum) intf);
             break;
         case HULL:
             shipComponent = new ShipComponent(intf);
@@ -18,7 +18,14 @@ public class ShipComponentFactory {
         case WEAPON:
             shipComponent = new ShipComponent(intf);
             break;
-        case CARGO:
+        case CARGOHOLD:
+            shipComponent = new CargoHoldComponent((CargoHoldComponentEnum) intf);
+            break;
+        case FUELTANK:
+            shipComponent = new TankComponent((TankComponentEnum) intf);
+            break;
+        case MAGAZINE:
+            shipComponent = new TankComponent((TankComponentEnum) intf);
             break;
         }
         return shipComponent;

@@ -1,9 +1,9 @@
 package sujoo.games.spacegame.manager;
 
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
-import sujoo.games.spacegame.datatype.cargo.CargoHold;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
+import sujoo.games.spacegame.datatype.ship.component.CargoHoldComponent;
 import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
 
 public class TransactionManager {
@@ -20,8 +20,8 @@ public class TransactionManager {
      */
     public static int validateBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
         int result = -1;
-        CargoHold playerHold = player.getShip().getCargoHold();
-        CargoHold stationHold = station.getCargoHold();
+        CargoHoldComponent playerHold = player.getShip().getCargoHold().get();
+        CargoHoldComponent stationHold = station.getShip().getCargoHold().get();
         int stationSellValue = station.getTransactionPrice(cargoEnum) * amount;
         // Does player have enough money?
         if (player.getWallet().getCredits() >= stationSellValue) {
@@ -55,8 +55,8 @@ public class TransactionManager {
      */
     public static int validateInstallFromStationTransaction(Player player, Station station, String componentName) {
         int result = -1;
-        CargoHold stationHold = station.getCargoHold();
-        CargoHold playerHold = player.getCargoHold();
+        CargoHoldComponent stationHold = station.getShip().getCargoHold().get();
+        CargoHoldComponent playerHold = player.getShip().getCargoHold().get();
         if (stationHold.doesComponentExist(componentName)) {
             ShipComponent component = stationHold.getComponentExist(componentName);
             if (player.getWallet().getCredits() >= component.getPrice()) {
@@ -102,8 +102,8 @@ public class TransactionManager {
      */
     public static int validateSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
         int result = -1;
-        CargoHold playerHold = player.getShip().getCargoHold();
-        CargoHold stationHold = station.getCargoHold();
+        CargoHoldComponent playerHold = player.getShip().getCargoHold().get();
+        CargoHoldComponent stationHold = station.getShip().getCargoHold().get();
         int stationBuyValue = station.getTransactionPrice(cargoEnum) * amount;
         // Does player have enough money?
         if (station.getWallet().getCredits() >= stationBuyValue) {
@@ -136,7 +136,7 @@ public class TransactionManager {
      * @return amount of money player will have to pay to station
      */
     public static void performBuyFromStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
-        transactCargoTrade(station.getCargoHold(), player.getShip().getCargoHold(), cargoEnum, amount);
+        transactCargoTrade(station.getShip().getCargoHold().get(), player.getShip().getCargoHold().get(), cargoEnum, amount);
 
         int stationSellValue = station.getTransactionPrice(cargoEnum) * amount;
         player.setTransactionPrice(station.getTransactionPrice(cargoEnum), cargoEnum);
@@ -146,11 +146,12 @@ public class TransactionManager {
     }
 
     public static void performInstallFromStationTransaction(Player player, Station station, String componentName) {
-        CargoHold stationHold = station.getCargoHold();
+        CargoHoldComponent stationHold = station.getShip().getCargoHold().get();
+        CargoHoldComponent playerHold = player.getShip().getCargoHold().get();
         ShipComponent component = stationHold.getComponentExist(componentName);
 
         for (CargoEnum cargoEnum : component.getMaterials()) {
-            transactCargoTrade(player.getCargoHold(), station.getCargoHold(), cargoEnum,
+            transactCargoTrade(playerHold, stationHold, cargoEnum,
                     component.getMaterialPrice(cargoEnum));
         }
 
@@ -171,7 +172,7 @@ public class TransactionManager {
      * @return amount of money player will gain from station
      */
     public static void performSellToStationTransaction(Player player, Station station, CargoEnum cargoEnum, int amount) {
-        transactCargoTrade(player.getShip().getCargoHold(), station.getCargoHold(), cargoEnum, amount);
+        transactCargoTrade(player.getShip().getCargoHold().get(), station.getShip().getCargoHold().get(), cargoEnum, amount);
 
         int stationBuyValue = station.getTransactionPrice(cargoEnum) * amount;
         player.setTransactionPrice(station.getTransactionPrice(cargoEnum), cargoEnum);
@@ -179,7 +180,7 @@ public class TransactionManager {
         station.getWallet().removeCredits(stationBuyValue);
     }
 
-    private static void transactCargoTrade(CargoHold srcHold, CargoHold destHold, CargoEnum cargoEnum, int amount) {
+    private static void transactCargoTrade(CargoHoldComponent srcHold, CargoHoldComponent destHold, CargoEnum cargoEnum, int amount) {
         srcHold.removeCargo(cargoEnum, amount);
         destHold.addCargo(cargoEnum, amount);
     }

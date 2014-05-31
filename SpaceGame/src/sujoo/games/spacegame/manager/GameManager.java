@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import sujoo.games.spacegame.ai.PlayerManagerAI;
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
-import sujoo.games.spacegame.datatype.cargo.CargoHold;
 import sujoo.games.spacegame.datatype.command.AttackCommand;
 import sujoo.games.spacegame.datatype.command.DockCommand;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
@@ -20,21 +20,24 @@ import sujoo.games.spacegame.datatype.player.HumanPlayer;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.ShipFactory;
-import sujoo.games.spacegame.datatype.ship.ShipType;
+import sujoo.games.spacegame.datatype.ship.ShipEnum;
+import sujoo.games.spacegame.datatype.ship.component.CargoHoldComponent;
+import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
 import sujoo.games.spacegame.gui.BattleFeedbackEnum;
 import sujoo.games.spacegame.gui.MainGui;
 import sujoo.games.spacegame.message.CommandException;
 
 public class GameManager {
-    private final int totalStarSystems = 10;
-    private final int maximumConnections = 4;
+    // TODO Add main menu and game creation interface
+    private final int totalStarSystems = 2;
+    private final int maximumConnections = 6;
     private final int minStarId = 1000;
-    private final int numberOfAIPlayers = 5;
+    private final int numberOfAIPlayers = 10;
     private final int minPlanets = 1;
-    private final int maxPlanets = 4;
+    private final int maxPlanets = 6;
     private final int initCredits = 1000;
 
-    private final int turnsUntilStationRefreshBase = 50;
+    private final int turnsUntilStationRefreshBase = 5;
     private final int turnsUntilModifier = totalStarSystems / numberOfAIPlayers;
     private final int turnsUntilStationRefresh = turnsUntilStationRefreshBase * turnsUntilModifier + 1;
 
@@ -55,10 +58,11 @@ public class GameManager {
     }
 
     private void initializeGame() {
+        System.out.println(turnsUntilStationRefresh);
         starSystemManager = new StarSystemManager(minStarId, totalStarSystems, maximumConnections, minPlanets, maxPlanets);
         aiPlayers = PlayerManagerAI.createAIPlayers(numberOfAIPlayers, starSystemManager);
 
-        Player humanPlayer = new HumanPlayer(ShipFactory.buildShip(ShipType.SMALL_TRANS), initCredits, "Sujoo");
+        Player humanPlayer = new HumanPlayer(ShipFactory.buildShip(ShipEnum.SMALL_TRANS), initCredits, "Sujoo");
         humanPlayer.setNewCurrentStar(starSystemManager.getRandomStarSystem());
 
         allPlayers = Lists.newArrayList();
@@ -171,8 +175,17 @@ public class GameManager {
         if (commandString.length > 1) {
             ShipLocationCommand secondCommand = ShipLocationCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
-                feedback = BattleManager.damageComponent(battlePlayer, secondCommand,
-                        player.getShip().getCurrentComponentValue(ShipLocationCommand.WEAPON));
+                if (secondCommand.isTargetable()) {
+                    Optional<ShipComponent> componentOptional = battlePlayer.getShip().getComponent(secondCommand);
+                    if (componentOptional.isPresent()) {
+                        feedback = BattleManager.damageComponent(battlePlayer, componentOptional.get(),
+                                player.getShip().getCurrentComponentValue(ShipLocationCommand.WEAPON));
+                    } else {
+                        throw new CommandException("Ship component does not exist");
+                    }
+                } else {
+                    throw new CommandException("Ship location not targetable");
+                }
             } else {
                 throw new CommandException("Invalid component name");
             }
@@ -190,7 +203,16 @@ public class GameManager {
         if (commandString.length > 1) {
             ShipLocationCommand secondCommand = ShipLocationCommand.toCommand(commandString[1]);
             if (secondCommand != null) {
-                feedback = BattleManager.repairComponent(player, secondCommand);
+                if (secondCommand.isTargetable()) {
+                    Optional<ShipComponent> componentOptional = player.getShip().getComponent(secondCommand);
+                    if (componentOptional.isPresent()) {
+                        feedback = BattleManager.repairComponent(player, componentOptional.get());
+                    } else {
+                        throw new CommandException("Ship component does not exist");
+                    }
+                } else {
+                    throw new CommandException("Ship location not targetable");
+                }
             } else {
                 throw new CommandException("Invalid component name");
             }
@@ -241,7 +263,7 @@ public class GameManager {
             break;
         case ESCAPE:
             attacker.getShip().restoreAllComponents();
-            battlePlayer.getShip().restoreAllComponents();
+            defender.getShip().restoreAllComponents();
             endBattle();
             gui.displayStatus(attacker);
             gui.displayBattleFeedback(feedback);
@@ -422,8 +444,8 @@ public class GameManager {
     // *************************
     private void dock(Player player) {
         state = GameState.DOCKED;
-        CargoHold stationHold = player.getCurrentStar().getStation().getCargoHold();
-        CargoHold playerHold = player.getCargoHold();
+        CargoHoldComponent stationHold = player.getCurrentStar().getStation().getShip().getCargoHold().get();
+        CargoHoldComponent playerHold = player.getShip().getCargoHold().get();
         for (CargoEnum cargoEnum : CargoEnum.getList()) {
             playerHold.setTransactionPrice(stationHold.getTransactionPrice(cargoEnum), cargoEnum);
         }
@@ -448,8 +470,8 @@ public class GameManager {
             if (cargoEnum != null) {
                 Station station = player.getCurrentStar().getStation();
                 int amountToBuy = getAmount(commandString[1], player.getWallet().getCredits(),
-                        station.getTransactionPrice(cargoEnum), player
-                                .getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), station.getCargoHold()
+                        station.getTransactionPrice(cargoEnum), player.getShip().getCargoHold().get()
+                                .getRemainingCargoSpace(), cargoEnum.getSize(), station.getShip().getCargoHold().get()
                                 .getCargoAmount(cargoEnum));
                 int validationCode = TransactionManager.validateBuyFromStationTransaction(player, station, cargoEnum,
                         amountToBuy);
@@ -512,8 +534,8 @@ public class GameManager {
             if (cargoEnum != null) {
                 Station station = player.getCurrentStar().getStation();
                 int amountToSell = getAmount(commandString[1], station.getWallet().getCredits(),
-                        station.getTransactionPrice(cargoEnum), station
-                                .getCargoHold().getRemainingCargoSpace(), cargoEnum.getSize(), player.getCargoHold()
+                        station.getTransactionPrice(cargoEnum), station.getShip().getCargoHold().get()
+                                .getRemainingCargoSpace(), cargoEnum.getSize(), player.getShip().getCargoHold().get()
                                 .getCargoAmount(cargoEnum));
                 int validationCode = TransactionManager.validateSellToStationTransaction(player, station, cargoEnum,
                         amountToSell);
@@ -559,7 +581,8 @@ public class GameManager {
 
     private void displayDefault(Player player) {
         if (state == GameState.DEFAULT) {
-            score();
+            scanSystem(player);
+            //score();
         } else if (state == GameState.BATTLE) {
             displayBattle(player);
         } else if (state == GameState.DOCKED) {
@@ -679,6 +702,7 @@ public class GameManager {
         turnCounter++;
         if (turnCounter % turnsUntilStationRefresh == 0) {
             starSystemManager.refreshStationCargo();
+            System.out.println("Cargo refreshed");
             PlayerManagerAI.stationCargoHasBeenRefreshed(aiPlayers);
         }
     }

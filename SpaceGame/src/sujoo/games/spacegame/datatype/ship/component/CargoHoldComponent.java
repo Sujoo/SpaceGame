@@ -1,25 +1,26 @@
-package sujoo.games.spacegame.datatype.cargo;
+package sujoo.games.spacegame.datatype.ship.component;
 
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
+import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 
 
-public class CargoHold {
+public class CargoHoldComponent extends ShipComponent {
 	private int size;
 	private int[] cargo;
 	private int[] transactionPrice;
 	private int[] recentPurchasedPrice;
 	private ShipComponent[] componentHold;
 	
-	public CargoHold(int size) {
-		this.size = size;
+	public CargoHoldComponent(CargoHoldComponentEnum cargoHoldComponentEnum) {
+	    super(cargoHoldComponentEnum);
+		this.size = cargoHoldComponentEnum.getHoldSize();
+		componentHold = new ShipComponent[cargoHoldComponentEnum.getComponentHoldSize()];
 		cargo = new int[CargoEnum.values().length];
 		transactionPrice = new int[CargoEnum.values().length];
 		recentPurchasedPrice = new int[CargoEnum.values().length];
-		componentHold = new ShipComponent[4];
 	}
 	
 	public boolean doesComponentExist(String componentName) {

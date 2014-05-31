@@ -3,22 +3,22 @@ package sujoo.games.spacegame.datatype.ship;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
-import sujoo.games.spacegame.datatype.cargo.CargoHold;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
+import sujoo.games.spacegame.datatype.ship.component.CargoHoldComponent;
 import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
 import sujoo.games.spacegame.datatype.ship.component.ShipComponentEnumIntf;
 import sujoo.games.spacegame.datatype.ship.component.ShipComponentFactory;
+import sujoo.games.spacegame.datatype.ship.component.ShieldComponent;
 
 public abstract class Ship {
-    private ShipType type;
-    private CargoHold hold;
+    private ShipEnum type;
     private Map<ShipLocationCommand, ShipComponent> components;
 
-    public Ship(ShipType type) {
+    public Ship(ShipEnum type) {
         this.type = type;
-        hold = new CargoHold(type.getHoldSize());
         components = Maps.newHashMap();
         for (ShipComponentEnumIntf component : type.getComponents()) {
             components.put(component.getLocation(),
@@ -35,32 +35,39 @@ public abstract class Ship {
         components.put(location, component);
     }
 
-    public boolean hasComponent(ShipLocationCommand location) {
-        return components.containsKey(location);
+    public Optional<ShipComponent> getComponent(ShipLocationCommand location) {
+        return Optional.<ShipComponent>fromNullable(components.get(location));
     }
-
-    public ShipComponent getComponent(ShipLocationCommand location) {
-        return components.get(location);
+    
+    public Optional<CargoHoldComponent> getCargoHold() {
+        return Optional.<CargoHoldComponent>fromNullable((CargoHoldComponent) components.get(ShipLocationCommand.CARGOHOLD));
+    }
+    
+    public Optional<ShieldComponent> getShield() {
+        return Optional.<ShieldComponent>fromNullable((ShieldComponent) components.get(ShipLocationCommand.SHIELD));
     }
 
     public int getCurrentComponentValue(ShipLocationCommand location) {
-        int result = 0;
-        if (hasComponent(location)) {
-            result = getComponent(location).getCurrentValue();
+        Optional<ShipComponent> component = getComponent(location);
+        if (component.isPresent()) {
+            return component.get().getCurrentValue();
+        } else {
+            return 0;
         }
-        return result;
     }
 
     public int getCurrentMaxComponentValue(ShipLocationCommand location) {
-        int result = 0;
-        if (hasComponent(location)) {
-            result = getComponent(location).getAbsoluteMaxValue();
+        Optional<ShipComponent> component = getComponent(location);
+        if (component.isPresent()) {
+            return component.get().getAbsoluteMaxValue();
+        } else {
+            return 0;
         }
-        return result;
     }
 
     public boolean isShieldUp() {
-        if (hasComponent(ShipLocationCommand.SHIELD) && getComponent(ShipLocationCommand.SHIELD).getCurrentValue() != 0) {
+        Optional<ShipComponent> component = getComponent(ShipLocationCommand.SHIELD);
+        if (component.isPresent() && component.get().getCurrentValue() > 0) {
             return true;
         } else {
             return false;
@@ -68,13 +75,12 @@ public abstract class Ship {
     }
 
     public boolean isDestoryed() {
-        boolean result = false;
-        if (hasComponent(ShipLocationCommand.HULL)) {
-            if (getComponent(ShipLocationCommand.HULL).getCurrentValue() == 0) {
-                result = true;
-            }
+        Optional<ShipComponent> component = getComponent(ShipLocationCommand.HULL);
+        if (component.isPresent() && component.get().getCurrentValue() == 0) {
+            return true;
+        } else {
+            return false;
         }
-        return result;
     }
 
     public void restoreAllComponents() {
@@ -84,25 +90,24 @@ public abstract class Ship {
     }
 
     public boolean isEscapePossible(int battleCounter) {
-        boolean result = false;
-        if (hasComponent(ShipLocationCommand.ENGINE)) {
-            int maximumComponentValue = 0;
-            for (Entry<ShipLocationCommand, ShipComponent> entry : components.entrySet()) {
-                maximumComponentValue += entry.getValue().getAbsoluteMaxValue();
-            }
-            int turnsToEscape = maximumComponentValue / ((getCurrentComponentValue(ShipLocationCommand.ENGINE) * 2) + 1);
-            if (battleCounter > turnsToEscape) {
-                result = true;
-            }
+        Optional<ShipComponent> component = getComponent(ShipLocationCommand.ENGINE);
+        int turnsToEscape = getWeight() / ((getCurrentComponentValue(ShipLocationCommand.ENGINE) * 2) + 1);
+        if (component.isPresent() && battleCounter > turnsToEscape) {
+            return true;
+        } else {
+            return false;
         }
-        return result;
+    }
+    
+    public int getWeight() {
+        int maximumComponentValue = 0;
+        for (Entry<ShipLocationCommand, ShipComponent> entry : components.entrySet()) {
+            maximumComponentValue += entry.getValue().getAbsoluteMaxValue();
+        }
+        return maximumComponentValue;
     }
 
-    public ShipType getType() {
+    public ShipEnum getType() {
         return type;
-    }
-
-    public CargoHold getCargoHold() {
-        return hold;
     }
 }

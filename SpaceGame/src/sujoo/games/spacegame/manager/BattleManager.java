@@ -1,10 +1,11 @@
 package sujoo.games.spacegame.manager;
 
-import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
+import com.google.common.base.Optional;
+
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.ship.Ship;
 import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
-import sujoo.games.spacegame.datatype.ship.component.ShipShieldComponent;
+import sujoo.games.spacegame.datatype.ship.component.ShieldComponent;
 import sujoo.games.spacegame.gui.BattleFeedbackEnum;
 
 public class BattleManager {
@@ -15,59 +16,53 @@ public class BattleManager {
         return feedback;
     }
 
-    public static BattleFeedbackEnum damageComponent(Player player, ShipLocationCommand location, int damage) {
+    public static BattleFeedbackEnum damageComponent(Player player, ShipComponent component, int damage) {
         Ship ship = player.getShip();
         BattleFeedbackEnum feedback = null;
-        // if the component isn't on the ship, than the player input the wrong
-        // command so leave feedback null
-        if (ship.hasComponent(location)) {
-            // If ship has shields, damage those first
-            if (ship.isShieldUp()) {
-                ShipComponent shield = ship.getComponent(ShipLocationCommand.SHIELD);
-                if (shield.getCurrentValue() >= damage) {
-                    int damageTaken = ship.getComponent(ShipLocationCommand.SHIELD).takeDamage(damage);
-                    feedback = BattleFeedbackEnum.SHIELD_HIT;
-                    feedback.setCode(player.getName() + " Shield absorbed " + damageTaken + " damage");
-                } else {
-                    int shieldDamage = shield.getCurrentValue();
-                    int remainingDamage = damage - shieldDamage;
-                    int shieldDamageTaken = shield.takeDamage(shieldDamage);
-                    int componentDamageTaken = ship.getComponent(location).takeDamage(remainingDamage);
-                    feedback = BattleFeedbackEnum.COMPONENT_DAMAGE;
-                    feedback.setCode(player.getName() + " Shield absorbed " + shieldDamageTaken + " damage"
-                            + System.lineSeparator() + player.getName() + " " + location.getCode() + " took "
-                            + componentDamageTaken + " damage");
-                }
+        // If ship has shields, damage those first
+        Optional<ShieldComponent> shieldOptional = ship.getShield();
+        if (ship.isShieldUp()) {
+            if (shieldOptional.isPresent() && shieldOptional.get().getCurrentValue() >= damage) {
+                int damageTaken = shieldOptional.get().takeDamage(damage);
+                feedback = BattleFeedbackEnum.SHIELD_HIT;
+                feedback.setCode(player.getName() + " Shield absorbed " + damageTaken + " damage");
             } else {
-                int damageTaken = ship.getComponent(location).takeDamage(damage);
+                int shieldDamage = shieldOptional.get().getCurrentValue();
+                int remainingDamage = damage - shieldDamage;
+                int shieldDamageTaken = shieldOptional.get().takeDamage(shieldDamage);
+                int componentDamageTaken = component.takeDamage(remainingDamage);
                 feedback = BattleFeedbackEnum.COMPONENT_DAMAGE;
-                feedback.setCode(player.getName() + " " + location.getCode() + " took " + damageTaken + " damage");
+                feedback.setCode(player.getName() + " Shield absorbed " + shieldDamageTaken + " damage"
+                        + System.lineSeparator() + player.getName() + " " + component.getLocation().getCode() + " took "
+                        + componentDamageTaken + " damage");
             }
+        } else {
+            int damageTaken = component.takeDamage(damage);
+            feedback = BattleFeedbackEnum.COMPONENT_DAMAGE;
+            feedback.setCode(player.getName() + " " + component.getLocation().getCode() + " took " + damageTaken + " damage");
+        }
 
-            if (ship.isDestoryed()) {
-                feedback = BattleFeedbackEnum.SHIP_DESTROYED;
-                feedback.setCode(player.getName() + " destroyed");
-            }
+        if (ship.isDestoryed()) {
+            feedback = BattleFeedbackEnum.SHIP_DESTROYED;
+            feedback.setCode(player.getName() + " destroyed");
         }
         return feedback;
     }
 
-    public static BattleFeedbackEnum repairComponent(Player player, ShipLocationCommand location) {
-        BattleFeedbackEnum feedback = null;
-        Ship ship = player.getShip();
-        if (ship.hasComponent(location)) {
-            int repaired = ship.getComponent(location).repair();
-            feedback = BattleFeedbackEnum.COMPONENT_REPAIR;
-            feedback.setCode(player.getName() + " repaired " + location.getCode() + " by " + repaired);
-        }
+    public static BattleFeedbackEnum repairComponent(Player player, ShipComponent component) {
+        BattleFeedbackEnum feedback;
+        int repaired = component.repair();
+        feedback = BattleFeedbackEnum.COMPONENT_REPAIR;
+        feedback.setCode(player.getName() + " repaired " + component.getLocation().getCode() + " by " + repaired);
         return feedback;
     }
 
     public static BattleFeedbackEnum performShieldRecharge(Player player, int battleCounter) {
         BattleFeedbackEnum feedback = null;
         Ship ship = player.getShip();
-        if (ship.hasComponent(ShipLocationCommand.SHIELD)) {
-            ShipShieldComponent shield = (ShipShieldComponent) ship.getComponent(ShipLocationCommand.SHIELD);
+        Optional<ShieldComponent> shieldOptional = ship.getShield();
+        if (shieldOptional.isPresent()) {
+            ShieldComponent shield = shieldOptional.get();
             if (battleCounter % shield.getRechargeTime() == 0) {
                 int restored = shield.restoreShield();
                 feedback = BattleFeedbackEnum.SHIELD_RECHARGE;

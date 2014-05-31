@@ -5,18 +5,26 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum ShipLocationCommand {
-    ENGINE("Engine", new String[] { "words" }),
-    WEAPON("Weapon", new String[] { "words" }),
-    SHIELD("Shield", new String[] { "words" }),
-    HULL("Hull", new String[] { "words" }),
-    CARGO("Cargo", new String[] { "words" });
+    ENGINE("Engine", new String[] { "words" }, true),
+    WEAPON("Weapon", new String[] { "words" }, true),
+    SHIELD("Shield", new String[] { "words" }, true),
+    HULL("Hull", new String[] { "words" }, true),
+    CARGOHOLD("CargoHold", new String[] { "words" }, false),
+    FUELTANK("FuelTank", new String[] { "words" }, false),
+    MAGAZINE("Magazine", new String[] { "words" }, false);
 
     private String code;
     private String[] explanation;
+    private boolean targetable;
 
-    private ShipLocationCommand(String code, String[] explanation) {
+    private ShipLocationCommand(String code, String[] explanation, boolean targetable) {
         this.code = code;
         this.explanation = explanation;
+        this.targetable = targetable;
+    }
+    
+    public boolean isTargetable() {
+        return targetable;
     }
 
     public String getCode() {

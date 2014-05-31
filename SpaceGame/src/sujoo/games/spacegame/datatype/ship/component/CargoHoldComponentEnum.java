@@ -3,11 +3,11 @@ package sujoo.games.spacegame.datatype.ship.component;
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 
-public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
-    BASE_SHIELD("starter shield", 50, 0.33, 1, ShipLocationCommand.SHIELD, 10, new CargoEnum[] { CargoEnum.FUEL }, new int[] { 100 }, 4, 0.5,
-            0.25),
-    ADVANCED_SHIELD("adv shield", 100, 0.33, 1, ShipLocationCommand.SHIELD, 10, new CargoEnum[] { CargoEnum.FUEL }, new int[] { 100 }, 1,
-            0.33, 0.25);
+public enum CargoHoldComponentEnum implements ShipComponentEnumIntf {
+    BASE_HOLD("starter hold", 100, 0.33, 1, ShipLocationCommand.CARGOHOLD, 10, new CargoEnum[] { CargoEnum.FUEL },
+            new int[] { 100 }, 100, 4),
+    STATION_BASE_HOLD("starter hold", 100, 0.33, 1, ShipLocationCommand.CARGOHOLD, 10, new CargoEnum[] { CargoEnum.FUEL },
+            new int[] { 100 }, 30000, 4);
 
     private String name;
     private int absoluteMaxValue;
@@ -17,12 +17,12 @@ public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
     private int price;
     private CargoEnum[] materials;
     private int[] materialPrices;
+    private int holdSize;
+    private int componentHoldSize;
 
-    private int rechargeTime;
-    private double maxValueToughness;
-    private double restoreFraction;
-
-    private ShipShieldComponentEnum(String name, int absoluteMaxValue, double repairFraction, double toughness, ShipLocationCommand location, int price, CargoEnum[] materials, int[] materialPrices, int rechargeTime, double maxValueToughness, double restoreFraction) {
+    private CargoHoldComponentEnum(String name, int absoluteMaxValue, double repairFraction, double toughness,
+            ShipLocationCommand location, int price, CargoEnum[] materials, int[] materialPrices, int holdSize,
+            int componentHoldSize) {
         this.name = name;
         this.absoluteMaxValue = absoluteMaxValue;
         this.repairFraction = repairFraction;
@@ -31,27 +31,21 @@ public enum ShipShieldComponentEnum implements ShipComponentEnumIntf {
         this.price = price;
         this.materials = materials;
         this.materialPrices = materialPrices;
-        
-        this.rechargeTime = rechargeTime;
-        this.maxValueToughness = maxValueToughness;
-        this.restoreFraction = restoreFraction;
+        this.holdSize = holdSize;
+        this.componentHoldSize = componentHoldSize;
     }
-    
+
+    public int getHoldSize() {
+        return holdSize;
+    }
+
+    public int getComponentHoldSize() {
+        return componentHoldSize;
+    }
+
     @Override
     public String getName() {
         return name;
-    }
-
-    public int getRechargeTime() {
-        return rechargeTime;
-    }
-
-    public double getMaxValueToughness() {
-        return maxValueToughness;
-    }
-
-    public double getRestoreFraction() {
-        return restoreFraction;
     }
 
     @Override

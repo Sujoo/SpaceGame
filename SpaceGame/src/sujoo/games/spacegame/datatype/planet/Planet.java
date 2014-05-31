@@ -1,13 +1,13 @@
 package sujoo.games.spacegame.datatype.planet;
 
 public abstract class Planet {
-	private PlanetType type;
+	private PlanetEnum type;
 	
-	public Planet(PlanetType type) {
+	public Planet(PlanetEnum type) {
 		this.type = type;
 	}
 	
-	public PlanetType getType() {
+	public PlanetEnum getType() {
 		return type;
 	}
 	

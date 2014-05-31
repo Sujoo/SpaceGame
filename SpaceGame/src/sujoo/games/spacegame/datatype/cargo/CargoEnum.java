@@ -5,10 +5,10 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum CargoEnum {
-	ELECTRONICS("Electronics", 1, 150),
-	ORGANICS("Organics", 1, 125),
-	PARTS("Parts", 1, 100),
-	ALLOY("Alloy", 1, 100),
+	ELECTRONICS("Electronics", 10, 150),
+	ORGANICS("Organics", 7, 125),
+	PARTS("Parts", 5, 100),
+	ALLOY("Alloy", 5, 100),
 	AMMO("Ammo", 1, 25),
 	FUEL("Fuel", 1, 25);
 

@@ -1,13 +1,13 @@
 package sujoo.games.spacegame.datatype.ship.component;
 
-public class ShipShieldComponent extends ShipComponent {
+public class ShieldComponent extends ShipComponent {
 
     private int rechargeTime;
     private int currentMaxValue;
     private double maxValueToughness;
     private double restoreFraction;
 
-    public ShipShieldComponent(ShipShieldComponentEnum shipComponentEnum) {
+    public ShieldComponent(ShieldComponentEnum shipComponentEnum) {
         super(shipComponentEnum);
         rechargeTime = shipComponentEnum.getRechargeTime();
         currentMaxValue = shipComponentEnum.getAbsoluteMaxValue();

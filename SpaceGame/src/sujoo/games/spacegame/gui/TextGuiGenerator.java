@@ -4,8 +4,9 @@ import java.awt.Color;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.base.Optional;
+
 import sujoo.games.spacegame.datatype.cargo.CargoEnum;
-import sujoo.games.spacegame.datatype.cargo.CargoHold;
 import sujoo.games.spacegame.datatype.command.ShipLocationCommand;
 import sujoo.games.spacegame.datatype.general.Star;
 import sujoo.games.spacegame.datatype.general.Wallet;
@@ -13,6 +14,7 @@ import sujoo.games.spacegame.datatype.planet.Planet;
 import sujoo.games.spacegame.datatype.player.Player;
 import sujoo.games.spacegame.datatype.player.Station;
 import sujoo.games.spacegame.datatype.ship.Ship;
+import sujoo.games.spacegame.datatype.ship.component.CargoHoldComponent;
 import sujoo.games.spacegame.datatype.ship.component.ShipComponent;
 
 public class TextGuiGenerator {
@@ -149,7 +151,7 @@ public class TextGuiGenerator {
     // Support Methods
     private static void includeCargoComponentText(STextArea textArea, Player player) {
         includeTitleText(textArea, player.getName() + " Cargo");
-        List<ShipComponent> components = player.getShip().getCargoHold().getComponentHoldList();
+        List<ShipComponent> components = player.getShip().getCargoHold().get().getComponentHoldList();
         String[] componentNames = new String[components.size()];
         String[] componentMats = new String[components.size()];
         for (int i = 0; i < components.size(); i++) {
@@ -173,14 +175,14 @@ public class TextGuiGenerator {
     }
 
     private static void includeCargoText(STextArea textArea, Station station) {
-        includeCargoText(textArea, station.getName(), station.getWallet(), station.getCargoHold(), true);
+        includeCargoText(textArea, station.getName(), station.getWallet(), station.getShip().getCargoHold().get(), true);
     }
 
     private static void includeCargoText(STextArea textArea, Player player) {
-        includeCargoText(textArea, player.getName(), player.getWallet(), player.getCargoHold(), false);
+        includeCargoText(textArea, player.getName(), player.getWallet(), player.getShip().getCargoHold().get(), false);
     }
 
-    private static void includeCargoText(STextArea textArea, String name, Wallet wallet, CargoHold hold, boolean isStation) {
+    private static void includeCargoText(STextArea textArea, String name, Wallet wallet, CargoHoldComponent hold, boolean isStation) {
         includeTitleText(textArea, name + " Cargo");
         includeCreditsText(textArea, wallet);
         includeCargoCapacityText(textArea, hold.getCargoSpaceUsage(), hold.getSize());
@@ -214,8 +216,12 @@ public class TextGuiGenerator {
                 if (hold.getCargoAmount(cargoEnum) * hold.getTransactionPrice(cargoEnum) > hold.getCargoAmount(cargoEnum)
                         * hold.getRecentPurchasePrice(cargoEnum)) {
                     valueColor = Colors.forestGreen;
-                } else {
+                } else if (hold.getCargoAmount(cargoEnum) * hold.getTransactionPrice(cargoEnum) < hold
+                        .getCargoAmount(cargoEnum)
+                        * hold.getRecentPurchasePrice(cargoEnum)) {
                     valueColor = Colors.crimson;
+                } else {
+                    valueColor = Colors.defaultTextColor;
                 }
             }
             textArea.append(
@@ -253,11 +259,11 @@ public class TextGuiGenerator {
     }
 
     private static void includeComponentCapacity(STextArea textArea, Ship ship, ShipLocationCommand location) {
-        if (ship.hasComponent(location)) {
+        Optional<ShipComponent> componentOptional = ship.getComponent(location);
+        if (componentOptional.isPresent()) {
+            ShipComponent component = componentOptional.get();
             textArea.append(frontPad(location.getCode(), getLongestTextLength(ShipLocationCommand.values())) + " : ");
-            includeCapacityText(textArea, ship.getComponent(location).getCurrentValue(), ship.getComponent(location)
-                    .getCurrentMaxValue(),
-                    Colors.rygList);
+            includeCapacityText(textArea, component.getCurrentValue(), component.getCurrentMaxValue(), Colors.rygList);
         }
     }
 
